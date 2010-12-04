@@ -1,0 +1,59 @@
+Django book : really good
+http://www.djangobook.com/en/2.0/
+
+Official tuto : not bad
+http://docs.djangoproject.com/en/dev/intro/tutorial01/
+
+Official doc (why not)
+http://docs.djangoproject.com/en/1.2/
+
+
+1.Installer django :
+$ sudo apt-get install python-django
+
+
+2.Faire tourner le site :
+Aller dans le dossier du site
+$ python manage.py runserver
+accessible via http://127.0.0.1:8000/ (ou autre numéro de port si l'a indiqué après le 'runserver')
+
+3.Lancer un shell:
+$ python manage.py shell
+pratique pour les petits tests ou manipluation de la db
+
+
+4.Manipulation base de donnée :
+-Via l'interface admin sur http://127.0.0.1:8000/admin/ (après un runserver)
+    login : mart
+    pass : martin
+ou
+-http://www.djangobook.com/en/2.0/chapter05/ (a partir de la moitié de la page)
+
+exemple :  
+>>> from profiles.models import User       # importer l'objet 'User' qui vient de l'app 'profiles'
+
+>>> User.objects.filter(name='martin')     # select * from users_user where name = 'martin'
+[]                                         # aucun objets, liste vide
+>>> User.objects.filter(name__contains='martin')     # select * from users_user where name like '%martin%'
+[<User: Martin Trigaux>]                   # liste avec un seul objet User
+
+>>> moi = User.objects.get(password__contains='super')  # X.objects.get plutot que .filtre renvoie un élément à la place d'une liste (attention aux exceptions si plus que 1 ou 0)
+>>> moi.phone_number                      # champ phone_number de la table
+u'012345678'
+>>> moi.request_set.all()                 # toutes les requetes où le user est la foreignkey
+[<Request: Martin Trigaux 1>, <Request: Martin Trigaux 2>]
+
+>>> moi.phone_number = '23456789'         # update
+>>> moi.save()                            # applique l'update dans la db
+
+>>> Request.objects.get(user=User.objects.filter(name__contains='martin'))  # requetes imbriquées
+<Request: Martin Trigaux>
+>>> from evaluations.models import Evaluation
+>>> eval1 = Evaluation(ride=myride, user_from=moi, content='super ride',      # cree un nouveau objet
+... time=datetime.datetime(2010, 12, 5, 21, 15, 42), locked=False)
+>>> eval1.save()
+
+
+prop = Prop(...)
+prop.save()
+prop.id 
