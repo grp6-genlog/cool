@@ -9,7 +9,7 @@ class Proposal(models.Model):
     departure_time = models.DateTimeField()
     
     def __unicode__(self):
-        return u'%s %d' % (self.user.name, self.id)
+        return u'%s %s %d' % (self.user.user.first_name, self.user.user.last_name, self.id)
     
     class Meta:
         ordering = ['user']
