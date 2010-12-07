@@ -1,5 +1,5 @@
 #@Author Group 6
-#Interface of the Payment Manager Module
+#Interface of the Offer Manager Module
 
 from portobjectIF import *
 from offers.models import Offer
