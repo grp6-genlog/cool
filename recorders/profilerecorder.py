@@ -1,7 +1,7 @@
 # @Author Group 6
 # Interface of the RequestRecorder module
 
-from portobjectIF import *
+from portobject import *
 from profiles.models import *
 
 USERID = 0
@@ -18,7 +18,6 @@ CARDESCRIPTION = 10
 SMARTPHONE = 11
 
 class ProfileRecorder(PortObject):
-    DB # the database
     
     def __init__(self,DBG):
         """
