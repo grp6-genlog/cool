@@ -10,14 +10,14 @@ from requestrecorder import RequestRecorder
 from findpair import FindPair
 from offermanager import OfferManager
 from ridemanager import RideManager
-from paymentmanager import PayementManager
+from paymentmanager import PaymentManager
 from evaluationmanager import EvaluationManager
 from usernotifier import UserNotifier
 from tracker import Tracker
 
 profile_rec_port = ProfileRecorder()
 user_notif_port = UserNotifier()
-payment_port = PayementManager()
+payment_port = PaymentManager()
 evaluation_port = EvaluationManager()
 tracker_port = Tracker(user_notif_port)
 ride_port = RideManager(user_notif_port, tracker_port, payment_port, evaluation_port)

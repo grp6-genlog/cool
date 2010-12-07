@@ -15,10 +15,9 @@ NBSEATS = 7
 CANCMARG = 8
 
 class RequestRecorder(PortObject):
-    DB = None # the database
     findpair_port = None # the communication port of FindPair
 
-    def __init__(self,DBG,findpair_portG):
+    def __init__(self,findpair_portG):
         """
         Initialize self, DB, findpair_port.
         @pre DBG is the SQL database

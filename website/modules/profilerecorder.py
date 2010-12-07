@@ -19,7 +19,7 @@ SMARTPHONE = 11
 
 class ProfileRecorder(PortObject):
     
-    def __init__(self,DBG):
+    def __init__(self):
         """
         Initialize self.DB
         @pre DBG is the SQL database

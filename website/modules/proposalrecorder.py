@@ -1,7 +1,7 @@
 # @Author Group 6
 # Interface of the RequestRecorder module
 
-from portobjectIF import *
+from portobject import *
 from proposals.models import *
 
 USERID = 0
@@ -13,7 +13,7 @@ MONEYPERKM = 5
 DEPTIME = 6
 
 class ProposalRecorder(PortObject):
-    findpair_port # the communication port of FindPair
+    findpair_port=None # the communication port of FindPair
     
     def __init__(self,findpair_portG):
         """
