@@ -21,7 +21,9 @@ class ProfileRecorder(PortObject):
     
     def __init__(self):
         """
-        Initialize the port object
+        Initialize self.DB
+        @pre DBG is the SQL database
+        @post self.DB = DBG
         """
         PortObject.__init__(self)
     

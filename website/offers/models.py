@@ -15,7 +15,7 @@ class Offer(models.Model):
     non_driver_ok = models.BooleanField(default=False)
     
     def __unicode__(self):
-        return u'%s %s' % (self.request.user.name, self.proposal.user.name)
+        return u'%s %s' % (self.request.user.user.first_name, self.proposal.user.user.last_name)
     
     class Meta:
         ordering = ['request']
