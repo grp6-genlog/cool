@@ -18,6 +18,7 @@ class RoutePoints(models.Model):
     proposal = models.ForeignKey('Proposal')
     latitude = models.FloatField()
     longitude = models.FloatField()
+    order = models.FloatField()
 
     def __unicode__(self):
-        return u'%s %s' % (self.Latitude, self.Longitude) # %s ???
+        return u'%s %s' % (self.Latitude, self.Longitude, self.order) # %s ???
