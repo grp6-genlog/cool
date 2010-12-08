@@ -1,8 +1,10 @@
 #@Author Group 6
-#Interface of the Payment Manager Module
+#Interface of the Offer Manager Module
 
 from portobjectIF import *
 from offers.models import Offer
+from requests.models import Request
+from proposals.models import Proposal
 
 OK=0
 RAA=-1
@@ -13,7 +15,6 @@ NEP_MSG="Not enough places"
 NEM_MSG="Not enough money"
 
 class OfferManager(PortObject):
-	db=None #stand for data base
 	usernotifier_port=None # the port of the UserNotifier module
 	ridemanager_port=None # the port of the RideManager module 
 	"""
@@ -24,7 +25,7 @@ class OfferManager(PortObject):
 	OK : it's cool eveything is fine
 	RAA : request already agree by both on an other offer
 	"""
-	def __init__(self,db,userNotifier,rideManager):
+	def __init__(self, userNotifier,rideManager):
 		"""
 		@pre:	db is an object that represents a DB on which we do SQL querries
 				userNotifier is the port of the UserNotifier module
@@ -34,7 +35,6 @@ class OfferManager(PortObject):
 			self.usernotifier_port=userNotifier
 			self.ridemananger_port=rideManager
 		"""
-		self.db=db
 		self.userNotifier=userNotifier
 		self.rideManager=rideManager
 	
@@ -82,6 +82,7 @@ class OfferManager(PortObject):
 			discarded(offerID)
 			return NEP
 		offer[0].driver_ok=True
+		offer[0].save() #?????????????
 		if offer[0].non_driver_ok:
 			return agree_by_both(offerID)
 		return OK
@@ -111,6 +112,7 @@ class OfferManager(PortObject):
 			discarded(offerID)
 			return NEP
 		offer[0].non_driver_ok=True
+		offer[0].save() #????????????????????
 		if offer[0].driver_ok:
 			return agree_by_both(offerID)
 		return OK
@@ -132,7 +134,24 @@ class OfferManager(PortObject):
 				the offer status is set to pending
 		@ret:	error code in {OK,NEP,NEM}
 		"""
-		pass
+		offers=Offer.objects.filter(id=offerID)
+		if len(offers)==0:
+			raise "Try to accept an offer that doesn't exist"
+		enoughSeats=False
+		enoughMoney=False
+		#Check enough seats
+		#Check enough money
+		if enoughSeats and enoughMoney:
+			offers[0].status='A'
+			offers[0].save() #????????????????
+			return OK
+		elif not enoughSeats:
+			discarded(offerID)
+			return NEP
+		else:
+			offers[0].non_driver_ok=False
+			send_to(self.userNotifier, ('newmsg', 'The offerID has a response. Not enough money to accept the ride. Please add money on your account.'))
+			return NEM
 
 	def discarded(offerID):
 		"""
@@ -140,6 +159,11 @@ class OfferManager(PortObject):
 		@pre:	offerID exists in the db
 		@post:	the offer status is set to 'discarded'
 		"""
+		offers=Offer.objects.filter(id=offerID)
+		if len(offers)==0:
+			raise "Try to accept an offer that doesn't exist"
+		offers[0].status='D'
+		offers[0].save() #???????????????
 		
 	def routine(self, src, msg):
 		"""
@@ -207,16 +231,7 @@ class OfferManager(PortObject):
 				callbackProc(False, NEP_MSG)
 		elif msg[0]=='refuseoffer':
 			discarded(msg[1])
-			callbackProc(True, "")
-
-"""
-Get an offer from the database that correspond to offerId
-@pre: DB is initialized and is a SQL database
-@post: the database is unchanged
-"""
-def get_offer_from_database(DB, offerId):
-	pass
-			
+			callbackProc(True, "")		
 					
 			
 			
