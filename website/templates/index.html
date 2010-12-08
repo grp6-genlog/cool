@@ -1,8 +1,25 @@
 {% extends "base.html" %}
 
-{% block title %}Bonjour{% endblock %}
+{% block title %}Home{% endblock %}
+
+{% block message %}
+It is now {{ current_date }}.<br/>
+<a href=/admin/>Admin zone</a>
+{% endblock %}
 
 {% block content %}
-<p>It is now {{ current_date }}.</p>
-<a href=/admin/>Admin zone</a>
+<center>
+Welcome to our car pooling website.<br/>To continue you need to log in.
+<br/>
+<br />
+<form action="/check_pass/" method="post">
+    {% for error in form.password.errors %}
+        <p style="font-weight: bold;">{{ error|escape }}</p>
+    {% endfor %}
+    {{ form.password }}
+</form>
+<a href="register">-register-</a>
+<br />
+
+<center>
 {% endblock %}

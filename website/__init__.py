@@ -1,3 +1,4 @@
+"""
 import sys, os
 
 PROJECT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__)))
@@ -25,6 +26,6 @@ offer_port = OfferManager(user_notif_port, ride_port)
 find_pair_port = FindPair(offer_port)
 proposal_rec_port = ProposalRecorder(find_pair_port)
 request_rec_port = RequestRecorder(find_pair_port)
-
+"""
 print "Car Pooling Server is now runing"
 

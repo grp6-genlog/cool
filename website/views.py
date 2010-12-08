@@ -1,11 +1,19 @@
 from django.shortcuts import render_to_response
-
 from django.http import HttpResponse
+from django import forms
 
 import datetime
 
+class PasswordForm(forms.Form):
+    password = forms.CharField(label=(u''),
+                       max_length=50,
+                       widget=forms.PasswordInput(render_value=True),
+                       error_messages={'required': 'si tu mets rien ca marchera pas'}) 
+
+
 def home(request):
     current_date = datetime.datetime.now()
+    form = PasswordForm()
     return render_to_response('index.html', locals())
     
 def hello(request):

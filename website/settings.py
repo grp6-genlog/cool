@@ -36,7 +36,7 @@ TIME_ZONE = 'Europe/Brussels'
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
-LANGUAGE_CODE = 'fr-BE'
+LANGUAGE_CODE = 'en-GB'
 
 SITE_ID = 1
 
@@ -50,7 +50,9 @@ USE_L10N = True
 
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
-MEDIA_ROOT = os.path.join(PROJECT_PATH,'/website/media')
+MEDIA_ROOT = os.path.join(PROJECT_PATH,'media/')
+IMAGE_ROOT = os.path.join(MEDIA_ROOT,'img/')
+CSS_ROOT = os.path.join(MEDIA_ROOT,'css/')
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
