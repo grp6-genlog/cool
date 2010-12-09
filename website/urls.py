@@ -1,8 +1,10 @@
 from django.conf.urls.defaults import *
 from django.conf import settings
 
-from website.views import *
+from django.contrib.auth.views import logout
 
+from website.views import *
+ 
 from django.contrib import admin
 admin.autodiscover()
 
@@ -14,8 +16,7 @@ urlpatterns = patterns('',
 
     ('^$', home),
     ('^hello/$',hello),
-    ('^time/$',current_datetime),
-    (r'^time/plus/(\d{1,2})/$', hours_ahead),
+    (r'^logout/$', logout),
     
     (r'^admin/', include(admin.site.urls)),
 )

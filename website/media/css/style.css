@@ -24,14 +24,6 @@ body {
     margin: auto;
 }
 
-.icons {
-    width: 100px;
-    text-align: right;
-}
-.file_name {
-    text-align: left;
-}
-
 .b1f, .b2f, .b3f, .b4f{font-size:1px; overflow:hidden; display:block;}
 .b1f {height:1px; background:#ddd; margin:0 5px;}
 .b2f {height:1px; background:#ddd; margin:0 3px;}
@@ -47,21 +39,38 @@ body {
     margin-top : 20px;
 }
 
-.txt_right
-{
+.txt_right {
     text-align: right;
 }
 
-.txt_left
-{
+.txt_left {
     text-align: left;
 }
 
-.txt_center
-{
+.txt_center {
     text-align: center;
 }
 
+
+.cssform {
+    width: 70%;
+    margin : auto;
+    margin-left :120px;
+/*    text-align: left;*/
+}
+
+.cssform label {
+    font-weight: bold;
+    float: left;
+    width: 10px;
+}
+
+.cssform input[type="submit"] {
+    display : block;
+    margin : auto;
+    margin-top:5px;
+    margin-bottom:5px;
+}
 
 a
 {

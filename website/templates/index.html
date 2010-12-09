@@ -8,18 +8,40 @@ It is now {{ current_date }}.<br/>
 {% endblock %}
 
 {% block content %}
-<center>
-Welcome to our car pooling website.<br/>To continue you need to log in.
-<br/>
-<br />
-<form action="/check_pass/" method="post">
-    {% for error in form.password.errors %}
-        <p style="font-weight: bold;">{{ error|escape }}</p>
-    {% endfor %}
-    {{ form.password }}
-</form>
-<a href="register">-register-</a>
-<br />
+<div class="txt_center">
+{% if connected %}
+    Hello {{ name }}!
+    You are connected but you can not do anything...<br/>
+    <a href="/logout/">exit</a>
+{% else %}
+    Welcome to our website stranger.<br/>
+    To continue you need to log in.
+    <br/>
+    <br />
+    <div class="cssform">
+        <form action="" method="post">
+            {% for notif in notifications %}
+                {% if notif.error %}
+                <span style="color: red;">
+                {% else %}
+                <span style="color: dark-green;">
+                {% endif %}
+                {{ notif.content|escape }}
+                </span><br/>
+            {% endfor %}
+            {% for error in form.password.errors %}
+                <span style="color: red;">{{ error|escape }}</span><br/>
+            {% endfor %}
+            {{ form.login.label_tag }}
+            {{ form.login }}<br/>
+            {{ form.password.label_tag }}
+            {{ form.password }}<br/>
+            <input type="submit" value="ok" />
+        </form>
+    </div>
+    <a href="/register/">-register-</a>
 
-<center>
+    <br />
+{% endif %}
+<div>
 {% endblock %}
