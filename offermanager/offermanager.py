@@ -55,7 +55,7 @@ class OfferManager(PortObject):
 		proposals=Proposal.objects.filter(id=proposalID)
 		if len(proposals)==0:
 			raise "Try to build an offer from a proposal that doesn't exist"
-		fee=compute_fee(proposalID, departure, arrival, proposals[0].money_per_kim)
+		fee=compute_fee(proposalID, departure, arrival, proposals[0].money_per_km)
 		offer=Offer(request=requestID, proposal=proposalID, status='P', driver_ok=False, nondriver_ok=False
 			    pickup_point_lat=departure[0], pickup_point_long=departure[1], drop_point_lat=arrival[0],
 			    drop_point_long=arrival[1], total_fee=fee)
@@ -90,7 +90,7 @@ class OfferManager(PortObject):
 			discarded(offerID)
 			return NEP
 		offer[0].driver_ok=True
-		offer[0].save() #?????????????
+		offer[0].save()
 		if offer[0].non_driver_ok:
 			return agree_by_both(offerID)
 		return OK
@@ -120,7 +120,7 @@ class OfferManager(PortObject):
 			discarded(offerID)
 			return NEP
 		offer[0].non_driver_ok=True
-		offer[0].save() #????????????????????
+		offer[0].save()
 		if offer[0].driver_ok:
 			return agree_by_both(offerID)
 		return OK
@@ -147,11 +147,25 @@ class OfferManager(PortObject):
 			raise "Try to accept an offer that doesn't exist"
 		enoughSeats=False
 		enoughMoney=False
-		#Check enough seats
+		#Get the proposal, request linked to the offer
+		requests=Request.objects.filter(id=offers[0].request)
+		if len(requests)==0:
+			raise 'Try to agree an offer where the request is invalid'
+		proposals=Proposal.objects.filter(id=offers[0].proposal)
+		if len(proposals)==0:
+			raise 'Try to agree an offer where the profile is invalid'
 		#Check enough money
+		profiles=UserProfile.objects.filter(id=requests[0].user)
+		if len(profiles)==0:
+			raise 'Try to agree an offer where the profile is invalid'
+		if profiles[0].account_balance>=offers[0].total_fee:
+			enoughMoney=True
+		#Check enough seats
+		if proposals[0].number_of_seats>=requests[0].nb_requested_seats:
+			enoughSeats=True
 		if enoughSeats and enoughMoney:
 			offers[0].status='A'
-			offers[0].save() #????????????????
+			offers[0].save()
 			return OK
 		elif not enoughSeats:
 			discarded(offerID)
@@ -171,7 +185,7 @@ class OfferManager(PortObject):
 		if len(offers)==0:
 			raise "Try to accept an offer that doesn't exist"
 		offers[0].status='D'
-		offers[0].save() #???????????????
+		offers[0].save()
 		
 	def routine(self, src, msg):
 		"""
