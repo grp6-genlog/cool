@@ -30,7 +30,7 @@ It is now {{ current_date }}.<br/>
                 </span><br/>
             {% endfor %}
             {% for error in form.password.errors %}
-                <span style="color: red;">{{ error|escape }}</span><br/>
+                <span style="color: red;">{{ error }}</span><br/>
             {% endfor %}
             {{ form.login.label_tag }}
             {{ form.login }}<br/>
