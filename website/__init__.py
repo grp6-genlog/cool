@@ -26,3 +26,6 @@ find_pair_port = FindPair(offer_port)
 proposal_rec_port = ProposalRecorder(find_pair_port)
 request_rec_port = RequestRecorder(find_pair_port)
 
+# Testing the Recorders and FindPair modules 
+from testRec&FindP import *
+testall()
