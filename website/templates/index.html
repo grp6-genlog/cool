@@ -18,7 +18,8 @@ It is now {{ current_date }}.<br/>
     To continue you need to log in.
     <br/>
     <br />
-    <div class="cssform">
+
+    <div class="aligned">
         <form action="" method="post">
             {% for notif in notifications %}
                 {% if notif.error %}
@@ -32,13 +33,17 @@ It is now {{ current_date }}.<br/>
             {% for error in form.password.errors %}
                 <span style="color: red;">{{ error }}</span><br/>
             {% endfor %}
+            <div class="form-row">
             {{ form.login.label_tag }}
             {{ form.login }}<br/>
+
             {{ form.password.label_tag }}
             {{ form.password }}<br/>
+            </div>
             <input type="submit" value="ok" />
         </form>
     </div>
+
     <a href="/register/">-register-</a>
 
     <br />
