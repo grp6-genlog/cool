@@ -45,8 +45,28 @@ class FindPair(PortObject):
             infos=Proposal.objects.get(id=propID)
             requests=Request.objects.filter(departure_time__gt=infos.departure_time,nb_requested_seats__lt=infos.number_of_seats)
             for request in requests:
-                if len(RoutePoints.object.filter(proposal=propID, latitude=request.departure_point_lat, longitude=request.departure_point_long))!=0 and len(RoutePoints.object.filter(proposal=propID,latitude=request.arrival_point_lat,longitude=request.arrival_point_long))!=0:
-                    send_to(self.offermanager_port,('buildoffer',request.id,propID))
+                d=None
+                p=None
+                pup=None
+                dp=None
+                i=0
+                j=0
+                c=0
+                for rp in RoutePoints.object.filter(proposal=propID):
+                    disdep = distance((request.departure_point_lat,request.departure_point_long),(rp.latitude,rp.longitude))
+                    disarr = distance((request.arrival_point_lat,request.arrival_point_long),(rp.latitude,rp.longitude))
+                    if(disdep<=rp.departure_range and d==None or disdep<d):
+                        d=disdep
+                        pup=(rp.latitude,rp.longitude)
+                        i=c
+                    if(disarr<= rp.arrival_range and p==None or disarr<p):
+                        p=disarr
+                        dp=(rp.latitude,rp.longitude)
+                        j=c
+                    c+=1
+                            
+                if pup!=None and dp!=None and i<j:
+                    send_to(self.offermanager_port,('buildoffer',request.id,propID,pup,dp))
         except:
             print("Error : no or more than one proposal with the specified id had been found");
 
@@ -66,14 +86,31 @@ class FindPair(PortObject):
                     ('buildoffer',requestID,proposalID) with proposalID, the database ID of the matching proposal
         """
         try:
-            infos=Proposal.objects.get(id=requestID)
+            infos=Request.objects.get(id=requestID)
             
             proposals=Proposal.objects.filter(departure_time__lt=infos.departure_time, number_of_seats__gte=infos.requested_seats)
             for proposal in proposals:
-            
-                if len(RoutePoints.object.filter(proposal=proposal.id, latitude=infos.departure_point_lat, longitude=infos.departure_point_long))==0 and len(RoutePoints.object.filter(proposal=proposal.id,latitude=infos.arrival_point_lat,longitude=infos.arrival_point_long))==0:
-                    send_to(self.offermanager_port,('buildoffer',requestID,proposal.id))
-                    
+                d=None
+                p=None
+                pup=None
+                dp=None
+                i=0
+                j=0
+                c=0
+                for rp in RoutePoints.object.filter(proposal=proposal.id):
+                    disdep = distance((infos.departure_point_lat,infos.departure_point_long),(rp.latitude,rp.longitude))
+                    disarr = distance((infos.arrival_point_lat,infos.arrival_point_long),(rp.latitude,rp.longitude))
+                    if(disdep<=rp.departure_range and d==None or disdep<d):
+                        d=disdep
+                        pup=(rp.latitude,rp.longitude)
+                        i=c
+                    if(disarr<= rp.arrival_range and p==None or disarr<p):
+                        p=disarr
+                        dp=(rp.latitude,rp.longitude)
+                        j=c
+                    c+=1
+                if pup!=None and dp!=None and i<j:
+                    send_to(self.offermanager_port,('buildoffer',requestId,proposal.id,pup,dp))
         except:
             print("Error on match request\n")
 
