@@ -6,7 +6,13 @@ from django.contrib.auth.models import User
 from website.profiles.models import UserProfile
 from website.proposals.models import Proposal
 from website.requests.models import Request
+from math import sqrt
 
+def distance(a,b):
+    (xa,ya)=a
+    (xb,yb)=b
+    return sqrt(((xa-ya)**2)+((ya-yb)**2))
+    
 """
 This is the interface for the FindPair port object. 
 This is the classe that will be responsible to find matches between proposals
