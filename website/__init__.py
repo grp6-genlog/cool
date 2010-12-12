@@ -28,4 +28,5 @@ request_rec_port = RequestRecorder(find_pair_port)
 
 # Testing the Recorders and FindPair modules 
 from testRec&FindP import *
-testall()
+testall(profile_rec_port, proposal_rec_port, request_rec_port)
+print "Car Pooling Server is now runing"
