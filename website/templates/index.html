@@ -1,8 +1,52 @@
 {% extends "base.html" %}
 
-{% block title %}Bonjour{% endblock %}
+{% block title %}Home{% endblock %}
+
+{% block message %}
+It is now {{ current_date }}.<br/>
+<a href=/admin/>Admin zone</a>
+{% endblock %}
 
 {% block content %}
-<p>It is now {{ current_date }}.</p>
-<a href=/admin/>Admin zone</a>
+<div class="txt_center">
+{% if connected %}
+    Hello {{ name }}!
+    You are connected but you can not do anything...<br/>
+    <a href="/logout/">exit</a>
+{% else %}
+    Welcome to our website stranger.<br/>
+    To continue you need to log in.
+    <br/>
+    <br />
+
+    <div class="aligned">
+        <form action="" method="post">
+            {% for notif in notifications %}
+                {% if notif.error %}
+                <span style="color: red;">
+                {% else %}
+                <span style="color: dark-green;">
+                {% endif %}
+                {{ notif.content|escape }}
+                </span><br/>
+            {% endfor %}
+            {% for error in form.password.errors %}
+                <span style="color: red;">{{ error }}</span><br/>
+            {% endfor %}
+            <div class="form-row">
+            {{ form.login.label_tag }}
+            {{ form.login }}<br/>
+
+            {{ form.password.label_tag }}
+            {{ form.password }}<br/>
+            </div>
+            <input type="submit" value="ok" />
+        </form>
+    </div>
+
+    <a href="/register/">-register-</a>
+
+    <br />
+{% endif %}
+<div>
 {% endblock %}

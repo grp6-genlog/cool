@@ -1,0 +1,105 @@
+/*CSS of the car pooling website */
+
+html {
+	font-size: 100%; /* ie only */
+	
+}
+
+body {
+	font-family: Verdana, "Lucida Grande", Lucida, Tahoma, "Trebuchet MS", Arial, Geneva, Helvetica, sans-serif;
+	font-size: .9em;
+	background-color: white;
+}
+
+#message {
+    width: 50%;
+    margin: auto;
+    text-align: center;
+    margin-top : 10px;
+    margin-bottom : 20px;
+}
+
+#content {
+    width: 60%;
+    margin: auto;
+}
+
+.b1f, .b2f, .b3f, .b4f{font-size:1px; overflow:hidden; display:block;}
+.b1f {height:1px; background:#ddd; margin:0 5px;}
+.b2f {height:1px; background:#ddd; margin:0 3px;}
+.b3f {height:1px; background:#ddd; margin:0 2px;}
+.b4f {height:2px; background:#ddd; margin:0 1px;}
+.contentf {background: #ddd;}
+.contentf div {margin-left: 5px; padding-right: 5px;}
+
+#footer{
+    width: 50%;
+    margin: auto;
+    text-align: center;
+    margin-top : 20px;
+}
+
+.txt_right {
+    text-align: right;
+}
+
+.txt_left {
+    text-align: left;
+}
+
+.txt_center {
+    text-align: center;
+}
+
+
+.cssform {
+    width: 70%;
+    margin : auto;
+    margin-left :120px;
+/*    text-align: left;*/
+}
+
+.cssform label {
+    font-weight: bold;
+    float: left;
+    width: 10px;
+}
+
+.cssform input[type="submit"] {
+    display : inline;
+    margin : auto;
+    margin-top:5px;
+    margin-bottom:5px;
+}
+
+a
+{
+   text-decoration: none;
+   color: gray;
+   font-style: italic;
+}
+a:hover
+{
+   text-decoration: underline;
+}
+a img
+{
+   border: none;
+}
+
+
+/*
+one two three four five
+and six beers later I was wild
+I said baby
+show me to the bed now
+
+cus I've been sitting here since half past nine
+been thinking dirty thoughts about you a thousand times
+come on baby
+do you feel the same huh? 
+
+cus I don't want to end up being
+a tragic heartbroken human being 
+*/
+
