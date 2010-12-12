@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% load adminmedia %}
+
+{% block head %}
+<link rel="stylesheet" href="/css_f/form.css" />
+{% endblock %}
+
+{% block title %}Register{% endblock %}
+
+
+{% block message %}
+Registration
+{% endblock %}
+
+{% block content %}
+<div style="width:70%; margin:auto;">
+Please fill the form below
+<br/>
+<br />
+<form action="/register/" method="post">
+    <div class="aligned">
+        <div class="text-center">
+        {{ notif }}
+        </div>
+        {% for error in form.password.errors %}
+            <span style="color: red;">{{ error }}</span><br/>
+        {% endfor %}
+        <div class="form-row">
+            {{ form.username.errors }}
+            <span class="required">
+                {{ form.username.label_tag }}
+            </span>
+            {{ form.username }}
+        </div>
+        <div class="form-row">
+            {{ form.password.errors }}
+            <span class="required">
+                {{ form.password.label_tag }}
+            </span>
+            {{ form.password }}
+        </div>
+        <div class="form-row">
+            {{ form.password2.errors }}
+            <span class="required">
+                {{ form.password2.label_tag }}
+            </span>
+            {{ form.password2 }}
+        </div>
+        <div class="form-row">
+            {{ form.email.errors }}
+            <span class="required">
+                {{ form.email.label_tag }}
+            </span>
+            {{ form.email }}
+        </div>
+        <div class="form-row">
+            {{ form.date_of_birth.errors }}
+            <span class="required">
+                {{ form.date_of_birth.label_tag }}
+            </span>
+            {{ form.date_of_birth }}<br/>
+            Using the format dd/mm/yyyy
+        </div>
+        <div class="form-row">
+            {{ form.gender.errors }}
+            <span class="required">
+                {{ form.gender.label_tag }}
+            </span>
+            {{ form.gender }}
+        </div>
+        <div class="form-row">
+            {{ form.smoker.errors }}
+            {{ form.smoker.label_tag }}
+            {{ form.smoker }}
+        </div>
+        <div class="form-row">
+            {{ form.communities.errors }}
+            {{ form.communities.label_tag }}
+            {{ form.communities }}<br/>
+            Groups you are belonging to, separated by a coma
+        </div>
+        <div class="form-row">
+            {{ form.bank_account_number.errors }}
+            <span class="required">
+                {{ form.bank_account_number.label_tag }}
+            </span>
+            {{ form.bank_account_number }}
+        </div>
+        <div class="form-row">
+            {{ form.phone_number.errors }}
+            <span class="required">
+                {{ form.phone_number.label_tag }}
+            </span>
+            {{ form.phone_number }}
+        </div>
+        <div class="form-row">
+            {{ form.car_id.errors }}
+            {{ form.car_id.label_tag }}
+            {{ form.car_id }}<br/>
+            For drivers only.
+        </div>
+        <div class="form-row">
+            {{ form.car_description.errors }}
+            {{ form.car_description.label_tag }}
+            {{ form.car_description }}<br/>
+            For drivers only.
+        </div>
+        <div class="form-row">
+            {{ form.money_per_km.errors }}
+            {{ form.money_per_km.label_tag }}
+            {{ form.money_per_km }}<br/>
+            For drivers only, how much in gas per km are you using to drive.<br/>
+            Will be divided by the number of people in the car during a ride.
+        </div>
+        <div class="form-row">
+            {{ form.number_of_seats.errors }}
+            {{ form.number_of_seats.label_tag }}
+            {{ form.number_of_seats }}<br/>
+            For drivers only, how many available seats do you have in your car.
+        </div>
+        <div class="form-row">
+            {{ form.smartphone_id.errors }}
+            {{ form.smartphone_id.label_tag }}
+            {{ form.smartphone_id }}<br/>
+            <emph>don't care</emph>
+        </div>
+        <span style="font-style:italic; font-size:11px;">Mandatory fields are in bold</span><br/>
+        <div class="submit-row">
+            <label>
+            <input type="submit" value="Register" />
+            </label>
+        </div>
+    </div>
+</form>
+<br />
+</div>
+{% endblock %}
