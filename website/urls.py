@@ -18,11 +18,13 @@ urlpatterns = patterns('',
 
 urlpatterns += patterns('website.views',
     ('^$', 'home'),
+    ('^home/$', 'home'),
     ('^hello/$','hello'),
     (r'^logout/$', 'logout'),
 )
 
 urlpatterns += patterns('website.profiles.views',
     (r'^register/$', 'register'),
+    (r'^profile/$', 'editprofile'),
 )
 

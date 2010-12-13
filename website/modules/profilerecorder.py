@@ -32,13 +32,13 @@ class ProfileRecorder(PortObject):
         The msg treatement routine.
         The only acceptable messages are the pairs ('recordprofile',[UserID,NumberOfSeats,
                                                                     BirthDate,Smoker,Communities,MoneyPerKm,
-                                                                    Gender,Name,BankAccountNumber,CarID,
-                                                                    GSMNumber,CarDescription,Mail,SmartphoneID],
+                                                                    Gender,BankAccountNumber,CarID,
+                                                                    GSMNumber,CarDescription,SmartphoneID],
                                                                     SuccessCallBack,FailureCallBack)
                                                    ('updateprofile',[UserID,UserPassword,NumberOfSeats,
                                                                     BirthDate,Smoker,Communities,MoneyPerKm,
-                                                                    Gender,Name,BankAccountNumber,CarID,
-                                                                    GSMNumber,CarDescription,Mail,SmartphoneID],
+                                                                    Gender,BankAccountNumber,CarID,
+                                                                    GSMNumber,CarDescription,SmartphoneID],
                                                                     SuccessCallBack,FailureCallBack)
         @pre : DB is initialized and is the SQL database
                
@@ -49,7 +49,6 @@ class ProfileRecorder(PortObject):
                Communities is a string
                MoneyPerKm is a float
                Gender is a string
-               Name is a string
                BankAccountNumber is a string
                CarID is a string
                GSMNumber is a string

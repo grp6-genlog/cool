@@ -1,4 +1,3 @@
-"""
 import sys, os
 
 PROJECT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__)))
@@ -16,16 +15,49 @@ from evaluationmanager import EvaluationManager
 from usernotifier import UserNotifier
 from tracker import Tracker
 
-profile_rec_port = ProfileRecorder()
-user_notif_port = UserNotifier()
-payment_port = PaymentManager()
-evaluation_port = EvaluationManager()
-tracker_port = Tracker(user_notif_port)
-ride_port = RideManager(user_notif_port, tracker_port, payment_port, evaluation_port)
-offer_port = OfferManager(user_notif_port, ride_port)
-find_pair_port = FindPair(offer_port)
-proposal_rec_port = ProposalRecorder(find_pair_port)
-request_rec_port = RequestRecorder(find_pair_port)
-"""
+class PortObjects(object):
+
+    def __init__(self):
+        self.profile_rec_port = ProfileRecorder()
+        self.user_notif_port = UserNotifier()
+        self.payment_port = PaymentManager()
+        self.evaluation_port = EvaluationManager()
+        self.tracker_port = Tracker(self.user_notif_port)
+        self.ride_port = RideManager(self.user_notif_port, self.tracker_port, self.payment_port, self.evaluation_port)
+        self.offer_port = OfferManager(self.user_notif_port, self.ride_port)
+        self.find_pair_port = FindPair(self.offer_port)
+        self.proposal_rec_port = ProposalRecorder(self.find_pair_port)
+        self.request_rec_port = RequestRecorder(self.find_pair_port)
+    
+     
+    """ designed by Oren Tirosh and Jeff Pitman """
+    def __new__(self, *args, **kwargs):
+        if not '_singleton' in self.__dict__:
+            print "first time created"
+            slate = object.__new__(self)
+            slate.state = {
+                 'threads':True,
+                 # add other state things as required
+            }
+            self._singleton = slate
+        return self._singleton 
+
+#PortObjects()
+
+class singleton(object):
+     """ designed by Oren Tirosh and Jeff Pitman """
+     def __new__(self, *args, **kwargs):
+         print "new singleton"
+         if not '_singleton' in self.__dict__:
+            print "first time created"
+            slate = object.__new__(self)
+            slate.state = {
+                'threads':True,
+                # add other state things as required
+            }
+            self._singleton = slate
+         return self._singleton
+
+singleton()
 print "Car Pooling Server is now runing"
 

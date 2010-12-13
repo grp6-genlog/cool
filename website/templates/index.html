@@ -4,20 +4,43 @@
 
 {% block message %}
 It is now {{ current_date }}.<br/>
-<a href=/admin/>Admin zone</a>
+<a href=/admin/>Admin zone</a><br/>
+You are connected - <a href="/logout/">log out</a>
 {% endblock %}
 
 {% block content %}
-<div class="txt_center">
+<div style="width:70%; margin:auto;">
+    <div class="txt_center">
 {% if connected %}
     Hello {{ name }}!
-    You are connected but you can not do anything...<br/>
-    <a href="/logout/">exit</a>
+    <br/><br/>
+<div class="colmask threecol">
+	<div class="colmid">
+		<div class="colleft">
+			<div class="col1">
+            My offers<br/>
+            Mr rides
+			</div>
+			<div class="col2">
+            <a href="/profile/">My profile</a>
+			</div>
+			<div class="col3">
+            My requests<br/>
+            Add a request<br/>
+            My offers<br/>
+            Add an offer<br/>
+            </div>
+		</div>
+	</div>
+</div>
+    <br/><br/>
+    </div>
 {% else %}
     Welcome to our website stranger.<br/>
     To continue you need to log in.
+    </div>
     <br/>
-    <br />
+    <br/>
 
     <div class="aligned">
         <form action="" method="post">
@@ -40,11 +63,12 @@ It is now {{ current_date }}.<br/>
             {{ form.password.label_tag }}
             {{ form.password }}<br/>
             </div>
-            <input type="submit" value="ok" />
+            <div class="submit-row">
+                <input type="submit" value="ok" /><br/>
+                <a href="/register/">-register-</a>
+            </div>
         </form>
     </div>
-
-    <a href="/register/">-register-</a>
 
     <br />
 {% endif %}
