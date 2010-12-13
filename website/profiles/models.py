@@ -17,7 +17,7 @@ class UserProfile(models.Model):
     date_of_birth = models.DateField(blank=True)
     smoker = models.BooleanField(default=False, blank=True)
     communities = models.CharField(max_length=100, blank=True)
-    money_per_km = models.FloatField()
+    money_per_km = models.FloatField(blank=True)
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
     bank_account_number = models.CharField(max_length=30)
     account_balance = models.FloatField(default=0.0, blank=True)

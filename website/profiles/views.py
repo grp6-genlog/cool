@@ -1,5 +1,5 @@
 from django.shortcuts import render_to_response
-from django.http import HttpResponse
+from django.http import HttpResponseRedirect
 
 from django import forms
 from django.contrib import auth
@@ -12,10 +12,11 @@ from django.db import models
 from website.profiles.models import UserProfile
 from django.contrib.auth.models import User
 
-from website import PortObjects
-
 import datetime
 
+from portobject import PortObject
+
+gui_port = PortObject()
 
 GENDER_CHOICES = (
     ('M', 'Male'),
@@ -54,7 +55,7 @@ class RegisterForm(forms.Form):
     smartphone_id = forms.CharField(max_length=100,
                                 required=False)
 
-def register(request):
+def register(request, port_profile):
     
     if request.user.is_authenticated():
         connected = True
@@ -83,7 +84,7 @@ def register(request):
                 valid = False
                 
             if valid:
-                toprofilerecorder(request,'register')
+                toprofilerecorder(request,port_profile,'register')
                 notif = 'Registered !'
 
         else:
@@ -97,10 +98,10 @@ def editprofile(request):
         name = request.user.username
         return render_to_response('index.html', locals())
     else:
-        return redirect('/home')
+        return HttpResponseRedirect('/home')
         
         
-def toprofilerecorder(request, action):
+def toprofilerecorder(request,port_profile, action):
     if action == 'register':
         username = request.POST.get('username', '')
         password = request.POST.get('password', '')
@@ -113,7 +114,7 @@ def toprofilerecorder(request, action):
         
         UserID = n_user.id
         NumberOfSeats = request.POST.get('number_of_seats', 0)
-        BirthDate = request.POST.get('date_of_birth', 0)
+        BirthDate = datetime.datetime.strptime(request.POST.get('date_of_birth', ''),'%d/%m/%Y').date()
         Smoker = request.POST.get('smoker', False)
         Communities = request.POST.get('communities', '')
         MoneyPerKm = request.POST.get('money_per_km', 0)
@@ -124,10 +125,18 @@ def toprofilerecorder(request, action):
         CarDescription = request.POST.get('car_description', '')
         SmartphoneID = request.POST.get('smartphone_id', '')
         
-        PortObjects.profile_rec_port.put((None,('recordprofile',[UserID,NumberOfSeats,
+        
+        
+        gui_port.send_to(port_profile,('recordprofile',[n_user,NumberOfSeats,
                                                        BirthDate,Smoker,Communities,MoneyPerKm,
                                                        Gender,BankAccountNumber,CarID,
                                                        GSMNumber,CarDescription,SmartphoneID],
-                                      None,
-                                      None)))
+                                      successcall,
+                                      failurecall))
 
+
+def successcall():
+    print "cool"
+    
+def failurecall():
+    print "zut"

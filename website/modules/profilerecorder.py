@@ -3,6 +3,8 @@
 
 from portobject import *
 from profiles.models import *
+import threading
+import traceback
 
 USERID = 0
 NBSEATS = 1
@@ -86,6 +88,7 @@ class ProfileRecorder(PortObject):
                 
                 pro.save()
             except:
+                traceback.print_exc()
                 threading.Thread(target = msg[3]).start()
             else:
                 threading.Thread(target = msg[2]).start()

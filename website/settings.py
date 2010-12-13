@@ -1,5 +1,5 @@
 # Django settings for website project.
-import os
+import os, sys
 
 PROJECT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__)))
 
@@ -101,5 +101,9 @@ INSTALLED_APPS = (
     'website.rides',
     'website.evaluations',
     
+    #'utils_port',
+        
     #'django_extensions',
 )
+
+#global_ports = utils_port.PortObjects()
