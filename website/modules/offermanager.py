@@ -1,7 +1,7 @@
 #@Author Group 6
 #Interface of the Offer Manager Module
 
-from portobjectIF import *
+from portobject import *
 from offers.models import Offer
 from requests.models import Request
 from proposals.models import Proposal
@@ -56,7 +56,7 @@ class OfferManager(PortObject):
 		if len(proposals)==0:
 			raise "Try to build an offer from a proposal that doesn't exist"
 		fee=compute_fee(proposalID, departure, arrival, proposals[0].money_per_km)
-		offer=Offer(request=requestID, proposal=proposalID, status='P', driver_ok=False, nondriver_ok=False
+		offer=Offer(request=requestID, proposal=proposalID, status='P', driver_ok=False, nondriver_ok=False,
 			    pickup_point_lat=departure[0], pickup_point_long=departure[1], drop_point_lat=arrival[0],
 			    drop_point_long=arrival[1], total_fee=fee)
 		offer.save()

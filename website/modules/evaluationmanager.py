@@ -25,8 +25,8 @@ class EvaluationManager(PortObject):
 		@post : the evaluation contains now the content
 		"""
 		evals=Evaluation.objects.filter(id=evaluationID)
-		if len(evals)==0:
-			raise "There doesn't exist an offer"
+		if len(evals)!=1:
+			raise "There isn't any valid offer for this ID"
 		if not evals[0].locked:
 			evals[0].rating=content[0]
 			evals[0].content=content[1]
