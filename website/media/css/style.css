@@ -109,17 +109,14 @@ body {
 a {
    text-decoration: none;
    color: gray;
-   font-style: italic;
+   /*font-style: italic;*/
 }
 a:hover {
-   text-decoration: underline;
+    color : #C87B02;
+    text-decoration: underline;
 }
 a img {
-   border: none;
-}
-.colleft a {
-    font-style: normal;
-    color: dark-gray;
+   border: 0 none;
 }
 
 

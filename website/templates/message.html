@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block top-message %}
+  <div id="message">
+        <b class="b1f"></b><b class="b2f"></b><b class="b3f"></b><b class="b4f"></b>
+            <div class="contentf">
+                <a href="/home/"><img src="/img_f/home.png" /> Home</a><br/>
+                {% block message %}{% endblock %}<br/>
+                {% if request.user.is_superuser %}
+                    <a href=/admin/>Admin zone</a><br/>
+                {% endif %}
+                {% if request.user.is_authenticated %}
+                    You are connected - <a href="/logout/">log out</a><br/>
+                {% endif %}
+            </div>
+        <b class="b4f"></b><b class="b3f"></b><b class="b2f"></b><b class="b1f"></b>
+    </div>
+{% endblock %}

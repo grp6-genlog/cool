@@ -53,9 +53,9 @@ urlpatterns = patterns('',
 )
 
 urlpatterns += patterns('website.views',
-    ('^$', 'home'),
-    ('^home/$', 'home'),
-    ('^hello/$','hello'),
+    (r'^$', 'home'),
+    (r'^home/$', 'home'),
+    (r'^hello/$','hello'),
     (r'^logout/$', 'logout'),
 )
 
@@ -67,4 +67,5 @@ urlpatterns += patterns('website.profiles.views',
 urlpatterns += patterns('website.requests.views',
     (r'^requests/$', 'myrequests'),
     (r'^addrequest/$', 'addrequest'),
+    (r'^editrequest/(\d+)/$', 'editrequest'),
 )

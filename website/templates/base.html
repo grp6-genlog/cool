@@ -9,18 +9,11 @@
 </head>
 
 <body>
-  <div id="message">
-        <b class="b1f"></b><b class="b2f"></b><b class="b3f"></b><b class="b4f"></b>
-            <div class="contentf">
-                {% block message %}{% endblock %}
-            </div>
-        <b class="b4f"></b><b class="b3f"></b><b class="b2f"></b><b class="b1f"></b>
-    </div>
-    
+    {% block top-message %}{% endblock %}    
     <div id="content">
         {% block content %}There is nothing to display here{% endblock %}
     </div>
-    
+    <br/>
     <div id="footer">
         {% block footer %}
         <hr>
