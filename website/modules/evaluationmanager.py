@@ -41,7 +41,7 @@ class EvaluationManager(PortObject):
 		"""
 		evals=Evaluation.objects.filter(id=evaluationID)
 		if len(evals)==0:
-			raise "There doesn't exist an offer"
+			raise "There isn't any valid offer for this ID"
 		evals.locked=True
 		
 	def buildEmptyEvaluation(userID, instructionID):
@@ -57,7 +57,7 @@ class EvaluationManager(PortObject):
 		proposals=Proposal.objects.filter(id=rides[0].proposal)
 		requests=Request.objects.filter(id=rides[0].request)
 		if len(proposals)==0 or len(requests)==0:
-			raise "The requests or the proposals doesn't exist from this offer"
+			raise "The requests or the proposals doesn't exist for this offer"
 		if proposals[0].user!=userID:
 			u_from=proposals[0].user
 		eval=Evaluation(ride=rides[0], user_from=u_from, user_to=userID, locked=False)

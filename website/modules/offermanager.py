@@ -4,8 +4,7 @@
 from portobject import *
 from offers.models import Offer
 from requests.models import Request
-from proposals.models import Proposal
-from routepoints.models import RoutePoints
+from proposals.models import Proposal, RoutePoints
 from google_tools_json import *
 
 OK=0

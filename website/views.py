@@ -4,6 +4,7 @@ from django.contrib import auth
 
 from django.core.context_processors import csrf
 from django.template import RequestContext
+from django.core.mail import send_mail
 
 
 import datetime
@@ -51,6 +52,7 @@ def home(request):
 
     
 def hello(request):
+    send_mail('test subject', "ceci est un beau email de test", "testfake@email.com", ["mart.tri@gmail.com"])
     return render_to_response('hello.html', locals())
 
 

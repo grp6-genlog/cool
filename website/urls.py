@@ -33,10 +33,10 @@ class PortObjects(object):
         self.evaluation_port = EvaluationManager()
         self.tracker_port = Tracker(self.user_notif_port)
         self.ride_port = RideManager(self.user_notif_port, self.tracker_port, self.payment_port, self.evaluation_port)
-        self.offer_port = OfferManager(self.user_notif_port, self.ride_port)
-        self.find_pair_port = FindPair(self.offer_port)
-        self.proposal_rec_port = ProposalRecorder(self.find_pair_port)
-        self.request_rec_port = RequestRecorder(self.find_pair_port)
+        #self.offer_port = OfferManager(self.user_notif_port, self.ride_port)
+        #self.find_pair_port = FindPair(self.offer_port)
+        #self.proposal_rec_port = ProposalRecorder(self.find_pair_port)
+        #self.request_rec_port = RequestRecorder(self.find_pair_port)
         
     def get_profile(self):
         return self.profile_rec_port.get_port()
