@@ -1,13 +1,9 @@
-{% extends "base.html" %}
+{% extends "message.html" %}
 
 {% block title %}Home{% endblock %}
 
 {% block message %}
 It is now {{ current_date }}.<br/>
-<a href=/admin/>Admin zone</a><br/>
-{% if connected %}
-    You are connected - <a href="/logout/">log out</a>
-{% endif %}
 {% endblock %}
 
 {% block content %}

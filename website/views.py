@@ -43,11 +43,10 @@ def home(request):
         else:
             connected = False
             form = LoginForm(initial={'login': 'login'})
-            csrf_token = {}
-            csrf_token.update(csrf(request))
-            return render_to_response('index.html', locals())
 
-    return render_to_response('index.html', locals())
+            return render_to_response('home.html', locals())
+
+    return render_to_response('home.html', locals())
     
 
     
@@ -61,5 +60,5 @@ def logout(request):
     connected = False
     form = LoginForm(initial={'login': 'login'})
     notifications = [{'error':False, 'msg':'You are now disconnected'}]
-    return render_to_response('index.html', locals())
+    return render_to_response('home.html', locals())
 

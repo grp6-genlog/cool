@@ -33,10 +33,10 @@ class PortObjects(object):
         self.evaluation_port = EvaluationManager()
         self.tracker_port = Tracker(self.user_notif_port)
         self.ride_port = RideManager(self.user_notif_port, self.tracker_port, self.payment_port, self.evaluation_port)
-        #self.offer_port = OfferManager(self.user_notif_port, self.ride_port)
-        #self.find_pair_port = FindPair(self.offer_port)
-        #self.proposal_rec_port = ProposalRecorder(self.find_pair_port)
-        #self.request_rec_port = RequestRecorder(self.find_pair_port)
+        self.offer_port = OfferManager(self.user_notif_port, self.ride_port)
+        self.find_pair_port = FindPair(self.offer_port)
+        self.proposal_rec_port = ProposalRecorder(self.find_pair_port)
+        self.request_rec_port = RequestRecorder(self.find_pair_port)
         
     def get_profile(self):
         return self.profile_rec_port.get_port()
@@ -53,13 +53,19 @@ urlpatterns = patterns('',
 )
 
 urlpatterns += patterns('website.views',
-    ('^$', 'home'),
-    ('^home/$', 'home'),
-    ('^hello/$','hello'),
+    (r'^$', 'home'),
+    (r'^home/$', 'home'),
+    (r'^hello/$','hello'),
     (r'^logout/$', 'logout'),
 )
 
 urlpatterns += patterns('website.profiles.views',
     (r'^register/$', 'register', {'port_profile':global_ports.get_profile()}),
     (r'^profile/$', 'editprofile'),
+)
+
+urlpatterns += patterns('website.requests.views',
+    (r'^requests/$', 'myrequests'),
+    (r'^addrequest/$', 'addrequest'),
+    (r'^editrequest/(\d+)/$', 'editrequest'),
 )

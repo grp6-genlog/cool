@@ -68,7 +68,7 @@ def register(request, port_profile):
             valid = form.is_valid()
             
             usern = request.POST.get('username', '')
-            if len(User.objects.filter(username=usern))!=0:
+            if User.objects.filter(username=usern):
                 form._errors["username"] = form.error_class(["There is already a user with that username"])
                 valid = False
             
@@ -79,7 +79,7 @@ def register(request, port_profile):
                 valid = False
             
             email_addr = request.POST.get('email', '')
-            if len(User.objects.filter(email=email_addr))!=0:
+            if User.objects.filter(email=email_addr):
                 form._errors["email"] = form.error_class(["This email address is already used by another user"])
                 valid = False
                 
@@ -96,7 +96,7 @@ def editprofile(request):
     if request.user.is_authenticated():
         connected = True
         name = request.user.username
-        return render_to_response('index.html', locals())
+        return render_to_response('home.html', locals())
     else:
         return HttpResponseRedirect('/home')
         
