@@ -24,7 +24,7 @@ class EvaluationManager(PortObject):
 			   userID is already in database, but empty
 		@post : the evaluation contains now the content
 		"""
-		evals=Evaluation.objects.filter(id=evaluationID)
+		evals=Evaluation.objects.filter(ride=instructionID, user_from=userID)
 		if len(evals)!=1:
 			raise "There isn't any valid offer for this ID"
 		if not evals[0].locked:
@@ -67,8 +67,8 @@ class EvaluationManager(PortObject):
 		
 	def routine(self, src, msg):
 		"""The message routine handler
-		The messages accepted are the pairs ('startevaluation', [userId,instructionid]),
-		('evaluate', [instructionid, userId, content],callback) and ('closeevaluation', [evaluationid])
+		The messages accepted are the pairs ('startevaluation', userId,instructionid),
+		('evaluate', instructionid, userId, content,callback) and ('closeevaluation', evaluationid)
 		
 		@pre : DB is initialized and is a SQL Database
 			 instructionid is an id for the instruction (int)
@@ -83,12 +83,12 @@ class EvaluationManager(PortObject):
 			  no evaluation is now possible
 		"""
 		if msg[0]=='startevaluation':
-			buildEmptyEvaluation(msg[1][0], msg[1][1])
+			buildEmptyEvaluation(msg[1], msg[2])
 		elif msg[0]=='evaluate':
-			res=updateEvaluation(msg[1][0], msg[1][1], msg[1][2])
-			callback(res)
+			res=updateEvaluation(msg[1], msg[2], msg[3])
+			msg[4](res)
 		elif msg[0]=='closeevaluation':
-			lockEvaluation(msg[1][0])
+			lockEvaluation(msg[1])
 
 #timer description
 class delayAction:

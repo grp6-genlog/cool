@@ -2,9 +2,9 @@
 #Interface of the Offer Manager Module
 
 from portobject import *
-from offers.models import Offer
-from requests.models import Request
-from proposals.models import Proposal, RoutePoints
+from website.offers.models import Offer
+from website.requests.models import Request
+from website.proposals.models import Proposal, RoutePoints
 from google_tools_json import *
 
 OK=0
@@ -171,8 +171,10 @@ class OfferManager(PortObject):
 			return NEP
 		else:
 			offers[0].non_driver_ok=False
-			send_to(self.userNotifier, ('newmsg', 'The offerID has a response. Not enough money to accept the ride. Please add money on your account.'))
+			send_to(self.userNotifier, ('newmsg', requests[0].user, 'The offerID has a response. Not enough money to accept the ride. Please add money on your account.'))
 			return NEM
+		send_to(self.rideManager, ('newacceptedride', offers[0].id))
+		return OK
 
 	def discarded(offerID):
 		"""
