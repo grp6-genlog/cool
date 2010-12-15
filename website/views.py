@@ -1,9 +1,10 @@
-from django.shortcuts import render_to_response
+from django.shortcuts import render_to_response, redirect
 from django import forms
 from django.contrib import auth
 
 from django.core.context_processors import csrf
 from django.template import RequestContext
+from django.core.mail import send_mail
 
 
 import datetime
@@ -42,15 +43,15 @@ def home(request):
         else:
             connected = False
             form = LoginForm(initial={'login': 'login'})
-            csrf_token = {}
-            csrf_token.update(csrf(request))
-            return render_to_response('index.html', locals())
 
-    return render_to_response('index.html', locals())
+            return render_to_response('home.html', locals())
+
+    return render_to_response('home.html', locals())
     
 
     
 def hello(request):
+    send_mail('test subject', "ceci est un beau email de test", "mtrigaux@student.uclouvain.be", ["mart.tri@gmail.com"])
     return render_to_response('hello.html', locals())
 
 
@@ -59,5 +60,5 @@ def logout(request):
     connected = False
     form = LoginForm(initial={'login': 'login'})
     notifications = [{'error':False, 'msg':'You are now disconnected'}]
-    return render_to_response('index.html', locals())
+    return redirect('/home/')
 

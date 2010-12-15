@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "message.html" %}
 
 {% load adminmedia %}
 
@@ -53,6 +53,20 @@ Please fill the form below
                 {{ form.email.label_tag }}
             </span>
             {{ form.email }}
+        </div>
+        <div class="form-row">
+            {{ form.first_name.errors }}
+            <span class="required">
+                {{ form.first_name.label_tag }}
+            </span>
+            {{ form.first_name }}
+        </div>
+        <div class="form-row">
+            {{ form.last_name.errors }}
+            <span class="required">
+                {{ form.last_name.label_tag }}
+            </span>
+            {{ form.last_name }}
         </div>
         <div class="form-row">
             {{ form.date_of_birth.errors }}

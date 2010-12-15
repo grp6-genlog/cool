@@ -1,26 +1,48 @@
-{% extends "base.html" %}
+{% extends "message.html" %}
 
 {% block title %}Home{% endblock %}
 
 {% block message %}
 It is now {{ current_date }}.<br/>
-<a href=/admin/>Admin zone</a>
 {% endblock %}
 
 {% block content %}
-<div class="txt_center">
+{{ notification }}
+<div style="width:70%; margin:auto;">
+    <div class="txt_center">
 {% if connected %}
     Hello {{ name }}!
-    You are connected but you can not do anything...<br/>
-    <a href="/logout/">exit</a>
+    <br/><br/>
+<div class="colmask threecol">
+	<div class="colmid">
+		<div class="colleft">
+			<div class="col1">
+            <a href="/offers/">My offers</a><br/><br/>
+            <a href="/rides/">My rides</a>
+			</div>
+			<div class="col2">
+            <a href="/profile/">My profile</a>
+			</div>
+			<div class="col3">
+            <a href="/requests/">My requests</a><br/>
+            <a href="/addrequest/">Add a request</a><br/><br/>
+            <a href="/proposals/">My proposal</a><br/>
+            <a href="/addproposal/">Add an porposal</a><br/>
+            </div>
+		</div>
+	</div>
+</div>
+    <br/><br/>
+    </div>
 {% else %}
     Welcome to our website stranger.<br/>
     To continue you need to log in.
+    </div>
     <br/>
-    <br />
+    <br/>
 
     <div class="aligned">
-        <form action="" method="post">
+        <form action="/home/" method="post">
             {% for notif in notifications %}
                 {% if notif.error %}
                 <span style="color: red;">
@@ -40,11 +62,12 @@ It is now {{ current_date }}.<br/>
             {{ form.password.label_tag }}
             {{ form.password }}<br/>
             </div>
-            <input type="submit" value="ok" />
+            <div class="submit-row">
+                <input type="submit" value="ok" /><br/>
+                <a href="/register/">-register-</a>
+            </div>
         </form>
     </div>
-
-    <a href="/register/">-register-</a>
 
     <br />
 {% endif %}

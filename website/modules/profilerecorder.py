@@ -3,6 +3,7 @@
 
 from portobject import *
 from profiles.models import *
+import threading, traceback
 
 USERID = 0
 NBSEATS = 1
@@ -32,14 +33,14 @@ class ProfileRecorder(PortObject):
         The msg treatement routine.
         The only acceptable messages are the pairs ('recordprofile',[UserID,NumberOfSeats,
                                                                     BirthDate,Smoker,Communities,MoneyPerKm,
-                                                                    Gender,Name,BankAccountNumber,CarID,
-                                                                    GSMNumber,CarDescription,Mail,SmartphoneID],
-                                                                    SuccessCallBack,FailureCallBack)
+                                                                    Gender,BankAccountNumber,CarID,
+                                                                    GSMNumber,CarDescription,SmartphoneID],
+                                                                    SuccessCallBack,FailureCallBack,request)
                                                    ('updateprofile',[UserID,UserPassword,NumberOfSeats,
                                                                     BirthDate,Smoker,Communities,MoneyPerKm,
-                                                                    Gender,Name,BankAccountNumber,CarID,
-                                                                    GSMNumber,CarDescription,Mail,SmartphoneID],
-                                                                    SuccessCallBack,FailureCallBack)
+                                                                    Gender,BankAccountNumber,CarID,
+                                                                    GSMNumber,CarDescription,SmartphoneID],
+                                                                    SuccessCallBack,FailureCallBack,request)
         @pre : DB is initialized and is the SQL database
                
                UserID is an integer
@@ -49,7 +50,6 @@ class ProfileRecorder(PortObject):
                Communities is a string
                MoneyPerKm is a float
                Gender is a string
-               Name is a string
                BankAccountNumber is a string
                CarID is a string
                GSMNumber is a string
@@ -87,9 +87,10 @@ class ProfileRecorder(PortObject):
                 
                 pro.save()
             except:
-                threading.Thread(target = msg[3]).start()
+                traceback.print_exc()
+                threading.Thread(target = msg[3], args = (msg[4],)).start()
             else:
-                threading.Thread(target = msg[2]).start()
+                threading.Thread(target = msg[2], args = (msg[4],)).start()
         elif msg[0] == 'updateprofile':
             try:
                 lfields = msg[1]
@@ -120,8 +121,8 @@ class ProfileRecorder(PortObject):
                 
                 pro.save()
             except:
-                threading.Thread(target = msg[3]).start()
+                threading.Thread(target = msg[3], args = (msg[4],)).start()
             else:
-                threading.Thread(target = msg[2]).start()
+                threading.Thread(target = msg[2], args = (msg[4],)).start()
         else:
             print 'ProfileRecorder received an unexpected message'
