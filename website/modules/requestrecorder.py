@@ -34,7 +34,7 @@ class RequestRecorder(PortObject):
         The only acceptable message is the pair ('recordrequest',[UserID,departurePoint,departureRange,
                                                                   arrivalPoint,arrivalRange,arrivalTime,maxDelay,
                                                                   nbRequestedSeats,cancellationMargin],
-                                                                  SuccessCallBack,FailureCallBack)
+                                                                  SuccessCallBack,FailureCallBack,request)
         @pre : DB is initialized and is the SQL database
                findpair_port is the FindPair module's port
 
@@ -56,7 +56,9 @@ class RequestRecorder(PortObject):
                 If no error or unexpected events happened, the SuccessCallBack procedure
                 has been executed, otherwise FailureCallBack has been executed.
         """
+        print "len : "+str(len(msg))
         if msg[0] == 'recordrequest':
+            
             try:
                 lfields = msg[1]
                 req = Request()
@@ -76,9 +78,10 @@ class RequestRecorder(PortObject):
                 req.save()
                 req_id = req.id
             except:
-                threading.Thread(target = msg[3]).start()
+                print "target = msg[3], args = (msg[4],), kwargs = {})"
+                #threading.Thread(target = msg[3], args = (msg[4],), kwargs = {}).start()
             else:  
                 send_to(findpair_port, ('newRequest', req_id))
-                threading.Thread(target = msg[2]).start()
+                #threading.Thread(target = msg[2], args = (msg[4],), kwargs = {}).start()
         else:
             print 'RequestRecorder received an unexpected message'

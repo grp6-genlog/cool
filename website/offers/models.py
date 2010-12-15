@@ -4,7 +4,8 @@ STATUS_CHOICES = (
     ('P', 'Pending'),
     ('C', 'Canceled'),
     ('A', 'agreedByBoth'),
-    ('D', 'discarded'),
+    ('D', 'Discarded'),
+    ('F', 'Finished'),
 )
 
 class Offer(models.Model):

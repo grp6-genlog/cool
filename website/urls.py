@@ -40,6 +40,9 @@ class PortObjects(object):
         
     def get_profile(self):
         return self.profile_rec_port.get_port()
+        
+    def get_request(self):
+        return self.request_rec_port.get_port()
 
 global_ports = PortObjects()
 
@@ -66,6 +69,6 @@ urlpatterns += patterns('website.profiles.views',
 
 urlpatterns += patterns('website.requests.views',
     (r'^requests/$', 'myrequests'),
-    (r'^addrequest/$', 'addrequest'),
+    (r'^addrequest/$', 'addrequest', {'port_request':global_ports.get_request()}),
     (r'^editrequest/(\d+)/$', 'editrequest'),
 )
