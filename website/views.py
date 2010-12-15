@@ -19,10 +19,7 @@ class LoginForm(forms.Form):
 
 def home(request):
     current_date = datetime.datetime.now()
-    if request.user.is_authenticated():
-        connected = True
-        name = request.user.username
-    else:
+    if not request.user.is_authenticated():
         if request.method == 'POST':
             form = LoginForm(request.POST)
             if form.is_valid():
@@ -44,21 +41,18 @@ def home(request):
             connected = False
             form = LoginForm(initial={'login': 'login'})
 
-            return render_to_response('home.html', locals())
-
     return render_to_response('home.html', locals())
     
 
     
 def hello(request):
-    send_mail('test subject', "ceci est un beau email de test", "mtrigaux@student.uclouvain.be", ["mart.tri@gmail.com"])
     return render_to_response('hello.html', locals())
 
 
 def logout(request):
     auth.logout(request)
-    connected = False
+    current_date = datetime.datetime.now()
     form = LoginForm(initial={'login': 'login'})
     notifications = [{'error':False, 'msg':'You are now disconnected'}]
-    return redirect('/home/')
+    return render_to_response('home.html', locals())
 

@@ -4,8 +4,8 @@
 from portobject import *
 from website.offers.models import Offer
 from website.rides.models import Ride
-from website.proposls.models import Proposal
-from webstie.requests.models import Request
+from website.proposals.models import Proposal
+from website.requests.models import Request
 
 class RideManager(PortObject):
 
@@ -62,8 +62,8 @@ class RideManager(PortObject):
             raise "There doesn't exist a proposal or a request for the offer %d" % msg[1]
         ride=Ride(offer=msg[1], ride_started=False)
         ride.save()
-        self.send_to(usernotifier_port, ('newmsg', proposal.user, "You've got a shared ride for proposal %d. Please visit your account for further information." % proposal.id))
-        self.send_to(usernotifier_port, ('newmsg', request.user, "You've got a shared ride for request %d. Please visit your account for further information." % request.id))
+        self.send_to(self.usernotifier_port, ('newmsg', proposal.user, "You've got a shared ride for proposal %d. Please visit your account for further information." % proposal.id))
+        self.send_to(self.usernotifier_port, ('newmsg', request.user, "You've got a shared ride for request %d. Please visit your account for further information." % request.id))
 
         #compute ridetime-30 in seconds
         start=proposal.departure_time
@@ -82,9 +82,9 @@ class RideManager(PortObject):
             raise 'The time to send the message is negative'
         sec2=ridetime.seconds+ridetime.days*86400
 
-        delay1=delayAction(sec1, self.send_to, (tracker_port, ('startride', ride.id, self.close_ride, self.cancel_ride)))
-        delay2=delayAction(sec2, self.send_to, (evaluationmanager_port, ('startevaluation', proposal.user, ride.id)))
-        delay3=delayAction(sec2, self.send_to, (evaluationmanager_port, ('startevaluation', request.user, ride.id)))
+        delay1=delayAction(sec1, self.send_to, (self.tracker_port, ('startride', ride.id, self.close_ride, self.cancel_ride)))
+        delay2=delayAction(sec2, self.send_to, (self.evaluationmanager_port, ('startevaluation', proposal.user, ride.id)))
+        delay3=delayAction(sec2, self.send_to, (self.evaluationmanager_port, ('startevaluation', request.user, ride.id)))
         delay1.start()
         delay2.start()
         delay3.start()
@@ -112,7 +112,7 @@ class RideManager(PortObject):
 		raise 'There is no offer for this instruction'
 	offer.status('F')
 	offer.save()
-	self.send_to(evaluationmanager_port, ('payfee', instructionID))
+	self.send_to(self.evaluationmanager_port, ('payfee', instructionID))
 
     def cancel_ride(self,instructionID):
         """
@@ -143,9 +143,10 @@ class RideManager(PortObject):
 		raise 'There is a problem with the users'
 	offer.status('F')
 	offer.save()
-	self.send_to(evaluationmanager_port, ('returnfee', instructionID)
-	self.send_to(usernotifier_port, ('newmsg', nondriver.user, 'The ride %d has been cancelled' % instructionID))
-	self.send_to(usernotifier_port, ('newmsg', driver.user, 'The ride %d has been cancelled' % instructionID))
+
+	self.send_to(self.evaluationmanager_port, ('returnfee', instructionID))
+	self.send_to(self.usernotifier_port, ('newmsg', nondriver.user, 'The ride %d has been cancelled' % instructionID))
+	self.send_to(self.usernotifier_port, ('newmsg', driver.user, 'The ride %d has been cancelled' % instructionID))
 
     def routine(self,src,msg):
         """

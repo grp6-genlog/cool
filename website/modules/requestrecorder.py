@@ -61,7 +61,7 @@ class RequestRecorder(PortObject):
             try:
                 lfields = msg[1]
                 req = Request()
-                print lfields
+
                 req.user = lfields[USERID]
                 req.departure_point_lat = lfields[DEPPOINT][0]
                 req.departure_point_long = lfields[DEPPOINT][1]
