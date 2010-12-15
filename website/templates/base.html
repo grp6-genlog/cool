@@ -1,15 +1,24 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
-<html lang="en">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+<html>
 <head>
+    <link rel="stylesheet" href="/css_f/style.css" />
+    <link rel="stylesheet" href="/css_f/form.css" />
+    {% block head %}{% endblock %}
     <title>{% block title %}{% endblock %} | Carpooling</title>
 </head>
+
 <body>
-    <h1>Carpooling website</h1>
-    {% block content %}{% endblock %}
-    {% block footer %}
-    <hr>
-    <p>Thanks for visiting our site.</p>
-    {% endblock %}
+    {% block top-message %}{% endblock %}    
+    <div id="content">
+        {% block content %}There is nothing to display here{% endblock %}
+    </div>
+    <br/>
+    <div id="footer">
+        {% block footer %}
+        <hr>
+        <p>Awesome website - copyright 2010 (who cares ?)</p>
+        {% endblock %}
+    </div>
 </body>
 </html>
-

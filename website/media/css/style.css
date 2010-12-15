@@ -1,0 +1,137 @@
+/*CSS of the car pooling website */
+
+html {
+	font-size: 100%; /* ie only */
+	
+}
+
+body {
+	font-family: Verdana, "Lucida Grande", Lucida, Tahoma, "Trebuchet MS", Arial, Geneva, Helvetica, sans-serif;
+	font-size: .9em;
+	background-color: white;
+}
+
+#message {
+    width: 50%;
+    margin: auto;
+    text-align: center;
+    margin-top : 10px;
+    margin-bottom : 20px;
+}
+
+#content {
+    width: 50%;
+    margin: auto;
+}
+
+.b1f, .b2f, .b3f, .b4f{font-size:1px; overflow:hidden; display:block;}
+.b1f {height:1px; background:#ddd; margin:0 5px;}
+.b2f {height:1px; background:#ddd; margin:0 3px;}
+.b3f {height:1px; background:#ddd; margin:0 2px;}
+.b4f {height:2px; background:#ddd; margin:0 1px;}
+.contentf {background: #ddd;}
+.contentf div {margin-left: 5px; padding-right: 5px;}
+
+#footer{
+    width: 50%;
+    margin: auto;
+    text-align: center;
+    margin-top : 20px;
+}
+
+.txt_right {
+    text-align: right;
+}
+
+.txt_left {
+    text-align: left;
+}
+
+.txt_center {
+    text-align: center;
+}
+
+
+
+.colmask {
+	position:relative;	/* This fixes the IE7 overflow hidden bug */
+	clear:both;
+	float:left;
+	width:100%;			/* width of whole page */
+	overflow:hidden;		/* This chops off any overhanging divs */
+}
+/* common column settings */
+.colright,
+.colmid,
+.colleft {
+	float:left;
+	width:100%;			/* width of page */
+	position:relative;
+}
+.col1,
+.col2,
+.col3 {
+	float:left;
+	position:relative;
+	padding:1em 0 1em 0;	/* no left and right padding on columns, we just make them narrower instead 
+					only padding top and bottom is included here, make it whatever value you need */
+	overflow:hidden;
+}
+/* 3 Column settings */
+.threecol {
+	background:#BFBFBF;	/* right column background colour */
+}
+.threecol .colmid {
+	right:33%;			/* width of the right column */
+	background:#FFFFFF;		/* center column background colour */
+}
+.threecol .colleft {
+	right:33%;			/* width of the middle column */
+	background:#BFBFBF;	/* left column background colour */
+}
+.threecol .col1 {
+	width:33%;			/* width of center column content (column width minus padding on either side) */
+	left:102%;			/* 100% plus left padding of center column */
+}
+.threecol .col2 {
+	width:33%;			/* Width of left column content (column width minus padding on either side) */
+	left:33%;			/* width of (right column) plus (center column left and right padding) plus (left column left padding) */
+}
+.threecol .col3 {
+	width:33%;			/* Width of right column content (column width minus padding on either side) */
+	left:66%;			/* Please make note of the brackets here:
+					(100% - left column width) plus (center column left and right padding) plus (left column left and right padding) plus (right column left padding) */
+}
+
+
+
+
+a {
+   text-decoration: none;
+   color: gray;
+   /*font-style: italic;*/
+}
+a:hover {
+    color : #C87B02;
+    text-decoration: underline;
+}
+a img {
+   border: 0 none;
+}
+
+
+/*
+one two three four five
+and six beers later I was wild
+I said baby
+show me to the bed now
+
+cus I've been sitting here since half past nine
+been thinking dirty thoughts about you a thousand times
+come on baby
+do you feel the same huh? 
+
+cus I don't want to end up being
+a tragic heartbroken human being 
+*/
+

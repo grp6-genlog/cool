@@ -1,6 +1,19 @@
 # Django settings for website project.
-import os
-
+import os, sys
+"""
+print "__name__ =", __name__
+print "__file__ =", __file__
+print "os.getpid() =", os.getpid()
+print "os.getcwd() =", os.getcwd()
+print "os.curdir =", os.curdir
+print "sys.path =", repr(sys.path)
+print "sys.modules.keys() =", repr(sys.modules.keys())
+print "sys.modules.has_key('website') =", sys.modules.has_key('website')
+if sys.modules.has_key('website'):
+  print "sys.modules['website'].__name__ =", sys.modules['website'].__name__
+  print "sys.modules['website'].__file__ =", sys.modules['website'].__file__
+  print "os.environ['DJANGO_SETTINGS_MODULE'] =", os.environ.get('DJANGO_SETTINGS_MODULE', None)
+"""
 PROJECT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__)))
 
 DEBUG = True
@@ -25,6 +38,14 @@ DATABASES = {
 
 AUTH_PROFILE_MODULE = 'profiles.User'
 
+EMAIL_USE_TLS = True
+EMAIL_HOST = "smtp.sgsi.ucl.ac.be"
+EMAIL_HOST_USER = "mtrigaux"
+EMAIL_HOST_PASSWORD = ""
+EMAIL_PORT = 587
+DEFAULT_FROM_EMAIL = "notexists@email.com"
+
+
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.
@@ -36,7 +57,7 @@ TIME_ZONE = 'Europe/Brussels'
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
-LANGUAGE_CODE = 'fr-BE'
+LANGUAGE_CODE = 'en-GB'
 
 SITE_ID = 1
 
@@ -50,7 +71,9 @@ USE_L10N = True
 
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
-MEDIA_ROOT = '/home/mart/'
+MEDIA_ROOT = os.path.join(PROJECT_PATH,'media/')
+IMAGE_ROOT = os.path.join(MEDIA_ROOT,'img/')
+CSS_ROOT = os.path.join(MEDIA_ROOT,'css/')
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
@@ -66,16 +89,13 @@ ADMIN_MEDIA_PREFIX = '/media/'
 SECRET_KEY = '5dlvqc@7&+f7&_#g19r@1t08r!@c(ahqhrt3tz25w$w5d)-%uj'
 
 # List of callables that know how to import templates from various sources.
-TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
-)
+
 
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'django.middleware.csrf.CsrfResponseMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
 )
@@ -102,5 +122,9 @@ INSTALLED_APPS = (
     'website.rides',
     'website.evaluations',
     
+    #'utils_port',
+        
     #'django_extensions',
 )
+
+#global_ports = utils_port.PortObjects()
