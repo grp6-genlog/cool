@@ -9,9 +9,8 @@ admin.autodiscover()
 
 import os, sys  
 
-PROJECT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__)))
     
-sys.path.append(os.path.join(PROJECT_PATH,'modules'))
+sys.path.insert(0, os.path.join(settings.PROJECT_PATH,'modules'))
 
 from profilerecorder import ProfileRecorder
 from proposalrecorder import ProposalRecorder

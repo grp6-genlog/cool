@@ -51,7 +51,7 @@ def home(request):
 
     
 def hello(request):
-    send_mail('test subject', "ceci est un beau email de test", "testfake@email.com", ["mart.tri@gmail.com"])
+    send_mail('test subject', "ceci est un beau email de test", "mtrigaux@student.uclouvain.be", ["mart.tri@gmail.com"])
     return render_to_response('hello.html', locals())
 
 
