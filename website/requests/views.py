@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 
 from portobject import PortObject
 
-import datetime
+import datetime, time, threading
 
 gui_port = PortObject()
 
@@ -26,6 +26,51 @@ class RequestForm(forms.Form):
     cancellation_margin = forms.DateTimeField(initial="yyyy-mm-dd HH:MM")
 
 
+class WaitCallbacksProfile():
+    _active = {}
+    _active_lock = threading.Lock()
+    
+    @classmethod
+    def append(cls, u):
+        with cls._active_lock:
+            cls._active.update({u:'pending'})
+    
+    @classmethod
+    def is_pending(cls, u):
+        with cls._active_lock:
+            if u in cls._active:
+                return cls._active.get(u) == 'pending'
+            else:
+                return False
+            
+    @classmethod
+    def declare(cls, u):
+        with cls._active_lock:
+            while u in cls._active:
+                pass
+            cls._active.update({u:'pending'})
+            
+    @classmethod
+    def free(cls, u):
+        with cls._active_lock:
+            if u in cls._active:
+                cls._active.pop(u)
+
+    @classmethod
+    def update(cls, u, status):
+        with cls._active_lock:
+            cls._active.update({u:status})
+            
+            
+    @classmethod
+    def status(cls, u):
+        with cls._active_lock:
+            if u in cls._active:
+                return cls._active.get(u)
+            else:
+                return None
+
+
 def myrequests(request):
     if not request.user.is_authenticated():
         return redirect('/home/')
@@ -37,7 +82,7 @@ def myrequests(request):
 def addrequest(request, port_request=None):
     if not request.user.is_authenticated():
         return redirect('/home/', request=request)
-    
+
     if request.method == 'POST':
         form = RequestForm(request.POST)
         if form.is_valid():
@@ -48,33 +93,49 @@ def addrequest(request, port_request=None):
             arrival_point_lat = request.POST.get('arrival_point_lat', 0)
             arrival_point_long = request.POST.get('arrival_point_long', 0)
             arrival_range = request.POST.get('arrival_range', 0)
-            arrival_time = request.POST.get('arrival_range', datetime.datetime.today())
+            arrival_time = request.POST.get('arrival_time', datetime.datetime.today())
             max_delay = request.POST.get('max_delay', datetime.datetime.today())
             nb_requested_seats = request.POST.get('nb_requested_seats', 1)
-            cancellation_margin = request.POST.get('max_delay', datetime.datetime.today())
+            cancellation_margin = request.POST.get('cancellation_margin', datetime.datetime.today())
             
-            port_request.send_to(gui_port,('recordrequest',[UserID,(departure_point_lat, departure_point_long),departure_range,
+            WaitCallbacksProfile.declare(request.user)
+            
+            print [UserID,(departure_point_lat, departure_point_long),departure_range,(arrival_point_lat, arrival_point_long),arrival_range,arrival_time,max_delay,nb_requested_seats,cancellation_margin]
+            
+            gui_port.send_to(port_request,('recordrequest',[UserID,(departure_point_lat, departure_point_long),departure_range,
                                                             (arrival_point_lat, arrival_point_long),arrival_range,arrival_time,max_delay,
                                                             nb_requested_seats,cancellation_margin],
                                            successcall,
-                                           failurecall))
-                                           
-            notification = "Success"            
-        else:
-            notification = "Failure"
+                                           failurecall,
+                                           request.user))
             
-        return render_to_response('requestform.html', locals())
+            wait_counter = 0
+            while WaitCallbacksProfile.is_pending(request.user) and wait_counter < 20:
+                time.sleep(0.1)
+                wait_counter += 1
+            
+            if WaitCallbacksProfile.status(request.user) == 'success':
+                WaitCallbacksProfile.free(request.user)
+                return render_to_response('home.html', locals())
+            else:
+                print WaitCallbacksProfile.status(request.user)
+                WaitCallbacksProfile.free(request.user)
+                return render_to_response('error.html', locals())
+        else:
+            return render_to_response('requestform.html', locals())
     else:    
         form = RequestForm()
         
         return render_to_response('requestform.html', locals())
 
 
-def successcall():
+def successcall(user):
     print "cool"
+    WaitCallbacksProfile.update(user, 'success')
     
-def failurecall():
+def failurecall(user):
     print "zut"
+    WaitCallbacksProfile.update(user, 'fail')
         
     
 def editrequest(request, offset):

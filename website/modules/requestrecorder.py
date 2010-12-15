@@ -4,6 +4,8 @@
 from portobject import *
 from requests.models import *
 
+import threading, traceback
+
 USERID = 0
 DEPPOINT = 1
 DEPRANGE = 2
@@ -20,10 +22,8 @@ class RequestRecorder(PortObject):
     def __init__(self,findpair_portG):
         """
         Initialize self, DB, findpair_port.
-        @pre DBG is the SQL database
-             findpair_portG is the FindPair module port (a Queue)
-        @post self.DB = DBG
-              self.findpair_port = findpair_portG              
+        @pre findpair_portG is the FindPair module port (a Queue)
+        @post self.findpair_port = findpair_portG              
         """
         self.findpair_port = findpair_portG
         PortObject.__init__(self)
@@ -34,7 +34,7 @@ class RequestRecorder(PortObject):
         The only acceptable message is the pair ('recordrequest',[UserID,departurePoint,departureRange,
                                                                   arrivalPoint,arrivalRange,arrivalTime,maxDelay,
                                                                   nbRequestedSeats,cancellationMargin],
-                                                                  SuccessCallBack,FailureCallBack,request)
+                                                                  SuccessCallBack,FailureCallBack,user)
         @pre : DB is initialized and is the SQL database
                findpair_port is the FindPair module's port
 
@@ -56,13 +56,12 @@ class RequestRecorder(PortObject):
                 If no error or unexpected events happened, the SuccessCallBack procedure
                 has been executed, otherwise FailureCallBack has been executed.
         """
-        print "len : "+str(len(msg))
         if msg[0] == 'recordrequest':
             
             try:
                 lfields = msg[1]
                 req = Request()
-
+                print lfields
                 req.user = lfields[USERID]
                 req.departure_point_lat = lfields[DEPPOINT][0]
                 req.departure_point_long = lfields[DEPPOINT][1]
@@ -70,7 +69,7 @@ class RequestRecorder(PortObject):
                 req.arrival_point_lat = lfields[ARRPOINT][0]
                 req.arrival_point_long = lfields[ARRPOINT][1]
                 req.arrival_range = lfields[ARRRANGE]
-                req.departure_time = lfields[DEPTIME]
+                req.arrival_time = lfields[ARRTIME]
                 req.max_delay = lfields[MAXDELAY]
                 req.nb_requested_seats = lfields[NBSEATS]
                 req.cancellation_margin = lfields[CANCMARG]
@@ -78,10 +77,10 @@ class RequestRecorder(PortObject):
                 req.save()
                 req_id = req.id
             except:
-                print "target = msg[3], args = (msg[4],), kwargs = {})"
-                #threading.Thread(target = msg[3], args = (msg[4],), kwargs = {}).start()
+                traceback.print_exc()
+                threading.Thread(target = msg[3], args = (msg[4],)).start()
             else:  
-                send_to(findpair_port, ('newRequest', req_id))
-                #threading.Thread(target = msg[2], args = (msg[4],), kwargs = {}).start()
+                self.send_to(self.findpair_port, ('newRequest', req_id))
+                threading.Thread(target = msg[2], args = (msg[4],)).start()
         else:
             print 'RequestRecorder received an unexpected message'

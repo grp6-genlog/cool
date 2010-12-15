@@ -1,0 +1,99 @@
+{% extends "message.html" %}
+
+{% block title %}My requests{% endblock %}
+
+{% block message %}
+My requests
+{% endblock %}
+
+{% block content %}
+<b>{{ notification }}</b>
+<form action="/addrequest/" method="post">
+    <div class="aligned">
+        <div class="text-center">
+        {{ notif }}
+        </div>
+        {% for error in form.password.errors %}
+            <span style="color: red;">{{ error }}</span><br/>
+        {% endfor %}
+        <div class="form-row">
+            {{ form.arrival_time.errors }}
+            <span class="required">
+                {{ form.arrival_time.label_tag }}
+            </span>
+            {{ form.arrival_time }}
+        </div>
+        <div class="form-row">
+            {{ form.departure_point_lat.errors }}
+            <span class="required">
+                {{ form.departure_point_lat.label_tag }}
+            </span>
+            {{ form.departure_point_lat }}
+        </div>
+        <div class="form-row">
+            {{ form.departure_point_long.errors }}
+            <span class="required">
+                {{ form.departure_point_long.label_tag }}
+            </span>
+            {{ form.departure_point_long }}
+        </div>
+        <div class="form-row">
+            {{ form.departure_range.errors }}
+            <span class="required">
+                {{ form.departure_range.label_tag }}
+            </span>
+            {{ form.departure_range }}
+        </div>
+        <div class="form-row">
+            {{ form.arrival_point_lat.errors }}
+            <span class="required">
+                {{ form.arrival_point_lat.label_tag }}
+            </span>
+            {{ form.arrival_point_lat }}
+        </div>
+        <div class="form-row">
+            {{ form.arrival_point_long.errors }}
+            <span class="required">
+                {{ form.arrival_point_long.label_tag }}
+            </span>
+            {{ form.arrival_point_long }}
+        </div>
+        <div class="form-row">
+            {{ form.arrival_range.errors }}
+            <span class="required">
+                {{ form.arrival_range.label_tag }}
+            </span>
+            {{ form.arrival_range }}
+        </div>
+        <div class="form-row">
+            {{ form.max_delay.errors }}
+            <span class="required">
+                {{ form.max_delay.label_tag }}
+            </span>
+            {{ form.max_delay }}<br/><br/>
+            eg : if 01:00, can arrive one hour before or after the specified arrival time.
+        </div>
+        <div class="form-row">
+            {{ form.nb_requested_seats.errors }}
+            <span class="required">
+                {{ form.nb_requested_seats.label_tag }}
+            </span>
+            {{ form.nb_requested_seats }}
+        </div>
+        <div class="form-row">
+            {{ form.cancellation_margin.errors }}
+            <span class="required">
+                {{ form.cancellation_margin.label_tag }}
+            </span>
+            {{ form.cancellation_margin }}<br/><br/>
+            If no match is found at that time, the request will be cancelled.
+        </div>
+        <span style="font-style:italic; font-size:11px;">Mandatory fields are in bold</span><br/>
+        <div class="submit-row">
+            <label>
+            <input type="submit" value="Record request" />
+            </label>
+        </div>
+    </div>
+</form>
+{% endblock %}

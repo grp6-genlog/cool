@@ -3,8 +3,7 @@
 
 from portobject import *
 from profiles.models import *
-import threading
-import traceback
+import threading, traceback
 
 USERID = 0
 NBSEATS = 1

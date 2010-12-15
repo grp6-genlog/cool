@@ -121,10 +121,8 @@ INSTALLED_APPS = (
     'website.offers',
     'website.rides',
     'website.evaluations',
-    
-    #'utils_port',
         
-    #'django_extensions',
+    'django_extensions',
 )
 
 #global_ports = utils_port.PortObjects()
