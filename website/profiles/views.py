@@ -55,12 +55,12 @@ class RegisterForm(forms.Form):
     smartphone_id = forms.CharField(max_length=100,
                                 required=False)
 
-def register(request, port_profile):
+def register(request, port_profile=None):
     
     if request.user.is_authenticated():
         connected = True
         name = request.user.username
-        return render_to_response('index.html', locals())
+        return render_to_response('home.html', locals())
     else:
         if request.method == 'POST':
             form = RegisterForm(request.POST)
@@ -86,10 +86,12 @@ def register(request, port_profile):
             if valid:
                 toprofilerecorder(request,port_profile,'register')
                 notif = 'Registered !'
-
+                return render_to_response('register.html', locals())
+            else:
+                return render_to_response('register.html', locals())
         else:
             form = RegisterForm(initial={'date_of_birth': datetime.date.today()})
-        return render_to_response('register.html', locals())
+            return render_to_response('register.html', locals())
 
 
 def editprofile(request):
@@ -101,7 +103,7 @@ def editprofile(request):
         return HttpResponseRedirect('/home')
         
         
-def toprofilerecorder(request,port_profile, action):
+def toprofilerecorder(request, port_profile, action):
     if action == 'register':
         username = request.POST.get('username', '')
         password = request.POST.get('password', '')
@@ -114,29 +116,39 @@ def toprofilerecorder(request,port_profile, action):
         
         UserID = n_user.id
         NumberOfSeats = request.POST.get('number_of_seats', 0)
+        if not NumberOfSeats:
+            NumberOfSeats = 0
         BirthDate = datetime.datetime.strptime(request.POST.get('date_of_birth', ''),'%d/%m/%Y').date()
         Smoker = request.POST.get('smoker', False)
-        Communities = request.POST.get('communities', '')
-        MoneyPerKm = request.POST.get('money_per_km', 0)
+        Communities = request.POST.get('communities', None)
+        MoneyPerKm = request.POST.get('money_per_km', 0.0)
+        if not MoneyPerKm:
+            MoneyPerKm = 0.0
         Gender = request.POST.get('gender', 'M')
-        BankAccountNumber = request.POST.get('bank_account_number', '')
-        CarID = request.POST.get('car_id', '')
-        GSMNumber = request.POST.get('phone_number', '')
-        CarDescription = request.POST.get('car_description', '')
-        SmartphoneID = request.POST.get('smartphone_id', '')
-        
-        
+        BankAccountNumber = request.POST.get('bank_account_number', None)
+        CarID = request.POST.get('car_id', None)
+        if not CarID:
+            CarID = None
+        GSMNumber = request.POST.get('phone_number', None)
+        CarDescription = request.POST.get('car_description', None)
+        if not CarDescription:
+            CarDescription = None
+        SmartphoneID = request.POST.get('smartphone_id', None)
         
         gui_port.send_to(port_profile,('recordprofile',[n_user,NumberOfSeats,
                                                        BirthDate,Smoker,Communities,MoneyPerKm,
                                                        Gender,BankAccountNumber,CarID,
                                                        GSMNumber,CarDescription,SmartphoneID],
-                                      successcall,
-                                      failurecall))
+                                        successcall,
+                                        failurecall,
+                                        request))
 
 
-def successcall():
-    print "cool"
+def successcall(request):
+    print request.user
+    notification = "youpiiiie"
+    return render_to_response('home.html', locals(), context_instance=RequestContext(request),)
     
-def failurecall():
-    print "zut"
+def failurecall(request):
+    notification = "zuuuut"
+    return render_to_response('home.html', locals())

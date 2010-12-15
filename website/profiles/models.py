@@ -13,7 +13,7 @@ GENDER_CHOICES = (
 class UserProfile(models.Model):
     user = models.ForeignKey(User, unique=True)
     
-    number_of_seats = models.IntegerField()
+    number_of_seats = models.IntegerField(null=True)
     date_of_birth = models.DateField(blank=True, null=True)
     smoker = models.BooleanField(default=False, blank=True)
     communities = models.CharField(max_length=100, blank=True, null=True)

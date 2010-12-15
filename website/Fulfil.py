@@ -19,31 +19,31 @@ def add_in_rp_list(rp, rp_list, order):
         for i in xrange(len(rp_list)):
             if (rp[0]**2) + (rp[1]**2) < (rp_list[i][0]**2) + (rp_list[i][1]**2):
                 rp_list.insert(i,rp)
+                break
     else:
         for k in xrange(len(rp_list)):
             if (rp[0]**2) + (rp[1]**2) > (rp_list[k][0]**2) + (rp_list[k][1]**2):
                 rp_list.insert(k,rp)
+                break
 
 def create_user(uname, firstname, lastname, mail, pwd):
     time_now = datetime.datetime.today()
-    u = User()
-    u.username = uname
+    u = User.objects.create_user(uname, mail, pwd)
     u.first_name = firstname
     u.last_name = lastname
-    u.email = mail
-    u.password = pwd
-    u.is_staff = False
-    u.is_active = True
-    u.is_superuser = False
-    u.date_joined = time_now
-    u.last_login = time_now
+    #u.is_staff = False
+    #u.is_active = True
+    #u.is_superuser = False
+    #u.date_joined = time_now
+    #u.last_login = time_now
     u.save()
+    return u
 
 def create_profile(user, nb_seats, birthdate, smoke_bool, communities, moneyperkm, gender, bank_account, car_id, phone_nb, car_desc, smartphone_id):
     p = UserProfile()
     p.user = user
     p.number_of_seats = nb_seats
-    p.date_of_birth = date_of_birth
+    p.date_of_birth = birthdate
     p.smoker = smoke_bool
     p.communities = communities
     p.money_per_km = moneyperkm
@@ -55,6 +55,7 @@ def create_profile(user, nb_seats, birthdate, smoke_bool, communities, moneyperk
     p.car_description = car_desc
     p.smartphone_id = smartphone_id
     p.save()
+    return p
 
 def create_request(user, dep_p_lat, dep_p_long, dep_ran, ar_p_lat, ar_p_long, ar_ran, ar_time, max_del, nb_seats, cancel_margin):
     r = Request()
@@ -65,7 +66,7 @@ def create_request(user, dep_p_lat, dep_p_long, dep_ran, ar_p_lat, ar_p_long, ar
     r.arrival_point_lat = ar_p_lat
     r.arrival_point_long = ar_p_long
     r.arrival_range = ar_ran
-    r.departure_time = dep_time
+    r.arrival_time = ar_time
     r.max_delay = max_del
     r.nb_requested_seats = nb_seats
     r.cancellation_margin = cancel_margin
@@ -79,7 +80,9 @@ def create_proposal(user, car_id, car_desc, nb_seats, moneyperkm, dep_time, rout
     p.number_of_seats = nb_seats
     p.money_per_km = moneyperkm
     p.departure_time = dep_time
-
+    
+    p.save()
+    
     order = 0
     for (latitude, longitude) in route_points_list:
         rp = RoutePoints()
@@ -90,7 +93,6 @@ def create_proposal(user, car_id, car_desc, nb_seats, moneyperkm, dep_time, rout
         rp.save()
         order += 1
 
-    p.save()
 
 def create_users(nb_users, male_first_name_list, female_first_name_list, last_name_list, server_list, pwd_list, communities_list, car_desc_list, smartphone_list, route_points_list):
     counter = 1
@@ -127,9 +129,11 @@ def create_users(nb_users, male_first_name_list, female_first_name_list, last_na
         if car:
             car_desc_ind = random.randint(0, len(car_desc_list) - 1)
             car_description = car_desc_list[car_desc_ind]
+        else:
+            car_description = None
         smartphone_ind = random.randint(0, len(smartphone_list) - 1)
         smartphone = smartphone_list[smartphone_ind]
-        birthdate = datetime.date(random.randint(1950,1990), random.randint(1,12), random.randint(1,31))
+        birthdate = datetime.date(random.randint(1950,1990), random.randint(1,12), random.randint(1,28))
         bank_account = str(random.randint(0,9)) + str(random.randint(0,9)) + str(random.randint(0,9)) + '-' + str(random.randint(0,9)) + str(random.randint(0,9)) + str(random.randint(0,9)) + str(random.randint(0,9)) + str(random.randint(0,9)) + str(random.randint(0,9)) + str(random.randint(0,9)) + '-' + str(random.randint(0,9)) + str(random.randint(0,9)) + str(random.randint(0,9))
         car_id = chr(random.randint(65,90)) + chr(random.randint(65,90)) + chr(random.randint(65,90)) + '-' + str(random.randint(0,9)) + str(random.randint(0,9)) + str(random.randint(0,9))
         phone_nb = '0'+ str(random.randint(0,9)) + str(random.randint(0,9)) + '/' + str(random.randint(0,9)) + str(random.randint(0,9)) + str(random.randint(0,9)) + str(random.randint(0,9)) + str(random.randint(0,9)) + str(random.randint(0,9))
@@ -139,9 +143,8 @@ def create_users(nb_users, male_first_name_list, female_first_name_list, last_na
             nb_seats = 0
 
         # Creating a new user and his/her profile:
-        create_user(uname, first_name, last_name, email, password)
-        user = User.objects.get(username=uname)
-        create_profile(user, nb_seats, birthdate, random.randint(0,1) == 1, communities, random.uniform(0.01, 0.25), gender, bank_account, car_id, phone_nb, car_desc, smartphone)
+        user = create_user(uname, first_name, last_name, email, password)
+        userprofile = create_profile(user, nb_seats, birthdate, random.randint(0,1) == 1, communities, random.uniform(0.01, 0.25), gender, bank_account, car_id, phone_nb, car_description, smartphone)
 
         # Chosing all the random fields for request and proposal tables
         for j in xrange(random.randint(0,4)):
@@ -153,31 +156,33 @@ def create_users(nb_users, male_first_name_list, female_first_name_list, last_na
             ar_p_lat = route_points_list[ar_p_ind][0]
             ar_p_long = route_points_list[ar_p_ind][1]
             ar_ran = random.uniform(2.5, 25.0)
-            ar_time = datetime.datetime(random.randint(2010), 12, random.randint(20,31), random.randint(7,22), random.randint(0,59), 0)
+            ar_time = datetime.datetime(2010, 12, random.randint(20,31), random.randint(7,22), random.randint(0,59), 0)
             max_del = datetime.time(random.randint(0,1),random.randint(0,45),0)
             nb_seats= random.randint(1,4)
-            cancel_margin = datetime.time(random.randint(0,23),random.randint(0,59),random.randint(0,59))
-            create_request(user, dep_p_lat, dep_p_long, dep_ran, ar_p_lat, ar_p_long, ar_ran, ar_time, max_del, nb_seats, cancel_margin)
+            cancel_margin = datetime.datetime(2010, 12, (ar_time.day-random.randint(0,1)), (ar_time.hour - random.randint(0,ar_time.hour)),ar_time.minute,ar_time.second)
+            create_request(userprofile, dep_p_lat, dep_p_long, dep_ran, ar_p_lat, ar_p_long, ar_ran, ar_time, max_del, nb_seats, cancel_margin)
+
 
         if car:
             for k in xrange(random.randint(0,7)):
-                prof = Profile.objects.get(user=user)
-                car_id = prof.car_id
-                car_desc = prof.car_description
-                nb_seats = prof.number_of_seats
-                moneyperkm = prof.money_per_km
-                dep_time = datetime.datetime(random.randint(2010), 12, random.randint(20,31), random.randint(7,22), random.randint(0,59), 0)
+                car_id = userprofile.car_id
+                car_desc = userprofile.car_description
+                nb_seats = userprofile.number_of_seats
+                moneyperkm = userprofile.money_per_km
+                arr_time = datetime.datetime(2010, 12, random.randint(20,31), random.randint(7,22), random.randint(0,59), 0)
                 rp_list = list()
                 for rp in xrange(random.randint(2, 25)):
                     rp_list.append(route_points_list[random.randint(0, len(route_points_list) - 1)])
+                
                 route_p_list = [(-8000.0,-8000.0)]
                 order = random.randint(0,1)
                 for e in list(set(rp_list)):
                     add_in_rp_list(e, route_p_list, order)
+                print len(route_p_list)
                 route_p_list.remove((-8000.0,-8000.0))
                 if len(route_p_list) < 2:
                     route_p_list.insert(0,(0.0,0.0))
-                create_proposal(user, car_id, car_desc, nb_seats, moneyperkm, dep_time, route_p_list)
+                create_proposal(userprofile, car_id, car_desc, nb_seats, moneyperkm, arr_time, route_p_list)
 
 def main():
     male_name_list = ['Jacob','Michael','Ethan','Joshua','Daniel','Alexander','Anthony','William','Christopher','Matthew','Jayden','Andrew','Joseph','David',

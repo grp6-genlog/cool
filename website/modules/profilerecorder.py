@@ -36,12 +36,12 @@ class ProfileRecorder(PortObject):
                                                                     BirthDate,Smoker,Communities,MoneyPerKm,
                                                                     Gender,BankAccountNumber,CarID,
                                                                     GSMNumber,CarDescription,SmartphoneID],
-                                                                    SuccessCallBack,FailureCallBack)
+                                                                    SuccessCallBack,FailureCallBack,request)
                                                    ('updateprofile',[UserID,UserPassword,NumberOfSeats,
                                                                     BirthDate,Smoker,Communities,MoneyPerKm,
                                                                     Gender,BankAccountNumber,CarID,
                                                                     GSMNumber,CarDescription,SmartphoneID],
-                                                                    SuccessCallBack,FailureCallBack)
+                                                                    SuccessCallBack,FailureCallBack,request)
         @pre : DB is initialized and is the SQL database
                
                UserID is an integer
@@ -89,9 +89,11 @@ class ProfileRecorder(PortObject):
                 pro.save()
             except:
                 traceback.print_exc()
-                threading.Thread(target = msg[3]).start()
+                #threading.Thread(target = msg[3], args = (msg[4],)).start()
+                msg[3](msg[4])
             else:
-                threading.Thread(target = msg[2]).start()
+                #threading.Thread(target = msg[2], args = (msg[4],)).start()
+                msg[2](msg[4])
         elif msg[0] == 'updateprofile':
             try:
                 lfields = msg[1]
@@ -122,8 +124,8 @@ class ProfileRecorder(PortObject):
                 
                 pro.save()
             except:
-                threading.Thread(target = msg[3]).start()
+                threading.Thread(target = msg[3], args = (msg[4],)).start()
             else:
-                threading.Thread(target = msg[2]).start()
+                threading.Thread(target = msg[2], args = (msg[4],)).start()
         else:
             print 'ProfileRecorder received an unexpected message'

@@ -9,7 +9,7 @@ class Request(models.Model):
     arrival_point_long = models.FloatField()
     arrival_range = models.FloatField()
     arrival_time = models.DateTimeField()
-    max_delay = models.DateTimeField()
+    max_delay = models.TimeField()
     nb_requested_seats = models.IntegerField(default=1, blank=True)
     cancellation_margin = models.DateTimeField()
     

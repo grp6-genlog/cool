@@ -1,4 +1,4 @@
-from django.shortcuts import render_to_response
+from django.shortcuts import render_to_response, redirect
 from django import forms
 from django.contrib import auth
 
@@ -60,5 +60,5 @@ def logout(request):
     connected = False
     form = LoginForm(initial={'login': 'login'})
     notifications = [{'error':False, 'msg':'You are now disconnected'}]
-    return render_to_response('home.html', locals())
+    return redirect('/home/')
 
