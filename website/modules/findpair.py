@@ -61,7 +61,7 @@ class FindPair(PortObject):
                 for rp in RoutePoints.object.filter(proposal=propID):
                     disdep = distance((request.departure_point_lat,request.departure_point_long),(rp.latitude,rp.longitude))
                     disarr = distance((request.arrival_point_lat,request.arrival_point_long),(rp.latitude,rp.longitude))
-                    if(disdep<=rp.departure_range and d==None or disdep<d):
+                    if(disdep<=rp.departure_range and (d==None or disdep<d)):
                         d=disdep
                         pup=(rp.latitude,rp.longitude)
                         i=c
