@@ -62,6 +62,8 @@ class EvaluationManager(PortObject):
 			u_from=proposals[0].user
 		eval=Evaluation(ride=rides[0], user_from=u_from, user_to=userID, locked=False)
 		eval.save()
+		delay=delayAction(86400, self.send_to, (self.get_port, ('closeevaluation', [eval.id])))
+		delay.start()
 		
 	def routine(self, src, msg):
 		"""The message routine handler
@@ -87,5 +89,22 @@ class EvaluationManager(PortObject):
 			callback(res)
 		elif msg[0]=='closeevaluation':
 			lockEvaluation(msg[1][0])
+
+#timer description
+class delayAction:
+	def __init__(self, delay, fun, arg):
+		self.delay = delay
+		self.fun = fun
+		self.arg = arg
+	def start(self):
+		self.t = Timer(self.delay,self.fun,self.arg)
+		self.t.start()
+	def cancel(self):
+		self.t.cancel()
+		self.t.join()
+	def restart(self):
+		self.cancel()
+		self.t = Timer(self.delay,self.fun,self.arg)
+		self.t.start()
 			 
 	
