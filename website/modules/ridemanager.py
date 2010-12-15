@@ -2,6 +2,8 @@
 # Interface of the RequestRecorder module
 
 from portobject import *
+from website.offers.models import Offer
+from website.rides.models import Ride
 
 class RideManager(PortObject):
 
@@ -66,7 +68,15 @@ class RideManager(PortObject):
                 a message is sent to the PaymentManager to pay the fee:
                    ('payfee',instructionID)
         """
-        pass
+        ride=Ride.objects.get(id=instructionID)
+	if ride==None:
+		raise 'There is no instruction for %d' % instructionID
+	offer=Offer.object.get(id=ride.offer)
+	if offer==None:
+		raise 'There is no offer for this instruction'
+	offer.status('F')
+	offer.save()
+	self.send_to(evaluationmanager_port, ('payfee', instructionID)
 
     def cancel_ride(self,instructionID):
         """
@@ -85,7 +95,22 @@ class RideManager(PortObject):
                 a message is sent for both user saying that the ride has been cancelled to UserNotifier:
                    ('newmsg',usersID,"The ride instructionID has been cancelled.")
         """
-        pass
+        ride=Ride.objects.get(id=instructionID)
+	if ride==None:
+		raise 'There is no instruction for %d' % instructionID
+	offer=Offer.object.get(id=ride.offer)
+	if offer==None:
+		raise 'There is no offer for this instruction'
+	nondriver=Proposal.object.get(id=offer.request)
+	driver=Proposal.object.get(id=offer.proposal)
+	if nondriver==None or driver==None:
+		raise 'There is a problem with the users'
+	offer.status('F')
+	offer.save()
+	self.send_to(evaluationmanager_port, ('returnfee', instructionID)
+	self.send_to(usernotifier_port, ('newmsg', nondriver, 'The ride %d has been cancelled') % instructionID)
+	self.send_to(usernotifier_port, ('newmsg', driver, 'The ride %d has been cancelled') % instructionID)
+
 
     def routine(self,src,msg):
         """
@@ -99,4 +124,13 @@ class RideManager(PortObject):
         )
         for 'newacceptedride', see self.buildinstruction msg
         """
-        pass
+        if msg[0]=='cancelride':
+		res=self.cancel_ride(msg[1])
+		if res==0:
+			successCancelRide()
+		else:
+			failureCancelRide('The ride cannot be canceled')
+	elif msg[0]=='newacceptedride':
+		self.buildinstruction(msg)
+	elif msg[0]=='closeride':
+		self.close_ride(msg[1])
