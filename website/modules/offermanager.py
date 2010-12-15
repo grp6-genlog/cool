@@ -2,9 +2,9 @@
 #Interface of the Offer Manager Module
 
 from portobject import *
-from offers.models import Offer
-from requests.models import Request
-from proposals.models import Proposal, RoutePoints
+from website.offers.models import Offer
+from website.requests.models import Request
+from website.proposals.models import Proposal, RoutePoints
 from google_tools_json import *
 
 OK=0
