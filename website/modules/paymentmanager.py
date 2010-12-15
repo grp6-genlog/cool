@@ -13,6 +13,7 @@ class PaymentManager(PortObject):
 		"""
 		PortObject.__init__(self)
 		self.bankaccounts={}
+		self.lock=threading.Lock()
 		
 	def fee_transfer(userID1, userID2, fee):
 		"""Transfer the fee from account of userID1 to the account of userID2
@@ -23,13 +24,17 @@ class PaymentManager(PortObject):
 		@post : the account of userID1 contains fee money less and the account of userID2 contains fee 
 				money more
 		"""
+		"""
+		    Message received by the routine is weird for that case. Why are not we using callback functions? a fee transfer can also screwd up no?
+		"""
+		self.lock.acquire()
 		user1=Profiles.objects.get(id=userID1)
 		user2=Profiles.objects.get(id=userID2)
         user1.account_balance=user1.account_balance-fee
         user2.account_balance=user2.acount_balance+fee
-        """LOCK????"""
         user1.save()
-        user2.save()	
+        user2.save()
+        self.lock.release()	
 		
 	def add_money(userID, bankAccount, communication, amount):
 		"""Add money from bank account to car pooling system account
@@ -43,13 +48,14 @@ class PaymentManager(PortObject):
 		if bankAccount not in self.bankaccounts:
 		    self.bankaccounts[bankAccount]=500
 		if(self.bankccounts[bankAccount]-amount<0):
-		    """What are we doing?"""
 		    return False
 		else:
+		    self.lock.acquire()
 		    self.bankccounts[bankAccount]-=amount
 		    user1=Profiles.objects.get(id=userID)
 		    user1.account_balance+=amount
 		    user1.save()
+		    self.lock.release()
 		    return True
 		
 	def get_money(userID, bankAccount, amount):
@@ -63,14 +69,15 @@ class PaymentManager(PortObject):
 		"""
 		user=Profiles.objects.get(id=userID)
 		if(user.account_balance-amount<0):
-		    """what to do?"""
 		    return False
 		else:
+		    self.lock.acquire()
 		    user.account_balance-=amount
 		    user.save()
 		    if bankAccount not in self.bankaccounts:
 		        self.bankaccounts[bankAccount]=500
 		    self.bankaccounts[bankAccount]+=amount
+            self.lock.release()
             return True
 		
 	def routine(self, src, msg):
