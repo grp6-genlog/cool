@@ -83,8 +83,8 @@ class RideManager(PortObject):
         sec2=ridetime.seconds+ridetime.days*86400
 
         delay1=delayAction(sec1, self.send_to, (tracker_port, ('startride', ride.id, self.close_ride, self.cancel_ride)))
-        delay2=delayAction(sec2, self.send_to, (evaluationmanager_port, ('startevaluation', proposal.user, offer.id)))
-        delay3=delayAction(sec2, self.send_to, (evaluationmanager_port, ('startevaluation', request.user, offer.id)))
+        delay2=delayAction(sec2, self.send_to, (evaluationmanager_port, ('startevaluation', proposal.user, ride.id)))
+        delay3=delayAction(sec2, self.send_to, (evaluationmanager_port, ('startevaluation', request.user, ride.id)))
         delay1.start()
         delay2.start()
         delay3.start()
