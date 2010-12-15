@@ -1,12 +1,12 @@
 from django.db import models
 
 class Evaluation(models.Model):
-    ride = models.ForeignKey('rides.Ride')
+    ride = models.ForeignKey('rides.Ride', null=True)
     user_from = models.ForeignKey('profiles.UserProfile', related_name='user_from')
     user_to = models.ForeignKey('profiles.UserProfile', related_name='user_to')
-    rating = models.IntegerField()
-    content = models.TextField(max_length=500)
-    time = models.DateTimeField()
+    rating = models.IntegerField(null=True)
+    content = models.TextField(max_length=500, null=True)
+    ride_time = models.DateTimeField(null=True)
     locked = models.BooleanField(default=True)
 
     
