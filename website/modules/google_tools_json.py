@@ -49,6 +49,14 @@ def address_to_location(address):
 	else:
         	return -1
 
+def location_to_address(location, print_url=False):
+	url=GEOCODING_URL+"?latlng=%s&sensor=false" % (location)
+	if print_url:
+		print url
+	data=urllib.urlopen(url)
+	return data
+    
+
 def get_location_from_doc(json_doc):
 	results=json_doc['results']
 	if len(results)==0:

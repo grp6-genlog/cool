@@ -1,5 +1,4 @@
 from django.shortcuts import render_to_response, redirect
-from django.http import HttpResponseRedirect
 from django import forms
 
 from website.profiles.models import UserProfile
@@ -95,64 +94,7 @@ def addproposal(request, port_proposal=None):
         return render_to_response('proposalform.html', locals())
 
 
-
-def editproposal(request, port_request=None):
-    if not request.user.is_authenticated():
-        return redirect('/home/', request=request)
-
-    if request.method == 'POST':
-        form = RequestForm(request.POST)
         
-        if form.is_valid():
-            form.cleaned_data
-            
-            UserID = UserProfile.objects.get(user=request.user)
-            departure_point_lat = request.POST.get('departure_point_lat', 0)
-            departure_point_long = request.POST.get('departure_point_long', 0)
-            departure_range = request.POST.get('departure_range', 0)
-            arrival_point_lat = request.POST.get('arrival_point_lat', 0)
-            arrival_point_long = request.POST.get('arrival_point_long', 0)
-            arrival_range = request.POST.get('arrival_range', 0)
-            arrival_time = request.POST.get('arrival_time', datetime.datetime.today())
-            max_delay = request.POST.get('max_delay', datetime.datetime.today())
-            nb_requested_seats = request.POST.get('nb_requested_seats', 1)
-            cancellation_margin = request.POST.get('cancellation_margin', datetime.datetime.today())
-            
-            WaitCallbacksRequest.declare(request.user)
-            
-            gui_port.send_to(port_request,('recordrequest',[UserID,(departure_point_lat, departure_point_long),departure_range,
-                                                            (arrival_point_lat, arrival_point_long),arrival_range,arrival_time,max_delay,
-                                                            nb_requested_seats,cancellation_margin],
-                                           successcall,
-                                           failurecall,
-                                           request.user))
-            
-            wait_counter = 0
-            while WaitCallbacksRequest.is_pending(request.user) and wait_counter < 10:
-                time.sleep(0.1)
-                wait_counter += 1
-            
-            if WaitCallbacksRequest.status(request.user) == 'success':
-                WaitCallbacksRequest.free(request.user)
-                return render_to_response('home.html', locals())
-            else:
-                print WaitCallbacksRequest.status(request.user)
-                WaitCallbacksRequest.free(request.user)
-                return render_to_response('error.html', locals())
-        else:
-            return render_to_response('requestform.html', locals())
-    else:
-        user=UserProfile.objects.get(user=request.user)
-        init = {
-            'car_id':user.car_id,
-            'car_description':user.car_description,
-            'number_of_seats':user.number_of_seats,
-            'money_per_km':user.money_per_km,
-        }
-          
-        form = ProposalForm(initial=init)
-
-        return render_to_response('requestform.html', locals())
 def successcall(user):
     WaitCallbacksProposal.update(user, 'success')
     

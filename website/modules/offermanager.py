@@ -7,6 +7,8 @@ from website.requests.models import Request
 from website.proposals.models import Proposal, RoutePoints
 from google_tools_json import *
 
+import threading
+
 OK=0
 RAA=-1
 NEP=-2
@@ -234,27 +236,46 @@ class OfferManager(PortObject):
 			        
 		"""
 		if msg[0]=='buildoffer':
-			build_offer(msg[1], msg[2], msg[3], msg[4])
-			callbackProc(True, "")
+		    try:
+			    build_offer(msg[1], msg[2], msg[3], msg[4])
+			except:
+			    threading.Thread(target = msg[3], args = (msg[4],)).start()
+			else:
+			    threading.Thread(target = msg[2], args = (msg[4],)).start()
+			
 		elif msg[0]=='driveragree':
-			ret=driver_agree(msg[1])
-			if ret==OK:
-				callbackProc(True, "")
-			elif ret==RAA:
-				callbackProc(False, RAA_MSG)
-			elif ret==NEP:
-				callbackProc(False, NEP_MSG)
+			try:
+			    ret = driver_agree(msg[1])
+			except:
+			    threading.Thread(target = msg[3], args = (msg[4],)).start()
+			else:
+			    if ret==OK:
+			        threading.Thread(target = msg[2], args = (msg[4],)).start()
+                elif ret==RAA:
+                    threading.Thread(target = msg[3], args = (msg[4],RAA_MSG)).start()
+			    elif ret==NEP:
+				    threading.Thread(target = msg[3], args = (msg[4],NEP_MSG)).start()
+				
 		elif msg[0]=='nondriver_agree':
-			nondriver_agree(msg[1])
-			if ret==OK:
-				callbackProc(True, "")
-			elif ret==RAA:
-				callbackProc(False, RAA_MSG)
-			elif ret==NEP:
-				callbackProc(False, NEP_MSG)
+		    try:
+			    ret = nondriver_agree(msg[1])
+			except:
+			    threading.Thread(target = msg[3], args = (msg[4],)).start()
+			else:
+			    if ret==OK:
+			        threading.Thread(target = msg[2], args = (msg[4],)).start()
+                elif ret==RAA:
+                    threading.Thread(target = msg[3], args = (msg[4],RAA_MSG)).start()
+			    elif ret==NEP:
+				    threading.Thread(target = msg[3], args = (msg[4],NEP_MSG)).start()
+				
 		elif msg[0]=='refuseoffer':
-			discarded(msg[1])
-			callbackProc(True, "")		
+		    try:
+			    discarded(msg[1])
+			except:
+			    threading.Thread(target = msg[3], args = (msg[4],)).start()
+			else:
+			    threading.Thread(target = msg[2], args = (msg[4],)).start()
 					
 
 """
