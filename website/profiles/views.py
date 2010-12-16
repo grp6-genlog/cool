@@ -79,6 +79,19 @@ class EditProfileForm(forms.Form):
     smartphone_id = forms.CharField(max_length=100,
                                 required=False)
 
+class PasswordForm(forms.Form):
+    old_password = forms.CharField(max_length=50,
+                       min_length=3,
+                       widget=forms.PasswordInput(render_value=False),)
+    new_password = forms.CharField(max_length=50,
+                       min_length=3,
+                       widget=forms.PasswordInput(render_value=False),)
+    new_password2 = forms.CharField(max_length=50,
+                       widget=forms.PasswordInput(render_value=False),
+                       label=u'Confirm password')
+
+
+
 class WaitCallbacksProfile(WaitCallbacks):
     pass
 
@@ -124,7 +137,6 @@ def register(request, port_profile=None):
 
 def editprofile(request, port_profile=None):
     if not request.user.is_authenticated():
-        connected = True
         current_date = datetime.datetime.now()
         return render_to_response('home.html', locals())
         
@@ -170,7 +182,45 @@ def editprofile(request, port_profile=None):
 
             return render_to_response('register.html', locals())
             
-        
+def changepassword(request, port_profile=None):
+    if not request.user.is_authenticated():
+        current_date = datetime.datetime.now()
+        return render_to_response('home.html', locals())
+    
+    else:
+        try:
+            p = UserProfile.objects.get(user=request.user)
+        except:
+            return render_to_response('404.html', locals())
+        else:
+            action = "password" 
+            if request.method == 'POST':
+                form = PasswordForm(request.POST)
+               
+                valid = form.is_valid()
+                
+                old_p = form.cleaned_data['old_password']
+                new_p1 = form.cleaned_data['new_password']
+                new_p2 = form.cleaned_data['new_password2']
+                
+                if auth.models.check_password(old_p, request.user.password):
+                    form._errors["old_p"] = form.error_class(["Invalid password"])
+                    valid = False
+                
+                if new_p1 != new_p2:
+                    form._errors["new_p2"] = form.error_class(["The passwords don't match"])
+                    valid = False
+                    
+                if valid:
+                    request.user.set_password(new_p1)
+                    notifications = "Password changed"
+                    return render_to_response('home.html', locals())
+            
+            else:
+                form = PasswordForm()
+
+            return render_to_response('home.html', locals())
+    
         
 def toprofilerecorder(request, port_profile, action):
     if action != 'register' and action != 'edit':
@@ -237,12 +287,15 @@ def toprofilerecorder(request, port_profile, action):
             
     if WaitCallbacksProfile.status(request.user) == 'success':
         WaitCallbacksProfile.free(request.user)
+        if action == 'register':
+            user = auth.authenticate(username=n_user.username, password=n_user.password)
+            if user is not None and user.is_active:
+                auth.login(request, user)
         return render_to_response('home.html', locals())
     else:
         print WaitCallbacksProfile.status(request.user)
         WaitCallbacksProfile.free(request.user)
         return render_to_response('error.html', locals())
-            
             
     
 

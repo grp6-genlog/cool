@@ -16,8 +16,10 @@ class Offer(models.Model):
     non_driver_ok = models.BooleanField(default=False)
     pickup_point_lat = models.FloatField()
     pickup_point_long = models.FloatField()
+    pickup_time = models.DateTimeField()
     drop_point_lat = models.FloatField()
     drop_point_long = models.FloatField()
+    drop_time = models.DateTimeField()
     total_fee = models.FloatField()
     
     def __unicode__(self):

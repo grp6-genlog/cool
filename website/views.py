@@ -28,17 +28,13 @@ def home(request):
                 user = auth.authenticate(username=username, password=passwd)
                 if user is not None and user.is_active:
                     auth.login(request, user)
-                    connected = True
                     name = request.user.username
                     notifications = [{'error':False, 'content':'You are now connected'}]
                 else:
-                    connected = False
                     notifications = [{'error':True, 'content':'Incorrect login or password'}]
             else:
-                connected = False
                 notifications = [{'error':True, 'content':'Invalid form'}]
         else:
-            connected = False
             form = LoginForm(initial={'login': 'login'})
 
     return render_to_response('home.html', locals())
