@@ -39,7 +39,7 @@ def distance_origin_dest(origin, destination, checkpoints):
         return -1
 
 def address_to_location(address):
-	doc=get_json_geocoding_doc(address)
+	doc=get_json_geocoding_doc(address, True)
 	parsed_doc=json.loads(doc.read())
  	if check_status(parsed_doc)==OK:
 		return get_location_from_doc(parsed_doc)
@@ -71,7 +71,7 @@ def get_distance_from_doc(json_doc):
     return legs[-1]['distance']['value']
 
 def get_json_geocoding_doc(address, print_url=False):
-	url="?address=%s&sensor=true_or_false" % (address)
+	url=GEOCODING_URL+"?address=%s&sensor=false" % (address)
 	if print_url:
 		print url
 	data=urllib.urlopen(url)
@@ -119,5 +119,5 @@ def check_status(json_doc):
         return ERROR
 
 if __name__=='__main__':
-    print address_to_location('Avenue+des+campanules, 1170, Bruxelles')
+    print address_to_location('rue+Humont,+46+7901+Thieulain')
 

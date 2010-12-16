@@ -3,6 +3,7 @@
 
 from portobject import *
 from proposals.models import *
+import threading
 
 USERID = 0
 ROUTEPOINTS =1
@@ -11,6 +12,7 @@ CARID = 3
 NBSEATS = 4
 MONEYPERKM = 5
 DEPTIME = 6
+ARRTIME = 7
 
 class ProposalRecorder(PortObject):
     findpair_port=None # the communication port of FindPair
@@ -28,7 +30,7 @@ class ProposalRecorder(PortObject):
         """
         The msg treatement routine.
         The only acceptable message is the pair ('recordproposal',[UserID,RoutePoints,CarDescription,
-                                                                  CarID,NumberOfSeats,MoneyPerKm,DepartureTime],
+                                                                  CarID,NumberOfSeats,MoneyPerKm,DepartureTime,ArrivalTime],
                                                                   SuccessCallBack,FailureCallBack)
         @pre : DB is initialized and is the SQL database
                findpair_port is the FindPair module's port
@@ -60,6 +62,7 @@ class ProposalRecorder(PortObject):
                 prop.number_of_seats = lfields[NBSEATS]
                 prop.money_per_km = lfields[MONEYPERKM]
                 prop.departure_time = lfields[DEPTIME]
+                prop.arrival_time = lfields[ARRTIME]
                 
                 prop.save()
                 prop_id = prop.id
@@ -72,9 +75,9 @@ class ProposalRecorder(PortObject):
                     rp.save()
 
             except:
-                threading.Thread(target = msg[3]).start()
+                threading.Thread(target = msg[3], args = (msg[4],)).start()
             else:  
-                send_to(findpair_port, ('newProposal', req_id))
-                threading.Thread(target = msg[2]).start()
+                self.send_to(self.findpair_port, ('newProposal', prop_id))
+                threading.Thread(target = msg[2], args = (msg[4],)).start()
         else:
             print 'ProposalRecorder received an unexpected message'

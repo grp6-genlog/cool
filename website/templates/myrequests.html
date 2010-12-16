@@ -18,7 +18,6 @@ My requests
         <b>To</b> : {{ req.arrival_point_lat }}-{{ req.arrival_point_lat }} (whithin {{ req.arrival_range }} km)<br/>
         {{ req.nb_requested_seats }} seat{% if req.nb_requested_seats > 1 %}s{% endif %} requested.<br/>
         If no match found, will be canceled {{ req.cancellation_margin }}<br/>
-        <a href="/editrequest/{{ req.id }}/"><img src="/img_f/edit.gif" /> edit</a> -
         <a href="/cancelrequest/{{ req.id }}/"><img src="/img_f/delete.gif" /> cancel</a>
         <br/><br/>
     {% endfor %}
