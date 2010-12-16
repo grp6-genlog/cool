@@ -24,7 +24,6 @@ class UserProfile(models.Model):
     car_id = models.CharField(max_length=50, blank=True, null=True)
     phone_number = models.CharField(max_length=20)
     car_description = models.TextField(max_length=500, blank=True, null=True)
-    smartphone_id = models.CharField(max_length=100, blank=True, null=True)
     
     def __str__(self):  
           return "%s's profile" % self.user

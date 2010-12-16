@@ -16,7 +16,6 @@ BANKACCOUNT = 7
 CARID = 8
 GSMNUMBER = 9
 CARDESCRIPTION = 10
-SMARTPHONE = 11
 
 class ProfileRecorder(PortObject):
     
@@ -34,12 +33,12 @@ class ProfileRecorder(PortObject):
         The only acceptable messages are the pairs ('recordprofile',[UserID,NumberOfSeats,
                                                                     BirthDate,Smoker,Communities,MoneyPerKm,
                                                                     Gender,BankAccountNumber,CarID,
-                                                                    GSMNumber,CarDescription,SmartphoneID],
+                                                                    GSMNumber,CarDescription],
                                                                     SuccessCallBack,FailureCallBack,request)
                                                    ('updateprofile',[UserID,UserPassword,NumberOfSeats,
                                                                     BirthDate,Smoker,Communities,MoneyPerKm,
                                                                     Gender,BankAccountNumber,CarID,
-                                                                    GSMNumber,CarDescription,SmartphoneID],
+                                                                    GSMNumber,CarDescription],
                                                                     SuccessCallBack,FailureCallBack,request)
         @pre : DB is initialized and is the SQL database
                
@@ -54,7 +53,6 @@ class ProfileRecorder(PortObject):
                CarID is a string
                GSMNumber is a string
                CarDescription is a string
-               SmartphoneID is string
                SuccessCallBack is a procedure 
                FailureCallBack is a procedure
       
@@ -83,7 +81,6 @@ class ProfileRecorder(PortObject):
                 pro.car_id = lfields[CARID]
                 pro.phone_number = lfields[GSMNUMBER]
                 pro.car_description = lfields[CARDESCRIPTION]
-                pro.smartphone_id = lfields[SMARTPHONE]
                 
                 pro.save()
             except:
@@ -117,8 +114,6 @@ class ProfileRecorder(PortObject):
                     pro.phone_number = lfields[GSMNUMBER]
                 if lfields[CARDESCRIPTION]:
                     pro.car_description = lfields[CARDESCRIPTION]
-                if lfields[SMARTPHONE]:
-                    pro.smartphone_id = lfields[SMARTPHONE]
                 
                 pro.save()
             except:

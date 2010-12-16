@@ -53,8 +53,7 @@ class RegisterForm(forms.Form):
                             widget=forms.Textarea,
                             required=False)
     number_of_seats = forms.IntegerField(required=False)
-    smartphone_id = forms.CharField(max_length=100,
-                                required=False)
+
 
 class EditProfileForm(forms.Form):
     email = forms.EmailField(max_length=70,
@@ -76,8 +75,7 @@ class EditProfileForm(forms.Form):
                             widget=forms.Textarea,
                             required=False)
     number_of_seats = forms.IntegerField(required=False)
-    smartphone_id = forms.CharField(max_length=100,
-                                required=False)
+
 
 class PasswordForm(forms.Form):
     old_password = forms.CharField(max_length=50,
@@ -176,7 +174,6 @@ def editprofile(request, port_profile=None):
                     'car_id' : p.car_id,
                     'car_description' : p.car_description,
                     'number_of_seats' : p.number_of_seats,
-                    'smartphone_id' : p.smartphone_id,
                 }
                 form = EditProfileForm(initial=init,)
 
@@ -264,7 +261,6 @@ def toprofilerecorder(request, port_profile, action):
 
     GSMNumber = form.cleaned_data['phone_number']
     CarDescription = form.cleaned_data['car_description']
-    SmartphoneID = form.cleaned_data['smartphone_id']
         
     if action == 'register':
         msg = 'recordprofile'
@@ -276,7 +272,7 @@ def toprofilerecorder(request, port_profile, action):
     gui_port.send_to(port_profile,(msg,[n_user,NumberOfSeats,
                                        BirthDate,Smoker,Communities,MoneyPerKm,
                                        Gender,BankAccountNumber,CarID,
-                                       GSMNumber,CarDescription,SmartphoneID],
+                                       GSMNumber,CarDescription],
                                    successcall,
                                    failurecall,
                                    request.user))
