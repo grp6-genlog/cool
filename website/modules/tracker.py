@@ -2,7 +2,7 @@
 # @Author Group 6
 # Interface of the Tracker
 
-from portobject.portobject import *
+from portobject import *
 from django.contrib.auth.models import User
 from offers.models import Offer
 from rides.models import Ride
@@ -72,6 +72,7 @@ class Tracker(PortObject):
         self.userdict = dict()
         self.unregistered_connections = list()
         self.lock = threading.Lock()
+        self.rides_list = list()
         self.check_all_rides()
 
     def check_all_rides(self):
@@ -102,11 +103,11 @@ class Tracker(PortObject):
                     try:
                         user = User.objects.get(username=unreg[0])
                         if user.check_password(msg.split('&')[MMESS]):
-                            if unreg[0] not in userdict:
+                            if unreg[0] not in self.userdict:
                                 self.userdict[unreg[0]]=(unreg[1],list())
                                 self.unregistered_connections.remove(unreg)
                             else:
-                                userdict[unreg[0]][UCONN]=unreg[1]
+                                self.userdict[unreg[0]][UCONN]=unreg[1]
                         else :
                             unreg[1].send('pwd?&&\n')
                     except:                      
@@ -116,9 +117,9 @@ class Tracker(PortObject):
         self.lock.release()
 
         # check for each ride if there's something to do
-        for ride in rides_list:
-            if not ride[NDAWARE] and ride[NDRIVER] in userdict:
-                userdict[NDRIVER][0].send('ndr!&&\n')
+        for ride in self.rides_list:
+            if not ride[NDAWARE] and ride[NDRIVER] in self.userdict:
+                self.userdict[NDRIVER][0].send('ndr!&&\n')
                 ride[NDAWARE]=True
             if ride[STATE]==SPENDING and (ride[RIDETIME]-datetime.datetime.now()) < datetime.timedelta(0,60*30):
                 # the driver has to be notified
@@ -127,61 +128,61 @@ class Tracker(PortObject):
                 ride[STATE]=SREMINDED
             if (ride[STATE]==SREMINDED or ride[STATE]==SOPENCONN) and (ride[RIDETIME]-datetime.datetime.now())<datetime.timedelta(0,60*5):
                 # the nondriver should be asked if the ride has started
-                if ride[NDRIVER] in userdict:
-                    userdict[ride[NDRIVER]].send('stt?&'+str(ride[RIDEID])+'&'+str(ride[RIDETIME])+'\n')
+                if ride[NDRIVER] in self.userdict:
+                    self.userdict[ride[NDRIVER]].send('stt?&'+str(ride[RIDEID])+'&'+str(ride[RIDETIME])+'\n')
                     ride[STATE]=SSTARTEDA
                 elif ride[STATE]==SREMINDED:
                     self.send_to(self.usernotifier_port,('newmsg',ride[NDRIVER],"Please, open your COOL's smartphone app."))
                     ride[STATE]=SOPENCONN
             
-            if ride[DRIVER] in userdict:
-                fill_buffer(userdict[ride[DRIVER]])
-                for msg in userdict[ride[DRIVER]][UBUFF]:
+            if ride[DRIVER] in self.userdict:
+                fill_buffer(self.userdict[ride[DRIVER]])
+                for msg in self.userdict[ride[DRIVER]][UBUFF]:
                     if msg.split('&')[MTYPE]=='est!' and int(msg.split('&')[MRIDE])==ride[RIDEID]:
-                        userdict[ride[DRIVER]][UBUFF].remove(msg)
-                        if ride[NDRIVER] not in userdict:
+                        self.userdict[ride[DRIVER]][UBUFF].remove(msg)
+                        if ride[NDRIVER] not in self.userdict:
                             self.send_to(self.usernotifier_port,('newmsg',ride[NDRIVER],"Please, open your COOL's smartphone app."))
                         else:
-                            userdict[ride[NDRIVER]][UCONN].send(msg)
+                            self.userdict[ride[NDRIVER]][UCONN].send(msg)
                     else:
                         print 'connection with ',ride[DRIVER],'closed.'
-                        userdict[ride[NDRIVER]][UCONN].close()
-                        userdict[ride[NDRIVER]][UCONN]=None
+                        self.userdict[ride[NDRIVER]][UCONN].close()
+                        self.userdict[ride[NDRIVER]][UCONN]=None
                 if userdic[ride[DRIVER]]==(None,list()):
                     # erase the connection
                     pass
 
-            if ride[NDRIVER] in userdict:
-                fill_buffer(userdict[ride[NDRIVER]])
-                for msg in userdict[ride[NDRIVER]][UBUFF]:
+            if ride[NDRIVER] in self.userdict:
+                fill_buffer(self.userdict[ride[NDRIVER]])
+                for msg in self.userdict[ride[NDRIVER]][UBUFF]:
                     if msg.split('&')[MTYPE]=='est?' and int(msg.split('&')[MRIDE])==ride[RIDEID]:
-                        userdict[ride[DRIVER]][UBUFF].remove(msg)
-                        if ride[DRIVER] not in userdict:
+                        self.userdict[ride[DRIVER]][UBUFF].remove(msg)
+                        if ride[DRIVER] not in self.userdict:
                             self.send_to(self.usernotifier_port,('newmsg',ride[DRIVER],"Please, open your COOL's smartphone app."))
-                            userdict[ride[NDRIVER]][UCONN].send('dnc!&&\n')
+                            self.userdict[ride[NDRIVER]][UCONN].send('dnc!&&\n')
                         else:
                             if ride[MANUAL_MODE]:
-                                userdict[ride[DRIVER]][UCONN].send('est?&'+str(ride[RIDEID])+'&'+str(ride[RIDETIME])+'\n')
+                                self.userdict[ride[DRIVER]][UCONN].send('est?&'+str(ride[RIDEID])+'&'+str(ride[RIDETIME])+'\n')
                             else:
-                                userdict[ride[DRIVER]][UCONN].send('pos?&&\n')
+                                self.userdict[ride[DRIVER]][UCONN].send('pos?&&\n')
                     elif msg.split('&')[MTYPE]=='stt!' and int(msg.split('&')[MRIDE])==ride[RIDEID]:
-                        userdict[ride[DRIVER]][UBUFF].remove(msg)
+                        self.userdict[ride[DRIVER]][UBUFF].remove(msg)
                         threading.Thread(target=ride[CALLB_OK]).start()
                         print 'ride ok'
                         rides_list.remove(ride)
                     elif msg.split('&')[MTYPE]=='ccl!' and int(msg.split('&')[MRIDE])==ride[RIDEID]:
-                        userdict[ride[DRIVER]][UBUFF].remove(msg)
+                        self.userdict[ride[DRIVER]][UBUFF].remove(msg)
                         threading.Thread(target=ride[CALLB_KO]).start()
                         print 'ride cancelled'
                         rides_list.remove(ride)
                     else:
                         print 'connection with ',ride[DRIVER],'closed.'
-                        userdict[ride[NDRIVER]][UCONN].close()
-                        userdict[ride[NDRIVER]][UCONN]=None
+                        self.userdict[ride[NDRIVER]][UCONN].close()
+                        self.userdict[ride[NDRIVER]][UCONN]=None
                 if userdic[ride[DRIVER]]==(None,list()):
                     # erase the connection
                     pass                           
-        threading.Timer(5.,lambda:self.check_all).start()
+        threading.Timer(5.,lambda:self.check_all_rides()).start()
 
     def start_ride(self,instructionID,callb_ok,callb_ko):
         """
@@ -222,8 +223,8 @@ class Tracker(PortObject):
             lock.acquire()
             info = (msg[1],datetime.datetime(offer.pickup_time),False,msg[2],msg[3],driver,ndriver,SPENDING,offer.pickup_point_lat,offer.pickup_point_long,False)
             rides_list.append(info)
-            if ndriver in userdict:
-                userdict[ndriver][0].send('ndr!&&\n')
+            if ndriver in self.userdict:
+                self.userdict[ndriver][0].send('ndr!&&\n')
                 info[NDAWARE]=True
             lock.release()
             

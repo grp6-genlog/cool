@@ -68,3 +68,9 @@ urlpatterns += patterns('website.requests.views',
     (r'^addrequest/$', 'addrequest', {'port_request':global_ports.request_rec_port}),
     (r'^editrequest/(\d+)/$', 'editrequest'),
 )
+
+urlpatterns += patterns('website.proposals.views',
+    (r'^proposals/$', 'myproposals'),
+    (r'^addproposal/$', 'addproposal', {'port_proposal':global_ports.proposal_rec_port}),
+    (r'^editproposal/(\d+)/$', 'editproposal'),
+)
