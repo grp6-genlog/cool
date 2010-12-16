@@ -6,6 +6,8 @@ from django.contrib.auth.models import User
 from website.profiles.models import UserProfile
 from website.proposals.models import Proposal
 from website.requests.models import Request
+from website.offers.models import Offer
+from website.rides.models import Ride
 from math import sqrt
 from utils import get_distance
 
@@ -45,10 +47,15 @@ class FindPair(PortObject):
                 for each request matching the specified proposal, a message is sent to OfferManager through its port:
                     ('buildoffer',requestID,proposalID) with requestID, the database ID of the matching request
         """
-        try:
-            infos=Proposal.objects.get(id=propID)
-            requests=Request.objects.filter(arrival_time__gt=infos.departure_time,nb_requested_seats__lt=infos.number_of_seats)
-            for request in requests:
+        infos=Proposal.objects.get(id=propID)
+        requests=Request.objects.filter(arrival_time__gt=infos.departure_time,nb_requested_seats__lt=infos.number_of_seats)
+        for request in requests:
+            found = False
+            for offer in Offer.objects.filter(request=request.id):
+                if Ride.objects.filter(offer=offer.id):
+                    found=True
+                    break
+            if not found:
                 d=None
                 p=None
                 pup=None
@@ -71,10 +78,7 @@ class FindPair(PortObject):
                             
                 if pup!=None and dp!=None and i<j:
                     send_to(self.offermanager_port,('buildoffer',request.id,propID,pup,dp))
-        except:
-            print("Error : no or more than one proposal with the specified id had been found");
 
-        
 
     def match_request(self,requestID):
         """

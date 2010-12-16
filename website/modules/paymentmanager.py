@@ -3,15 +3,14 @@
 from portobject import *
 from website.offers.models import Offer
 from website.rides.models import Ride
-from website.profiles.models import UserProfile
-class PaymentManager(PortObject):
-    bankanccounts = None # the dico of bank accounts
+from website.proposals.models import Proposal
+from website.requests.models import Request
 
+class PaymentManager(PortObject):
     def __init__(self):
         """
         """
         PortObject.__init__(self)
-        self.bankaccounts={}
         
     def fee_transfer(self,instructionID):
         """Transfer the fee from account of userID1 to the account of userID2
@@ -22,17 +21,30 @@ class PaymentManager(PortObject):
         @post : the account of userID1 contains fee money less and the account of userID2 contains fee 
                 money more
         """
-        """
-            Message received by the routine is weird for that case. Why are not we using callback functions? a fee transfer can also screwd up no?
-        """
-        user1=Profiles.objects.get(id=userID1)
-        user2=Profiles.objects.get(id=userID2)
-        user1.account_balance=user1.account_balance-fee
-        user2.account_balance=user2.acount_balance+fee
-        user1.save()
-        user2.save()
-
+        ride = Ride.objects.get(id=instructionID)
+        offer = Offer.objects.get(id=ride.offer)
+        proposal = Proposal.objects.get(id=offer.proposal)
+        request = Request.objects.get(id=offer.request)
+        driver=UserProfile.objects.get(id=proposal.user)
+        ndriver=UserProfile.objects.get(id=request.user)
         
+        ndriver.account_balance=ndriver.account_balance-fee
+        driver.account_balance=driver.acount_balance+fee
+        driver.save()
+        ndriver.save()
+
+    def valid_transfer(self,bankAccount,communication,amount):
+        """
+        We trust you my friend :)
+        """
+        return True
+
+    def transfer_money(self,bankAccount,communication,amount):
+        """
+        Trust me :)
+        """
+        print 'Transfer sent to bank:',bankAccount,communication,amount
+
     def add_money(self,userID, bankAccount, communication, amount):
         """Add money from bank account to car pooling system account
         @pre : userID is the id of the user who wants to add the money
@@ -42,17 +54,12 @@ class PaymentManager(PortObject):
                amount is the amount of money to transfer
         @post : the account of userID is incremented by the money amount coming from the bank transfer
         """
-        if bankAccount not in self.bankaccounts:
-            self.bankaccounts[bankAccount]=500
-        if(self.bankccounts[bankAccount]-amount<0):
-            return False
+        if not self.valid_transfer(bankAccount,communication,amount):
+            return False 
         else:
-            self.lock.acquire()
-            self.bankccounts[bankAccount]-=amount
-            user1=Profiles.objects.get(id=userID)
+            user1=UserProfile.objects.get(id=userID)
             user1.account_balance+=amount
             user1.save()
-            self.lock.release()
             return True
         
     def get_money(self,userID, bankAccount, amount):
@@ -64,17 +71,13 @@ class PaymentManager(PortObject):
         @post : the account of userID contains is decremented by the amount of money specified
                 and this amount of money is transferred to bankAccount
         """
-        user=Profiles.objects.get(id=userID)
+        user=UserProfile.objects.get(id=userID)
         if(user.account_balance-amount<0):
             return False
         else:
-            self.lock.acquire()
             user.account_balance-=amount
+            self.transfer_money(bankAccount,str(userId),amount))
             user.save()
-            if bankAccount not in self.bankaccounts:
-                self.bankaccounts[bankAccount]=500
-            self.bankaccounts[bankAccount]+=amount
-            self.lock.release()
             return True
         
     def routine(self, src, msg):
@@ -96,17 +99,16 @@ class PaymentManager(PortObject):
         """
         if len(msg)==2:
             (name,instructionID)=msg
-            
-            self.fee_transfer(tab[0],tab[1],tab[2])
+            self.fee_transfer(instructionID)
         if len(msg)==3:
             (name,tab,functionOk,functionKo)=msg
             if name=='addmoney':
                 if(self.add_money(tab[0],tab[1],tab[2],tab[3])):
-                    threading.Thread(target=functionOk()).start()
+                    threading.Thread(target=functionOk).start()
                 else:
-                    threading.Thread(target=functionKo()).start()
+                    threading.Thread(target=functionKo).start()
             elif name=='getmoney':
                 if self.get_money(tab[0],tab[1],tab[2]):
-                    threading.Thread(target=functionOk()).start()
+                    threading.Thread(target=functionOk).start()
                 else:
-                    threading.Thread(target=functionKo()).start()
+                    threading.Thread(target=functionKo).start()

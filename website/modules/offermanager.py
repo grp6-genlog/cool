@@ -233,6 +233,8 @@ class OfferManager(PortObject):
 			                status = True if the offer is correct (existing, waiting for answer)
 			                        False otherwise with a message of explaination
 			        - post discarded
+			    for 'cancelrequest':
+			        -
 			        
 		"""
 		if msg[0]=='buildoffer':
