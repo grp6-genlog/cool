@@ -94,25 +94,26 @@ class ProfileRecorder(PortObject):
                 lfields = msg[1]
                 pro = UserProfile.objects.get(user=lfields[USERID])
 
-                if lfields[NBSEATS]:
+                if lfields[NBSEATS] == None:
                     pro.number_of_seats = lfields[NBSEATS]
-                if lfields[BIRTHDATE]:
+                if lfields[BIRTHDATE] == None:
                     pro.date_of_birth = lfields[BIRTHDATE]
-                if lfields[SMOKER]:
-                    pro.smoker = lfields[SMOKER]
-                if lfields[COMMUNITIES]:
+                
+                pro.smoker = lfields[SMOKER]
+                
+                if lfields[COMMUNITIES] == None:
                     pro.communities = lfields[COMMUNITIES]
-                if lfields[MONEYPERKM]:
+                if lfields[MONEYPERKM] == None:
                     pro.money_per_km = lfields[MONEYPERKM]
-                if lfields[GENDER]:
+                if lfields[GENDER] == None:
                     pro.gender = lfields[GENDER]
-                if lfields[BANKACCOUNT]:
+                if lfields[BANKACCOUNT] == None:
                     pro.bank_account_number = lfields[BANKACCOUNT]
-                if lfields[CARID]:
+                if lfields[CARID] == None:
                     pro.car_id = lfields[CARID]
-                if lfields[GSMNUMBER]:
+                if lfields[GSMNUMBER] == None:
                     pro.phone_number = lfields[GSMNUMBER]
-                if lfields[CARDESCRIPTION]:
+                if lfields[CARDESCRIPTION] == None:
                     pro.car_description = lfields[CARDESCRIPTION]
                 
                 pro.save()

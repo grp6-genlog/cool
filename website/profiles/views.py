@@ -200,23 +200,26 @@ def changepassword(request, port_profile=None):
                 new_p1 = form.cleaned_data['new_password']
                 new_p2 = form.cleaned_data['new_password2']
                 
-                if auth.models.check_password(old_p, request.user.password):
-                    form._errors["old_p"] = form.error_class(["Invalid password"])
+                if not auth.models.check_password(old_p, request.user.password):
+                    form._errors["old_password"] = form.error_class(["Invalid password"])
                     valid = False
                 
                 if new_p1 != new_p2:
-                    form._errors["new_p2"] = form.error_class(["The passwords don't match"])
+                    form._errors["new_password2"] = form.error_class(["The passwords don't match"])
                     valid = False
                     
                 if valid:
+
                     request.user.set_password(new_p1)
-                    notifications = "Password changed"
+                    request.user.save()
+
+                    notification = {'content':"Password changed successfully", 'success':True}
                     return render_to_response('home.html', locals())
             
             else:
                 form = PasswordForm()
 
-            return render_to_response('home.html', locals())
+            return render_to_response('password.html', locals())
     
         
 def toprofilerecorder(request, port_profile, action):

@@ -9,38 +9,52 @@
 {% endblock %}
 
 {% block content %}
-{{ notification }}
 <div style="width:70%; margin:auto;">
     <div class="txt_center">
+    
 {% if request.user.is_authenticated %}
+    
     Hello {{ request.user.first_name }}!
     <br/><br/>
-<div class="colmask threecol">
-	<div class="colmid">
-		<div class="colleft">
-			<div class="col1">
-            <a href="/offers/">My offers</a><br/><br/>
-            <a href="/rides/">My rides</a>
-			</div>
-			<div class="col2">
-            <a href="/profile/">My profile</a><br/><br/>
-            <a href="/password/">Change password</a>
-			</div>
-			<div class="col3">
-            <a href="/requests/">My requests</a><br/>
-            <a href="/addrequest/">Add a request</a><br/><br/>
-            <a href="/proposals/">My proposal</a><br/>
-            <a href="/addproposal/">Add an porposal</a><br/>
-            </div>
-		</div>
-	</div>
-</div>
-    <br/><br/>
+    
+    {% if notification.content %}
+        {% if notification.success %}
+            <span style="color:green;">
+        {% else %}
+            <span style="color:red;">
+        {% endif %}
+        
+        {{ notification.content }}
+        </span>
+        <br/><br/>
+    {% endif %}
+    
+    <div class="colmask threecol">
+	    <div class="colmid">
+		    <div class="colleft">
+			    <div class="col1">
+                <a href="/offers/">My offers</a><br/><br/>
+                <a href="/rides/">My rides</a>
+			    </div>
+			    <div class="col2">
+                <a href="/profile/">My profile</a><br/><br/>
+                <a href="/password/">Change password</a>
+			    </div>
+			    <div class="col3">
+                <a href="/requests/">My requests</a><br/>
+                <a href="/addrequest/">Add a request</a><br/><br/>
+                <a href="/proposals/">My proposal</a><br/>
+                <a href="/addproposal/">Add an porposal</a><br/>
+                </div>
+		    </div>
+	    </div>
     </div>
+    <br/><br/>
+</div>
 {% else %}
     Welcome to our website stranger.<br/>
     To continue you need to log in.
-    </div>
+</div>
     <br/>
     <br/>
 
