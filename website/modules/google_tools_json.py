@@ -42,29 +42,29 @@ def get_distance((src_lat,src_lon),(dst_lat,dst_lon)):
     return float(distance_origin_dest(str(src_lat)+","+str(src_lon),str(dst_lat)+","+str(dst_lon),list()))/1000
 
 def address_to_location(address):
-	doc=get_json_geocoding_doc(address, False)
-	parsed_doc=json.loads(doc.read())
- 	if check_status(parsed_doc)==OK:
-		return get_location_from_doc(parsed_doc)
-	else:
+    doc=get_json_geocoding_doc(address, False)
+    parsed_doc=json.loads(doc.read())
+     if check_status(parsed_doc)==OK:
+        return get_location_from_doc(parsed_doc)
+    else:
         return -1
 
 def location_to_address(location, print_url=False):
-	url=GEOCODING_URL+"?latlng=%s&sensor=false" % (location)
-	if print_url:
-		print url
-	data=urllib.urlopen(url)
-	return data
+    url=GEOCODING_URL+"?latlng=%s&sensor=false" % (location)
+    if print_url:
+        print url
+    data=urllib.urlopen(url)
+    return data
     
 
 def get_location_from_doc(json_doc):
-	results=json_doc['results']
-	if len(results)==0:
-		raise 'Not results'
-	geometry=results[0]['geometry']
-	if len(geometry)==0:
-		raise 'Not geometry'
-	return (geometry['location']['lat'], geometry['location']['lng'])
+    results=json_doc['results']
+    if len(results)==0:
+        raise 'Not results'
+    geometry=results[0]['geometry']
+    if len(geometry)==0:
+        raise 'Not geometry'
+    return (geometry['location']['lat'], geometry['location']['lng'])
 
 """
 Get the distance from an json_doc
@@ -82,11 +82,11 @@ def get_distance_from_doc(json_doc):
     return legs[-1]['distance']['value']
 
 def get_json_geocoding_doc(address, print_url=False):
-	url=GEOCODING_URL+"?address=%s&sensor=false" % (address)
-	if print_url:
-		print url
-	data=urllib.urlopen(url)
-	return data
+    url=GEOCODING_URL+"?address=%s&sensor=false" % (address)
+    if print_url:
+        print url
+    data=urllib.urlopen(url)
+    return data
 
 """
 Get the json_doc from Google maps web service
