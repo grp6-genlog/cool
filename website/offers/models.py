@@ -2,7 +2,7 @@ from django.db import models
 
 STATUS_CHOICES = (
     ('P', 'Pending'),
-    ('C', 'Canceled'),
+    ('C', 'Cancelled'),
     ('A', 'agreedByBoth'),
     ('D', 'Discarded'),
     ('F', 'Finished'),

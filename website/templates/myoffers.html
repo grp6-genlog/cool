@@ -7,17 +7,56 @@ My offers
 {% endblock %}
 
 {% block content %}
-{% if offers|length == 0 %}
+{% if info_offers|length == 0 %}
     You don't have any offers waiting for an approval.<br/>
 {% else %}
-    {% for off in offers %}
-        <b>Car plate</b> : {{ req.car_id }}<br/>
-        <b>Car description</b> : {{ req.car_description }}<br/>
-        <b>Number of seats available</b> : {{ req.number_of_seats }}<br/>
-        <b>Money per km</b> : {{ req.money_per_km }}<br/>
-        <b>Departure time</b> : {{ req.departure_time }}<br/>
-        <b>Arrival time</b> : {{ req.arrival_time }}<br/>
-        <a href="/cancelproposal/{{ req.id }}/"><img src="/img_f/delete.gif" /> cancel</a>
+    <span style="text-weight:bold;font-size:1.1em;">Offers for which you are the driver</span>
+    <br/><br/>
+    {% for offer in info_offers %}
+    
+        {% if offer.driver %}
+    
+            <b>Proposition of ride with <a href="/profile/{{ offer.other.user.user.id }}/">{{ offer.other.user.first_name }} {{ offer.other.user.last_name }}</a></b><br/>
+            Pickup request on {{ offer.date_pick }} at {{ offer.pick_point }} (<a href="http://maps.google.com/maps?f=q&source=s_q&hl=en&geocode=&q={{ offer.pick_point }}">See on Google Maps</a>)<br/>
+            And to drop at {{ offer.drop_point }} (<a href="http://maps.google.com/maps?f=q&source=s_q&hl=en&geocode=&q={{ offer.drop_point }}">See on Google Maps</a>)<br/>
+            {{ nb_seat }} seat{% if nb_seat > 1 %}s{% endif %} requested.<br/>
+            Money earned : {{ offer.fee }}<br/>
+            {% if offer.status %}
+                <form method="link" action="/acceptoffer/{{ offer.id }}/"><input type="submit" value="Accept offer" /></form>
+                <form method="link" action="/discardoffer/{{ offer.id }}/"><input type="submit" value="Discard offer" /></form>
+                <br/>
+                <i>This choice engages you to a ride, please take it carefully.</i>
+            {% else %}
+                <i>You have already accepted this offer, you must wait for the approval of the passenger.<br/>
+                You will be warned if this offer is accepted.</i>
+            {% endif %}
+        {% endif %}
+        <br/><br/>
+    {% endfor %}
+    
+    <hr>
+    
+    <span style="text-weight:bold;font-size:1.1em;">Offers for which you are the passenger</span>
+    <br/><br/>
+    {% for offer in info_offers %}
+    
+        {% if not offer.driver %}
+    
+            <b>Proposition of ride with <a href="/profile/{{ offer.other.user.user.id }}/">{{ offer.other.user.first_name }} {{ offer.other.user.last_name }}</a></b><br/>
+            You will be picked up on {{ offer.date_pick }} at {{ offer.pick_point }} (<a href="http://maps.google.com/maps?f=q&source=s_q&hl=en&geocode=&q={{ offer.pick_point }}">See on Google Maps</a>)<br/>
+            and dropped at {{ offer.date_drop.hour }}:{{ offer.date_drop.minute }} at {{ offer.drop_point }} (<a href="http://maps.google.com/maps?f=q&source=s_q&hl=en&geocode=&q={{ offer.drop_point }}">See on Google Maps</a>)<br/>
+            {{ nb_seat }} seat{% if nb_seat > 1 %}s{% endif %} requested.<br/>
+            Money required : {{ offer.fee }}<br/>
+            {% if offer.status %}
+                <form method="link" action="/acceptoffer/{{ offer.id }}/"><input type="submit" value="Accept offer" /></form>
+                <form method="link" action="/discardoffer/{{ offer.id }}/"><input type="submit" value="Discard offer" /></form>
+                <br/>
+                <i>This choice engages you to a ride, please take it carefully.</i>
+            {% else %}
+                <i>You have already accepted this offer, you must wait for the approval of the driver.<br/>
+                You will be warned if this offer is accepted.</i>
+            {% endif %}
+        {% endif %}
         <br/><br/>
     {% endfor %}
 {% endif %}

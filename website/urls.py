@@ -72,9 +72,10 @@ urlpatterns += patterns('website.requests.views',
 urlpatterns += patterns('website.proposals.views',
     (r'^proposals/$', 'myproposals'),
     (r'^addproposal/$', 'addproposal', {'port_proposal':global_ports.proposal_rec_port}),
-    (r'^editproposal/(\d+)/$', 'editproposal'),
 )
 
 urlpatterns += patterns('website.offers.views',
     (r'^offers/$', 'myoffers'),
+    (r'^acceptoffer/(?P<offset>\d+)/$', 'responseoffer', {'port_offer':global_ports.offer_port, 'accept':True}),
+    (r'^discardoffer/(?P<offset>\d+)/$', 'responseoffer', {'port_offer':global_ports.offer_port, 'accept':False}),
 )

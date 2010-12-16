@@ -1,5 +1,4 @@
 from django.shortcuts import render_to_response
-from django.http import HttpResponseRedirect
 
 from django import forms
 from django.contrib import auth
