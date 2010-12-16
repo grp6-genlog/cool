@@ -1,21 +1,19 @@
 #@Author Group 6
 
 from portobject import *
-import threading
-
+from website.offers.models import Offer
+from website.rides.models import Ride
+from website.profiles.models import UserProfile
 class PaymentManager(PortObject):
+    bankanccounts = None # the dico of bank accounts
 
-    
     def __init__(self):
-        """Initialize self.DB
-        @pre : DB is a database written in SQL
-        @post : self.DB=DB
+        """
         """
         PortObject.__init__(self)
         self.bankaccounts={}
-        self.lock=threading.Lock()
         
-    def fee_transfer(userID1, userID2, fee):
+    def fee_transfer(self,instructionID):
         """Transfer the fee from account of userID1 to the account of userID2
         @pre : DB is initialized
                userID1 is the id of the user where the fee is withdrawn
@@ -27,16 +25,15 @@ class PaymentManager(PortObject):
         """
             Message received by the routine is weird for that case. Why are not we using callback functions? a fee transfer can also screwd up no?
         """
-        self.lock.acquire()
         user1=Profiles.objects.get(id=userID1)
         user2=Profiles.objects.get(id=userID2)
         user1.account_balance=user1.account_balance-fee
         user2.account_balance=user2.acount_balance+fee
         user1.save()
         user2.save()
-        self.lock.release()    
+
         
-    def add_money(userID, bankAccount, communication, amount):
+    def add_money(self,userID, bankAccount, communication, amount):
         """Add money from bank account to car pooling system account
         @pre : userID is the id of the user who wants to add the money
                bankAccount is the bank account where the money comes from
@@ -58,7 +55,7 @@ class PaymentManager(PortObject):
             self.lock.release()
             return True
         
-    def get_money(userID, bankAccount, amount):
+    def get_money(self,userID, bankAccount, amount):
         """Withdraw the money amount from account to bank account
         @pre : userID is the id of the user who wants to get the money
                bankAccount is the bank account where the money should go
@@ -82,7 +79,7 @@ class PaymentManager(PortObject):
         
     def routine(self, src, msg):
         """This is the message routine handler
-        The messages accepted are the pairs ('payfee', [userID1, userID2, fee]), ('addmoney', [userID, srcBankAccount, communication, amount], callbackOk,callbackKo), ('getmoney', [userID, dstBankAccount, amount], callbackOk,callbackKo)
+        The messages accepted are the pairs ('payfee', instructionID), ('addmoney', [userID, srcBankAccount, communication, amount], callbackOk,callbackKo), ('getmoney', [userID, dstBankAccount, amount], callbackOk,callbackKo)
         
         @pre : DB is initialized as a SQL Database
             userID is the id of a user (int)
@@ -98,8 +95,8 @@ class PaymentManager(PortObject):
             removed and sent to the dstBankAccount. The call back function is called.
         """
         if len(msg)==2:
-            (name,tab)=msg
-            """Make assumption here that all elements in the tab are already in the good form"""
+            (name,instructionID)=msg
+            
             self.fee_transfer(tab[0],tab[1],tab[2])
         if len(msg)==3:
             (name,tab,functionOk,functionKo)=msg

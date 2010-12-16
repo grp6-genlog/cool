@@ -7,11 +7,9 @@ from website.profiles.models import UserProfile
 from website.proposals.models import Proposal
 from website.requests.models import Request
 from math import sqrt
+from utils import get_distance
 
-def distance(a,b):
-    (xa,ya)=a
-    (xb,yb)=b
-    return sqrt(((xa-ya)**2)+((ya-yb)**2))
+
     
 """
 This is the interface for the FindPair port object. 
@@ -59,8 +57,8 @@ class FindPair(PortObject):
                 j=0
                 c=0
                 for rp in RoutePoints.object.filter(proposal=propID):
-                    disdep = distance((request.departure_point_lat,request.departure_point_long),(rp.latitude,rp.longitude))
-                    disarr = distance((request.arrival_point_lat,request.arrival_point_long),(rp.latitude,rp.longitude))
+                    disdep = get_distance((request.departure_point_lat,request.departure_point_long),(rp.latitude,rp.longitude))
+                    disarr = get_distance((request.arrival_point_lat,request.arrival_point_long),(rp.latitude,rp.longitude))
                     if(disdep<=rp.departure_range and (d==None or disdep<d)):
                         d=disdep
                         pup=(rp.latitude,rp.longitude)
@@ -104,8 +102,8 @@ class FindPair(PortObject):
                 j=0
                 c=0
                 for rp in RoutePoints.object.filter(proposal=proposal.id):
-                    disdep = distance((infos.departure_point_lat,infos.departure_point_long),(rp.latitude,rp.longitude))
-                    disarr = distance((infos.arrival_point_lat,infos.arrival_point_long),(rp.latitude,rp.longitude))
+                    disdep = get_distance((infos.departure_point_lat,infos.departure_point_long),(rp.latitude,rp.longitude))
+                    disarr = get_distance((infos.arrival_point_lat,infos.arrival_point_long),(rp.latitude,rp.longitude))
                     if(disdep<=rp.departure_range and d==None or disdep<d):
                         d=disdep
                         pup=(rp.latitude,rp.longitude)

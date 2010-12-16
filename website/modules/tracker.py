@@ -9,7 +9,7 @@ from rides.models import Ride
 from proposals.models import Proposal
 from requests.models import Request 
 import socket,threading,datetime
-
+from utils import get_distance
 RIDEID=0
 RIDETIME=1
 MANUAL_MODE=2
@@ -144,6 +144,13 @@ class Tracker(PortObject):
                             self.send_to(self.usernotifier_port,('newmsg',ride[NDRIVER],"Please, open your COOL's smartphone app."))
                         else:
                             self.userdict[ride[NDRIVER]][UCONN].send(msg)
+                    elif msg.split('&')[MTYPE]=='pos!' and int(msg.split('&')[MRIDE])==ride[RIDEID]:
+                        self.userdict[ride[DRIVER]][UBUFF].remove(msg)
+                        if ride[NDRIVER] not in self.userdict:
+                            self.send_to(self.usernotifier_port,('newmsg',ride[NDRIVER],"Please, open your COOL's smartphone app."))
+                        else:
+                            dist = get_distance(map(float,msg.split('&')[MMESS].split()),(ride[PPLAT],ride[PPLON]))
+                            self.userdict[ride[NDRIVER]][UCONN].send('dst!&'+msg[MRIDE]+'&'+str(dist)+' km\n')
                     else:
                         print 'connection with ',ride[DRIVER],'closed.'
                         self.userdict[ride[NDRIVER]][UCONN].close()
