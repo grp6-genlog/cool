@@ -1,0 +1,66 @@
+{% extends "message.html" %}
+
+{% block title %}My proposals{% endblock %}
+
+{% block message %}
+My proposals
+{% endblock %}
+
+{% block content %}
+<b>{{ notification }}</b>
+<form action="/addproposal/" method="post">
+    <div class="aligned">
+        <div class="text-center">
+        {{ notif }}
+        </div>
+        <div class="form-row">
+            {{ form.car_id.errors }}
+            <span class="required">
+                {{ form.car_id.label_tag }}
+            </span>
+            {{ form.car_id }}
+        </div>
+        <div class="form-row">
+            {{ form.car_description.errors }}
+            {{ form.car_description.label_tag }}
+            {{ form.car_description }}
+        </div>
+        <div class="form-row">
+            {{ form.number_of_seats.errors }}
+            <span class="required">
+                {{ form.number_of_seats.label_tag }}
+            </span>
+            {{ form.number_of_seats }}
+        </div>
+        <div class="form-row">
+            {{ form.money_per_km.errors }}
+            <span class="required">
+                {{ form.money_per_km.label_tag }}
+            </span>
+            {{ form.money_per_km }}
+        </div>
+        <div class="form-row">
+            {{ form.departure_time.errors }}
+            <span class="required">
+                {{ form.departure_time.label_tag }}
+            </span>
+            {{ form.departure_time }}<br/><br/>
+            Using the format yyyy-mm-dd HH:MM
+        </div>
+        <div class="form-row">
+            {{ form.arrival_time.errors }}
+            <span class="required">
+                {{ form.arrival_time.label_tag }}
+            </span>
+            {{ form.arrival_time }}<br/>
+            Using the format yyyy-mm-dd HH:MM
+        </div>
+        <span style="font-style:italic; font-size:11px;">Mandatory fields are in bold</span><br/>
+        <div class="submit-row">
+            <label>
+            <input type="submit" value="Record request" />
+            </label>
+        </div>
+    </div>
+</form>
+{% endblock %}

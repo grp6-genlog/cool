@@ -1,0 +1,26 @@
+{% extends "message.html" %}
+
+{% block title %}My proposals{% endblock %}
+
+{% block message %}
+My proposals
+{% endblock %}
+
+{% block content %}
+{% if requests|length == 0 %}
+    You don't have any proposal waiting for a match.<br/>
+    <a href="/addproposal/">Add a proposal</a>
+{% else %}
+    <a href="/addproposal/"><img src="/img_f/add.gif" /> Add a proposal</a><br/><br/>
+    {% for req in proposals %}
+        <b>Car plate</b> : {{ req.car_id }}<br/>
+        <b>Car description</b> : {{ req.car_description }}<br/>
+        <b>Number of seats available</b> : {{ req.number_of_seats }}<br/>
+        <b>Money per km</b> : {{ req.money_per_km }}<br/>
+        <b>Departure time</b> : {{ req.departure_time }}<br/>
+        <b>Arrival time</b> : {{ req.arrival_time }}<br/>
+        <a href="/cancelproposal/{{ req.id }}/"><img src="/img_f/delete.gif" /> cancel</a>
+        <br/><br/>
+    {% endfor %}
+{% endif %}
+{% endblock %}
