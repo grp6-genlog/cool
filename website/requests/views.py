@@ -8,6 +8,7 @@ from django.contrib.auth.models import User
 
 from portobject import PortObject
 from guiutils import WaitCallbacks
+from google_tools_json import *
 
 import datetime, time
 
@@ -48,12 +49,17 @@ def addrequest(request, port_request=None):
     if request.method == 'POST':
         form = RequestForm(request.POST)
         if form.is_valid():
-            UserID = UserProfile.objects.get(user=request.user)
-            departure_point_lat = request.POST.get('departure_point_lat', 0)
-            departure_point_long = request.POST.get('departure_point_long', 0)
+            
+            departure_point = address_to_location(request.POST.get('departure_point', 0))
+            #departure_point_lat = request.POST.get('departure_point_lat', 0)
+            #departure_point_long = request.POST.get('departure_point_long', 0)
             departure_range = request.POST.get('departure_range', 0)
-            arrival_point_lat = request.POST.get('arrival_point_lat', 0)
-            arrival_point_long = request.POST.get('arrival_point_long', 0)
+
+            arrival_point = address_to_location(request.POST.get('arrival_point', 0))
+            
+            UserID = UserProfile.objects.get(user=request.user)
+            #arrival_point_lat = request.POST.get('arrival_point_lat', 0)
+            #arrival_point_long = request.POST.get('arrival_point_long', 0)
             arrival_range = request.POST.get('arrival_range', 0)
             arrival_time = request.POST.get('arrival_time', datetime.datetime.today())
             max_delay = request.POST.get('max_delay', datetime.datetime.today())
@@ -62,8 +68,8 @@ def addrequest(request, port_request=None):
             
             WaitCallbacksRequest.declare(request.user)
             
-            gui_port.send_to(port_request,('recordrequest',[UserID,(departure_point_lat, departure_point_long),departure_range,
-                                                            (arrival_point_lat, arrival_point_long),arrival_range,arrival_time,max_delay,
+            gui_port.send_to(port_request,('recordrequest',[UserID,departure_point,departure_range,
+                                                            arrival_point,arrival_range,arrival_time,max_delay,
                                                             nb_requested_seats,cancellation_margin],
                                            successcall,
                                            failurecall,

@@ -2,6 +2,104 @@
 
 {% block title %}My proposals{% endblock %}
 
+
+{% block head %}
+    <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAhOS2B6-EQD5T3SnECoQ9PxRsKpCEGTM6La2gZHhYvr-1cMUY4hTZuWrG30_Zvj6WGIj-hLMe-xR4xA" type="text/javascript"></script>
+	<script type="text/javascript"> 
+		window.onload=initialize;
+		window.onunload=GUnload;
+ 
+		var map;
+		var gdir;
+		var addressMarker;
+		var points = [];
+		var clickCounter = 1;
+		var currZoom = 13;
+//		var addresses = [];
+ 
+		function initialize() {
+			if (GBrowserIsCompatible()) {      
+				map = new GMap2(document.getElementById("map_canvas"));
+	//			gdir = new GDirections(map, document.getElementById("directions1"));
+				gdir = new GDirections(map);
+				map.setCenter(new GLatLng(50.6686131506577, 4.5867919921875), currZoom);    
+ 
+				map.addControl(new GLargeMapControl());
+				map.addControl(new GScaleControl());
+				map.disableDoubleClickZoom();
+				map.enableScrollWheelZoom();
+ 
+				GEvent.addListener(gdir, "error", handleErrors);
+				GEvent.addListener(map, "click", function(overlay, latlng) {    
+					if (latlng) {  
+						var myIcon = new GIcon();
+						myIcon.image = "image/flag_red1.gif";
+						myIcon.iconSize = new GSize(16,16);
+						myIcon.iconAnchor = new GPoint(0,16);
+						markerOptions = { icon:myIcon };
+ 
+						points[points.length] = latlng;
+						var marker = new GMarker(latlng,markerOptions);  
+						map.addOverlay(marker);
+						var str = "";
+						for(i=0; i<points.length; i++) {
+							str += points[i].toString() + "|";
+						}
+						document.getElementById("status").value = str;
+						if (clickCounter>1){
+							currZoom = map.getZoom();
+							gdir.loadFromWaypoints(points,{getSteps:true,travelMode:G_TRAVEL_MODE_DRIVING});
+						}
+						clickCounter++;
+					}
+				});
+ 
+				GEvent.addListener(gdir,"load", function() { 
+					var directionDetail = 		
+								"Route Length: " + gdir.getDistance().meters  + " meters / " + gdir.getDistance().html  + "<br>" +
+								"Estimate Duration: " + gdir.getDuration().seconds  + "seconds / " + gdir.getDuration().html  + "<br>";
+					for (var i=0;i<gdir.getNumRoutes() ;i++ ){
+						var route = gdir.getRoute(i); 
+						var marker = gdir.getMarker(i); 
+						var markerN = gdir.getMarker(i+1); 
+						var geocode1 = route.getStartGeocode(); 
+						var geocode2 = route.getEndGeocode(); 
+					}
+					document.getElementById("directions").innerHTML = directionDetail;
+				});
+			}
+		}
+		
+ 
+		function refreshMap() {
+			map.clearOverlays();
+			gdir.clear();
+			points = [];
+			document.getElementById("status").value = "";
+			document.getElementById("directions").innerHTML = "";
+			return false;
+		}
+ 
+ 
+		function handleErrors(){
+			if (gdir.getStatus().code == G_GEO_UNKNOWN_ADDRESS)
+				alert("No corresponding geographic location could be found for one of the specified addresses. This may be due to the fact that the address is relatively new, or it may be incorrect.\nError code: " + gdir.getStatus().code);
+			else if (gdir.getStatus().code == G_GEO_SERVER_ERROR)
+				alert("A geocoding or directions request could not be successfully processed, yet the exact reason for the failure is not known.\n Error code: " + gdir.getStatus().code);
+			else if (gdir.getStatus().code == G_GEO_MISSING_QUERY)
+				alert("The HTTP q parameter was either missing or had no value. For geocoder requests, this means that an empty address was specified as input. or directions requests, this means that no query was specified in the input.\n Error code: " + gdir.getStatus().code);
+			else if (gdir.getStatus().code == G_GEO_BAD_KEY)
+				alert("The given key is either invalid or does not match the domain for which it was given. \n Error code: " + gdir.getStatus().code);
+			else if (gdir.getStatus().code == G_GEO_BAD_REQUEST)
+				alert("A directions request could not be successfully parsed.\n Error code: " + gdir.getStatus().code);
+			else 
+				alert("An unknown error occurred.");
+		}
+ 
+    </script> 
+{% endblock %}
+
+
 {% block message %}
 My proposals
 {% endblock %}
@@ -9,6 +107,7 @@ My proposals
 {% block content %}
 <b>{{ notification }}</b>
 <form action="/addproposal/" method="post">
+
     <div class="aligned">
         <div class="text-center">
         {{ notif }}
@@ -55,9 +154,29 @@ My proposals
             {{ form.arrival_time }}<br/>
             Using the format yyyy-mm-dd HH:MM
         </div>
+        <div class="form-row">
         <span style="font-style:italic; font-size:11px;">Mandatory fields are in bold</span><br/>
+        </div>
+        
+<div id="map_canvas" style="margin: 1em 1em; width:400px; height:300px; "></div> 
+<div id="doSomething" style="margin: 1em 1em;" > 
+</div> 
+<input type='hidden' id='status' name='status' value=''> 
+<div id="directions1" width=200></div> 
+<div id="directions" width=200></div> 
+    <div class="submit-row">
+            <label style="margin-left:-200px;">
+            <input name="submit" type="submit" value="Refresh Map" on click="return refreshMap();"/>
+            </label>
+        </div>
+        <br/>
+    <span style="font-style:italic;">Click on the map at each place you are going
+     to pass starting from your departure point and finishing with your arrival point.</span>
+     <br/><br/>
+        
+        
         <div class="submit-row">
-            <label>
+            <label style="margin-left:25px;">
             <input type="submit" value="Record request" />
             </label>
         </div>

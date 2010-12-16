@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 from portobject import PortObject
 from guiutils import WaitCallbacks
 
-import datetime, time
+import datetime, time, re
 
 gui_port = PortObject()
 
@@ -43,9 +43,17 @@ def addproposal(request, port_proposal=None):
 
     if request.method == 'POST':
         form = ProposalForm(request.POST)
-        
+
+                
         if form.is_valid():
             form.cleaned_data
+            
+            route_points_list = []
+            route_points_bad = re.split('\|',re.sub(r",", '' , re.sub(r"\(", '', re.sub(r"\)", '', request.POST.get('status', '')))))
+            for rp in route_points_bad:
+                if rp != '':
+                    rp_l = re.split(' ', rp)
+                    route_points_list.append((float(rp_l[0]),float(rp_l[1])))
             
             UserID = UserProfile.objects.get(user=request.user)
             car_id = form.cleaned_data['car_id']
@@ -57,7 +65,7 @@ def addproposal(request, port_proposal=None):
             
             WaitCallbacksProposal.declare(request.user)
             
-            gui_port.send_to(port_proposal,('recordproposal',[UserID,[],car_description,car_id,
+            gui_port.send_to(port_proposal,('recordproposal',[UserID,route_points_list,car_description,car_id,
                                                             number_of_seats,money_per_km,departure_time,arrival_time],
                                            successcall,
                                            failurecall,

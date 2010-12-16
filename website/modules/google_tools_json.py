@@ -44,7 +44,7 @@ def address_to_location(address):
  	if check_status(parsed_doc)==OK:
 		return get_location_from_doc(parsed_doc)
 	else:
-        	return -1
+        return -1
 
 def location_to_address(location, print_url=False):
 	url=GEOCODING_URL+"?latlng=%s&sensor=false" % (location)

@@ -25,18 +25,11 @@ My requests
             Using the format yyyy-mm-dd HH:MM
         </div>
         <div class="form-row">
-            {{ form.departure_point_lat.errors }}
+            {{ form.departure_point.errors }}
             <span class="required">
-                {{ form.departure_point_lat.label_tag }}
+                {{ form.departure_point.label_tag }}
             </span>
-            {{ form.departure_point_lat }}
-        </div>
-        <div class="form-row">
-            {{ form.departure_point_long.errors }}
-            <span class="required">
-                {{ form.departure_point_long.label_tag }}
-            </span>
-            {{ form.departure_point_long }}
+            {{ form.departure_point }}
         </div>
         <div class="form-row">
             {{ form.departure_range.errors }}
@@ -46,18 +39,11 @@ My requests
             {{ form.departure_range }}
         </div>
         <div class="form-row">
-            {{ form.arrival_point_lat.errors }}
+            {{ form.arrival_point.errors }}
             <span class="required">
-                {{ form.arrival_point_lat.label_tag }}
+                {{ form.arrival_point.label_tag }}
             </span>
-            {{ form.arrival_point_lat }}
-        </div>
-        <div class="form-row">
-            {{ form.arrival_point_long.errors }}
-            <span class="required">
-                {{ form.arrival_point_long.label_tag }}
-            </span>
-            {{ form.arrival_point_long }}
+            {{ form.arrival_point }}
         </div>
         <div class="form-row">
             {{ form.arrival_range.errors }}
