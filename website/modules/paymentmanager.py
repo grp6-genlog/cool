@@ -1,21 +1,18 @@
 #@Author Group 6
 
 from portobject import *
-import threading
+from website.offers.models import Offer
+from website.rides.models import Ride
+from website.proposals.models import Proposal
+from website.requests.models import Request
 
 class PaymentManager(PortObject):
-
-    
     def __init__(self):
-        """Initialize self.DB
-        @pre : DB is a database written in SQL
-        @post : self.DB=DB
+        """
         """
         PortObject.__init__(self)
-        self.bankaccounts={}
-        self.lock=threading.Lock()
         
-    def fee_transfer(userID1, userID2, fee):
+    def fee_transfer(self,instructionID):
         """Transfer the fee from account of userID1 to the account of userID2
         @pre : DB is initialized
                userID1 is the id of the user where the fee is withdrawn
@@ -24,19 +21,31 @@ class PaymentManager(PortObject):
         @post : the account of userID1 contains fee money less and the account of userID2 contains fee 
                 money more
         """
-        """
-            Message received by the routine is weird for that case. Why are not we using callback functions? a fee transfer can also screwd up no?
-        """
-        self.lock.acquire()
-        user1=Profiles.objects.get(id=userID1)
-        user2=Profiles.objects.get(id=userID2)
-        user1.account_balance=user1.account_balance-fee
-        user2.account_balance=user2.acount_balance+fee
-        user1.save()
-        user2.save()
-        self.lock.release()    
+        ride = Ride.objects.get(id=instructionID)
+        offer = Offer.objects.get(id=ride.offer)
+        proposal = Proposal.objects.get(id=offer.proposal)
+        request = Request.objects.get(id=offer.request)
+        driver=UserProfile.objects.get(id=proposal.user)
+        ndriver=UserProfile.objects.get(id=request.user)
         
-    def add_money(userID, bankAccount, communication, amount):
+        ndriver.account_balance=ndriver.account_balance-fee
+        driver.account_balance=driver.acount_balance+fee
+        driver.save()
+        ndriver.save()
+
+    def valid_transfer(self,bankAccount,communication,amount):
+        """
+        We trust you my friend :)
+        """
+        return True
+
+    def transfer_money(self,bankAccount,communication,amount):
+        """
+        Trust me :)
+        """
+        print 'Transfer sent to bank:',bankAccount,communication,amount
+
+    def add_money(self,userID, bankAccount, communication, amount):
         """Add money from bank account to car pooling system account
         @pre : userID is the id of the user who wants to add the money
                bankAccount is the bank account where the money comes from
@@ -45,20 +54,15 @@ class PaymentManager(PortObject):
                amount is the amount of money to transfer
         @post : the account of userID is incremented by the money amount coming from the bank transfer
         """
-        if bankAccount not in self.bankaccounts:
-            self.bankaccounts[bankAccount]=500
-        if(self.bankccounts[bankAccount]-amount<0):
-            return False
+        if not self.valid_transfer(bankAccount,communication,amount):
+            return False 
         else:
-            self.lock.acquire()
-            self.bankccounts[bankAccount]-=amount
-            user1=Profiles.objects.get(id=userID)
+            user1=UserProfile.objects.get(id=userID)
             user1.account_balance+=amount
             user1.save()
-            self.lock.release()
             return True
         
-    def get_money(userID, bankAccount, amount):
+    def get_money(self,userID, bankAccount, amount):
         """Withdraw the money amount from account to bank account
         @pre : userID is the id of the user who wants to get the money
                bankAccount is the bank account where the money should go
@@ -67,22 +71,18 @@ class PaymentManager(PortObject):
         @post : the account of userID contains is decremented by the amount of money specified
                 and this amount of money is transferred to bankAccount
         """
-        user=Profiles.objects.get(id=userID)
+        user=UserProfile.objects.get(id=userID)
         if(user.account_balance-amount<0):
             return False
         else:
-            self.lock.acquire()
             user.account_balance-=amount
+            self.transfer_money(bankAccount,str(userId),amount))
             user.save()
-            if bankAccount not in self.bankaccounts:
-                self.bankaccounts[bankAccount]=500
-            self.bankaccounts[bankAccount]+=amount
-            self.lock.release()
             return True
         
     def routine(self, src, msg):
         """This is the message routine handler
-        The messages accepted are the pairs ('payfee', [userID1, userID2, fee]), ('addmoney', [userID, srcBankAccount, communication, amount], callbackOk,callbackKo), ('getmoney', [userID, dstBankAccount, amount], callbackOk,callbackKo)
+        The messages accepted are the pairs ('payfee', instructionID), ('addmoney', [userID, srcBankAccount, communication, amount], callbackOk,callbackKo), ('getmoney', [userID, dstBankAccount, amount], callbackOk,callbackKo)
         
         @pre : DB is initialized as a SQL Database
             userID is the id of a user (int)
@@ -98,18 +98,17 @@ class PaymentManager(PortObject):
             removed and sent to the dstBankAccount. The call back function is called.
         """
         if len(msg)==2:
-            (name,tab)=msg
-            """Make assumption here that all elements in the tab are already in the good form"""
-            self.fee_transfer(tab[0],tab[1],tab[2])
+            (name,instructionID)=msg
+            self.fee_transfer(instructionID)
         if len(msg)==3:
             (name,tab,functionOk,functionKo)=msg
             if name=='addmoney':
                 if(self.add_money(tab[0],tab[1],tab[2],tab[3])):
-                    threading.Thread(target=functionOk()).start()
+                    threading.Thread(target=functionOk).start()
                 else:
-                    threading.Thread(target=functionKo()).start()
+                    threading.Thread(target=functionKo).start()
             elif name=='getmoney':
                 if self.get_money(tab[0],tab[1],tab[2]):
-                    threading.Thread(target=functionOk()).start()
+                    threading.Thread(target=functionOk).start()
                 else:
-                    threading.Thread(target=functionKo()).start()
+                    threading.Thread(target=functionKo).start()

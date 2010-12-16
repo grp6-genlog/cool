@@ -38,8 +38,11 @@ def distance_origin_dest(origin, destination, checkpoints):
     else:
         return -1
 
+def get_distance((src_lat,src_lon),(dst_lat,dst_lon)):
+    return float(distance_origin_dest(str(src_lat)+","+str(src_lon),str(dst_lat)+","+str(dst_lon),list()))/1000
+
 def address_to_location(address):
-	doc=get_json_geocoding_doc(address, True)
+	doc=get_json_geocoding_doc(address, False)
 	parsed_doc=json.loads(doc.read())
  	if check_status(parsed_doc)==OK:
 		return get_location_from_doc(parsed_doc)
@@ -125,8 +128,3 @@ def check_status(json_doc):
         return ACCESS_DENIED
     else:
         return ERROR
-
-
-if __name__=='__main__':
-    print address_to_location('rue+Humont,+46+7901+Thieulain')
-
