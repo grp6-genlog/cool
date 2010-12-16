@@ -3,39 +3,109 @@ from django.http import HttpResponseRedirect
 from django import forms
 
 from website.profiles.models import UserProfile
-from website.proposals.models import Proposal, RoutePoints
+from website.offers.models import Proposal
+from website.requests.models import Request
 from django.contrib.auth.models import User
+
 
 from portobject import PortObject
 from guiutils import WaitCallbacks
+form google_tools_json import *
 
 import datetime, time
 
 gui_port = PortObject()
 
 
-class ProposalForm(forms.Form):
-
-    car_id = forms.CharField(max_length=50)
-    car_description = forms.CharField(max_length=500,
-                            widget=forms.Textarea,
-                            required=False)
-    number_of_seats = forms.IntegerField()
-    money_per_km = forms.FloatField()
-    departure_time = forms.DateTimeField()
-    arrival_time = forms.DateTimeField()
-
-class WaitCallbacksProposal(WaitCallbacks):
+class WaitCallbacksOffer(WaitCallbacks):
     pass
 
 
-def myproposals(request):
+def myoffers(request):
     if not request.user.is_authenticated():
         return redirect('/home/')
     
     user=UserProfile.objects.get(user=request.user)
-    proposals = user.proposal_set.all()
+    info_offers = []
+    
+    for prop in user.proposal_set.all():
+        new_offers = Offer.objects.filter(proposal=prop, status='Pending')
+        for of in new_offers:
+            route_points = of.proposal.routepoints_set.all()
+            
+            date_pick = get_time(of.proposal.departure_time,
+                                 of.proposal.arrival_time,
+                                 route_points,
+                                (of.pickup_point_lat, of.pickup_point_long))
+            
+            date_drop = get_time(of.proposal.departure_time,
+                                 of.proposal.arrival_time,
+                                 route_points,
+                                (of.drop_point_lat, of.drop_point_long))
+            pick_point = ""
+            drop_point = ""
+            
+            infos = {
+                'driver':True, 'status':of.driver_ok, 'other':of.request.user,
+                'date_pick':date_pick, 'pick_point': pick_point,
+                'date_drop':date_drop, 'drop_point': drop_point,
+                'fee': of.total_fee, 'id':of.id
+            }
+            
+            self.insert_offer(info_offers, infos)
+            
+    for req in user.request_set.all()
+        new_offers = Offer.objects.filter(request=req, status='Pending')
+        for of in new_offers:
+            route_points = of.proposal.routepoints_set.all()
+            
+            date_pick = get_time(of.proposal.departure_time,
+                                 of.proposal.arrival_time,
+                                 route_points,
+                                (of.pickup_point_lat, of.pickup_point_long))
+            
+            date_drop = get_time(of.proposal.departure_time,
+                                 of.proposal.arrival_time,
+                                 route_points,
+                                (of.drop_point_lat, of.drop_point_long))
+            pick_point = ""
+            drop_point = ""
+            
+            infos = {
+                'driver':False, 'status':of.non_driver_ok, 'other':of.proposal.user,
+                'date_pick':date_pick, 'pick_point': pick_point,
+                'date_drop':date_drop, 'drop_point': drop_point,
+                'fee': of.total_fee, 'id':of.id
+            }
+            
+            self.insert_offer(info_offers, infos)
+    
     return render_to_response('myproposals.html', locals())
+    
+    
+    
+def insert_offer(offer_l, new_o):
+    for i in xrange(len(offer_l)):
+         if offer_l[i]['date_pick'] > new_o['date_pick']:
+             rp_list.insert(i,new_o)
+             break
+    
+    
+def get_time(dep_time, arr_time, checkpoints, pick_point):
+    points_str = []
+    cpt_point = 0
+    for point in checkpoints:
+        points_str.append(str(point.latitude)+","+str(point.longitude))
+        if point.latitude == pick_point[0] and point.longitude == pick_point[1]:
+            point_index = cpt_point
+        cpt_point += 1
+        
+    distance = distance_origin_dest(points_str[0], points_str[-1], points_str[1:-1])
+    total_time = (dep_time - arr_time).seconds + (dep_time - arr_time).days*60*60*24
+    
+    time_per_point = total_time / (len(checkpoints)-1)
+    
+    return datetime.timedelta(seconds=(time_per_point * point_index)) + dep_time
     
     
 def addproposal(request, port_proposal=None):

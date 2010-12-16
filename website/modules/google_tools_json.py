@@ -118,6 +118,7 @@ def check_status(json_doc):
     else:
         return ERROR
 
+
 if __name__=='__main__':
     print address_to_location('rue+Humont,+46+7901+Thieulain')
 

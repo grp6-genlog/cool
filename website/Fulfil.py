@@ -90,7 +90,7 @@ def create_proposal(user, car_id, car_desc, nb_seats, moneyperkm, dep_time, ar_t
         rp.proposal = p
         rp.latitude = latitude
         rp.longitude = longitude
-        rp.order = float(order)
+        rp.order = order
         rp.save()
         order += 1
 

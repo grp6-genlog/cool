@@ -1,0 +1,24 @@
+{% extends "message.html" %}
+
+{% block title %}My offers{% endblock %}
+
+{% block message %}
+My offers
+{% endblock %}
+
+{% block content %}
+{% if offers|length == 0 %}
+    You don't have any offers waiting for an approval.<br/>
+{% else %}
+    {% for off in offers %}
+        <b>Car plate</b> : {{ req.car_id }}<br/>
+        <b>Car description</b> : {{ req.car_description }}<br/>
+        <b>Number of seats available</b> : {{ req.number_of_seats }}<br/>
+        <b>Money per km</b> : {{ req.money_per_km }}<br/>
+        <b>Departure time</b> : {{ req.departure_time }}<br/>
+        <b>Arrival time</b> : {{ req.arrival_time }}<br/>
+        <a href="/cancelproposal/{{ req.id }}/"><img src="/img_f/delete.gif" /> cancel</a>
+        <br/><br/>
+    {% endfor %}
+{% endif %}
+{% endblock %}

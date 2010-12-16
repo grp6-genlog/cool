@@ -66,13 +66,17 @@ class ProposalRecorder(PortObject):
                 
                 prop.save()
                 prop_id = prop.id
-
+                
+                order = 0
                 for routePoint in lfields[ROUTEPOINTS]:
                     rp = RoutePoint()
                     rp.proposal = prop_id
                     rp.latitude = routePoint[0]
                     rp.longitude = routePoint[1]
+                    rp.order = order
                     rp.save()
+                    
+                    order += 1
 
             except:
                 threading.Thread(target = msg[3], args = (msg[4],)).start()
