@@ -3,15 +3,17 @@
 {% block title %}Home{% endblock %}
 
 {% block message %}
-It is now {{ current_date }}.<br/>
+{% if current_date %}
+    It is now {{ current_date }}.<br/>
+{% endif %}
 {% endblock %}
 
 {% block content %}
 {{ notification }}
 <div style="width:70%; margin:auto;">
     <div class="txt_center">
-{% if connected %}
-    Hello {{ name }}!
+{% if request.user.is_authenticated %}
+    Hello {{ request.user.first_name }}!
     <br/><br/>
 <div class="colmask threecol">
 	<div class="colmid">
@@ -63,7 +65,9 @@ It is now {{ current_date }}.<br/>
             {{ form.password }}<br/>
             </div>
             <div class="submit-row">
-                <input type="submit" value="ok" /><br/>
+                <label>
+                <input type="submit" value="Connect" />
+                </label><br/>
                 <a href="/register/">-register-</a>
             </div>
         </form>

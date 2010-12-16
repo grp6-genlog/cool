@@ -6,11 +6,17 @@
 <link rel="stylesheet" href="/css_f/form.css" />
 {% endblock %}
 
-{% block title %}Register{% endblock %}
+{% block title %}{{ action }}{% endblock %}
 
 
 {% block message %}
-Registration
+{% if action == "Register" %}
+    Registration
+{% else %}
+    {% if action == "Edit" %}
+        Edit profile
+    {% endif %}
+{% endif %}
 {% endblock %}
 
 {% block content %}
@@ -18,7 +24,13 @@ Registration
 Please fill the form below
 <br/>
 <br />
-<form action="/register/" method="post">
+{% if action == "Register" %}
+    <form action="/register/" method="post">
+{% else %}
+    {% if action == "Edit" %}
+        <form action="/profile/" method="post">
+    {% endif %}
+{% endif %}
     <div class="aligned">
         <div class="text-center">
         {{ notif }}
@@ -26,27 +38,31 @@ Please fill the form below
         {% for error in form.password.errors %}
             <span style="color: red;">{{ error }}</span><br/>
         {% endfor %}
-        <div class="form-row">
-            {{ form.username.errors }}
-            <span class="required">
-                {{ form.username.label_tag }}
-            </span>
-            {{ form.username }}
-        </div>
-        <div class="form-row">
-            {{ form.password.errors }}
-            <span class="required">
-                {{ form.password.label_tag }}
-            </span>
-            {{ form.password }}
-        </div>
-        <div class="form-row">
-            {{ form.password2.errors }}
-            <span class="required">
-                {{ form.password2.label_tag }}
-            </span>
-            {{ form.password2 }}
-        </div>
+        
+        {% if action == "Register" %}
+            <div class="form-row">
+                {{ form.username.errors }}
+                <span class="required">
+                    {{ form.username.label_tag }}
+                </span>
+                {{ form.username }}
+            </div>
+            <div class="form-row">
+                {{ form.password.errors }}
+                <span class="required">
+                    {{ form.password.label_tag }}
+                </span>
+                {{ form.password }}
+            </div>
+            <div class="form-row">
+                {{ form.password2.errors }}
+                <span class="required">
+                    {{ form.password2.label_tag }}
+                </span>
+                {{ form.password2 }}
+            </div>
+        {% endif %}
+        
         <div class="form-row">
             {{ form.email.errors }}
             <span class="required">

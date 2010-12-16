@@ -30,12 +30,12 @@ class PortObjects(object):
         self.user_notif_port = UserNotifier()
         self.payment_port = PaymentManager()
         self.evaluation_port = EvaluationManager()
-        self.tracker_port = Tracker(get_port(self.user_notif_port))
-        self.ride_port = RideManager(get_port(self.user_notif_port), get_port(self.tracker_port), get_port(self.payment_port), get_port(self.evaluation_port))
-        self.offer_port = OfferManager(get_port(self.user_notif_port), get_port(self.ride_port))
-        self.find_pair_port = FindPair(get_port(self.offer_port))
-        self.proposal_rec_port = ProposalRecorder(get_port(self.find_pair_port))
-        self.request_rec_port = RequestRecorder(get_port(self.find_pair_port))
+        self.tracker_port = Tracker(self.get_port(self.user_notif_port))
+        self.ride_port = RideManager(self.get_port(self.user_notif_port), self.get_port(self.tracker_port), self.get_port(self.payment_port), self.get_port(self.evaluation_port))
+        self.offer_port = OfferManager(self.get_port(self.user_notif_port), self.get_port(self.ride_port))
+        self.find_pair_port = FindPair(self.get_port(self.offer_port))
+        self.proposal_rec_port = ProposalRecorder(self.get_port(self.find_pair_port))
+        self.request_rec_port = RequestRecorder(self.get_port(self.find_pair_port))
         
     def get_port(self, port):
         return port.get_port()
@@ -60,12 +60,12 @@ urlpatterns += patterns('website.views',
 )
 
 urlpatterns += patterns('website.profiles.views',
-    (r'^register/$', 'register', {'port_profile':global_ports.get_e()}),
-    (r'^profile/$', 'editprofile'),
+    (r'^register/$', 'register', {'port_profile':global_ports.profile_rec_port.get_port()}),
+    (r'^profile/$', 'editprofile', {'port_profile':global_ports.profile_rec_port.get_port()}),
 )
 
 urlpatterns += patterns('website.requests.views',
     (r'^requests/$', 'myrequests'),
-    (r'^addrequest/$', 'addrequest', {'port_request':global_ports.get_request()}),
+    (r'^addrequest/$', 'addrequest', {'port_request':global_ports.request_rec_port.get_port()}),
     (r'^editrequest/(\d+)/$', 'editrequest'),
 )

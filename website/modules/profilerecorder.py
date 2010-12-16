@@ -91,6 +91,7 @@ class ProfileRecorder(PortObject):
                 threading.Thread(target = msg[3], args = (msg[4],)).start()
             else:
                 threading.Thread(target = msg[2], args = (msg[4],)).start()
+                
         elif msg[0] == 'updateprofile':
             try:
                 lfields = msg[1]
@@ -121,6 +122,7 @@ class ProfileRecorder(PortObject):
                 
                 pro.save()
             except:
+                traceback.print_exc()
                 threading.Thread(target = msg[3], args = (msg[4],)).start()
             else:
                 threading.Thread(target = msg[2], args = (msg[4],)).start()

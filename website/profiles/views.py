@@ -12,9 +12,10 @@ from django.db import models
 from website.profiles.models import UserProfile
 from django.contrib.auth.models import User
 
-import datetime
+import datetime, time
 
 from portobject import PortObject
+from guiutils import WaitCallbacks
 
 gui_port = PortObject()
 
@@ -55,6 +56,33 @@ class RegisterForm(forms.Form):
     smartphone_id = forms.CharField(max_length=100,
                                 required=False)
 
+class EditProfileForm(forms.Form):
+    email = forms.EmailField(max_length=70,
+                        label=u'Email address')
+    first_name = forms.CharField(max_length=50,)
+    last_name = forms.CharField(max_length=50,)
+    date_of_birth = forms.DateField(widget=widgets.AdminDateWidget())
+    smoker = forms.BooleanField(required=False)
+    gender = forms.ChoiceField(choices=GENDER_CHOICES)
+    communities = forms.CharField(max_length=100,
+                        required=False)
+    money_per_km = forms.FloatField(required=False)
+    bank_account_number = forms.CharField(max_length=30)
+    phone_number = forms.CharField(max_length=20)
+    car_id = forms.CharField(max_length=10,
+                        label=u'Car plate number',
+                        required=False)
+    car_description = forms.CharField(max_length=500,
+                            widget=forms.Textarea,
+                            required=False)
+    number_of_seats = forms.IntegerField(required=False)
+    smartphone_id = forms.CharField(max_length=100,
+                                required=False)
+
+class WaitCallbacksProfile(WaitCallbacks):
+    pass
+
+
 def register(request, port_profile=None):
     
     if request.user.is_authenticated():
@@ -62,6 +90,7 @@ def register(request, port_profile=None):
         name = request.user.username
         return render_to_response('home.html', locals())
     else:
+        action = "Register"
         if request.method == 'POST':
             form = RegisterForm(request.POST)
                
@@ -84,9 +113,8 @@ def register(request, port_profile=None):
                 valid = False
                 
             if valid:
-                toprofilerecorder(request,port_profile,'register')
-                notif = 'Registered !'
-                return render_to_response('register.html', locals())
+                return toprofilerecorder(request,port_profile,'register')
+                
             else:
                 return render_to_response('register.html', locals())
         else:
@@ -94,61 +122,132 @@ def register(request, port_profile=None):
             return render_to_response('register.html', locals())
 
 
-def editprofile(request):
-    if request.user.is_authenticated():
+def editprofile(request, port_profile=None):
+    if not request.user.is_authenticated():
         connected = True
-        name = request.user.username
+        current_date = datetime.datetime.now()
         return render_to_response('home.html', locals())
+        
     else:
-        return HttpResponseRedirect('/home')
+        try:
+            p = UserProfile.objects.get(user=request.user)
+        except:
+            return render_to_response('404.html', locals())
+        else:
+            action = "Edit"
+            
+            if request.method == 'POST':
+                form = EditProfileForm(request.POST)
+               
+                valid = form.is_valid()
+                
+                email_addr = form.cleaned_data['email']
+                if request.user.email != email_addr and User.objects.filter(email=email_addr):
+                    form._errors["email"] = form.error_class(["This email address is already used by another user"])
+                    valid = False
+                    
+                if valid:
+                    return toprofilerecorder(request,port_profile,'edit')
+            
+            else:
+                init = {
+                    'email' : request.user.email,
+                    'first_name' : request.user.first_name,
+                    'last_name' : request.user.last_name,
+                    'date_of_birth' : p.date_of_birth,
+                    'smoker' : p.smoker,
+                    'gender' : p.gender,
+                    'communities' : p.communities,
+                    'money_per_km' : p.money_per_km,
+                    'bank_account_number' : p.bank_account_number,
+                    'phone_number' : p.phone_number,
+                    'car_id' : p.car_id,
+                    'car_description' : p.car_description,
+                    'number_of_seats' : p.number_of_seats,
+                    'smartphone_id' : p.smartphone_id,
+                }
+                form = EditProfileForm(initial=init,)
+
+            return render_to_response('register.html', locals())
+            
         
         
 def toprofilerecorder(request, port_profile, action):
+    if action != 'register' and action != 'edit':
+        return render_to_response('404.html', locals())
+        
     if action == 'register':
-        username = request.POST.get('username', '')
-        password = request.POST.get('password', '')
-        email = request.POST.get('email', '')
-        
-        n_user = User.objects.create_user(username, email, password)
-        n_user.first_name = request.POST.get('first_name', '')
-        n_user.last_name = request.POST.get('last_name', '')
-        n_user.save()
-        
-        UserID = n_user.id
-        NumberOfSeats = request.POST.get('number_of_seats', 0)
-        if not NumberOfSeats:
-            NumberOfSeats = 0
-        BirthDate = datetime.datetime.strptime(request.POST.get('date_of_birth', ''),'%d/%m/%Y').date()
-        Smoker = request.POST.get('smoker', False)
-        Communities = request.POST.get('communities', None)
-        MoneyPerKm = request.POST.get('money_per_km', 0.0)
-        if not MoneyPerKm:
-            MoneyPerKm = 0.0
-        Gender = request.POST.get('gender', 'M')
-        BankAccountNumber = request.POST.get('bank_account_number', None)
-        CarID = request.POST.get('car_id', None)
-        if not CarID:
-            CarID = None
-        GSMNumber = request.POST.get('phone_number', None)
-        CarDescription = request.POST.get('car_description', None)
-        if not CarDescription:
-            CarDescription = None
-        SmartphoneID = request.POST.get('smartphone_id', None)
-        
-        gui_port.send_to(port_profile,('recordprofile',[n_user,NumberOfSeats,
-                                                       BirthDate,Smoker,Communities,MoneyPerKm,
-                                                       Gender,BankAccountNumber,CarID,
-                                                       GSMNumber,CarDescription,SmartphoneID],
-                                        successcall,
-                                        failurecall,
-                                        request))
-
-
-def successcall(request):
-    print request.user
-    notification = "youpiiiie"
-    return render_to_response('home.html', locals(), context_instance=RequestContext(request),)
+        form = RegisterForm(request.POST)
+    elif action == 'edit':
+        form = EditProfileForm(request.POST)
+    form.is_valid()
+    form.cleaned_data
     
-def failurecall(request):
-    notification = "zuuuut"
-    return render_to_response('home.html', locals())
+    if action == 'register':
+        username = form.cleaned_data['username']
+        password = form.cleaned_data['password']
+        email = form.cleaned_data['email']
+        n_user = User.objects.create_user(username, email, password)
+        
+    elif action == 'edit':
+        email = form.cleaned_data['email']
+        n_user = request.user
+        n_user.email = email
+    
+    n_user.first_name = form.cleaned_data['first_name']
+    n_user.last_name = form.cleaned_data['last_name']
+    n_user.save()
+        
+    
+    
+    UserID = n_user.id
+    NumberOfSeats = form.cleaned_data['number_of_seats']
+    if not NumberOfSeats:
+        NumberOfSeats = 0
+    BirthDate = form.cleaned_data['date_of_birth']
+    Smoker = form.cleaned_data['smoker']
+    Communities = form.cleaned_data['communities']
+    MoneyPerKm = form.cleaned_data['money_per_km']
+    Gender = form.cleaned_data['gender']
+    BankAccountNumber = form.cleaned_data['bank_account_number']
+    CarID = form.cleaned_data['car_id']
+
+    GSMNumber = form.cleaned_data['phone_number']
+    CarDescription = form.cleaned_data['car_description']
+    SmartphoneID = form.cleaned_data['smartphone_id']
+        
+    if action == 'register':
+        msg = 'recordprofile'
+    elif action == 'edit':
+        msg = 'updateprofile'
+        
+    WaitCallbacksProfile.declare(request.user)
+    
+    gui_port.send_to(port_profile,(msg,[n_user,NumberOfSeats,
+                                       BirthDate,Smoker,Communities,MoneyPerKm,
+                                       Gender,BankAccountNumber,CarID,
+                                       GSMNumber,CarDescription,SmartphoneID],
+                                   successcall,
+                                   failurecall,
+                                   request.user))
+    wait_counter = 0
+    while WaitCallbacksProfile.is_pending(request.user) and wait_counter < 10:
+        time.sleep(0.1)
+        wait_counter += 1
+            
+    if WaitCallbacksProfile.status(request.user) == 'success':
+        WaitCallbacksProfile.free(request.user)
+        return render_to_response('home.html', locals())
+    else:
+        print WaitCallbacksProfile.status(request.user)
+        WaitCallbacksProfile.free(request.user)
+        return render_to_response('error.html', locals())
+            
+            
+    
+
+def successcall(user):
+    WaitCallbacksProfile.update(user, 'success')
+    
+def failurecall(user):
+    WaitCallbacksProfile.update(user, 'fail')
