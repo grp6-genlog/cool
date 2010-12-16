@@ -49,7 +49,7 @@ class FindPair(PortObject):
         """
         try:
             infos=Proposal.objects.get(id=propID)
-            requests=Request.objects.filter(departure_time__gt=infos.departure_time,nb_requested_seats__lt=infos.number_of_seats)
+            requests=Request.objects.filter(arrival_time__gt=infos.departure_time,nb_requested_seats__lt=infos.number_of_seats)
             for request in requests:
                 d=None
                 p=None
@@ -61,7 +61,7 @@ class FindPair(PortObject):
                 for rp in RoutePoints.object.filter(proposal=propID):
                     disdep = distance((request.departure_point_lat,request.departure_point_long),(rp.latitude,rp.longitude))
                     disarr = distance((request.arrival_point_lat,request.arrival_point_long),(rp.latitude,rp.longitude))
-                    if(disdep<=rp.departure_range and d==None or disdep<d):
+                    if(disdep<=rp.departure_range and (d==None or disdep<d)):
                         d=disdep
                         pup=(rp.latitude,rp.longitude)
                         i=c
