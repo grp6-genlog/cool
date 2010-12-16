@@ -4,6 +4,7 @@ import urllib
 import json
 
 DIRECTION_URL="http://maps.googleapis.com/maps/api/directions/json"
+GEOCODING_URL="http://maps.googleapis.com/maps/api/geocode/json"
 END_URL="sensor=false"
 
 OK=0
@@ -37,6 +38,23 @@ def distance_origin_dest(origin, destination, checkpoints):
     else:
         return -1
 
+def address_to_location(address):
+	doc=get_json_geocoding_doc(address)
+	parsed_doc=json.loads(doc.read())
+ 	if check_status(parsed_doc)==OK:
+		return get_location_from_doc(parsed_doc)
+	else:
+        	return -1
+
+def get_location_from_doc(json_doc):
+	results=json_doc['results']
+	if len(results)==0:
+		raise 'Not results'
+	geometry=results[0]['geometry']
+	if len(geometry)==0:
+		raise 'Not geometry'
+	return (geometry['location']['lat'], geometry['location']['lng'])
+
 """
 Get the distance from an json_doc
 @pre : json_doc must be the json responsed by Google Maps, it must already parsed and
@@ -51,6 +69,13 @@ def get_distance_from_doc(json_doc):
     if len(legs)==0:
         return -1
     return legs[-1]['distance']['value']
+
+def get_json_geocoding_doc(address, print_url=False):
+	url="?address=%s&sensor=true_or_false" % (address)
+	if print_url:
+		print url
+	data=urllib.urlopen(url)
+	return data
 
 """
 Get the json_doc from Google maps web service
@@ -94,5 +119,5 @@ def check_status(json_doc):
         return ERROR
 
 if __name__=='__main__':
-    print distance_origin_dest("Grez-Doiceau", "Louvain-La-Neuve", ["Brussels", "Antwerp"])
+    print address_to_location('Avenue+des+campanules, 1170, Bruxelles')
 
