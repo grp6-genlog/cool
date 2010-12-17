@@ -73,37 +73,21 @@ class OfferManager(PortObject):
         offer.drop_point_long=arrival[1]
         offer.drop_time = arrival[2]
         offer.total_fee=fee
-        
         offer.save()
 
 
-    def driver_agree(self,offerID):
-        """
-        Change the DriverOk status for the offer into true if it doesn't exist an other offer such as the request is the same, and the status is bothAgree
+    def driver_agree(self,(msg,offerID,callb_ok,callb_ko)):
+        # ('driveragree',offerId,callb_ok,call_ko)
+        offer=Offer.objects.get(id=offerID)
+        offer.driver_ok=True
 
-        @pre:     offerID is the id of an existing offer in the db 
-        @post:     if it doesn't exist an other offer such as the request is the same, and the status is bothAgree and there is enough seats in the car:
-                    the DriveerOk for this offer is set to true
-                else
-                    the status for this offer is changed to cancelled
-        @ret:    error Code in {OK,RAA,NEP}
-        """
-        offer=Offer.objects.filter(id=offerID)
-        if len(offer)==0:
-            raise 'Try to agree an offer that not exists'
-        offersAccepted=Offer.objects.filter(request=offer[0].request, status='A')
+        offersAccepted=Offer.objects.filter(request=offer.request, status='agreedbyboth')
         if len(offersAccepted)!=0:
-            discarded(offerID)
-            return RAA
-        proposal=Proposal.objects.filter(id=offer[0].proposal)
-        if len(proposal)==0:
-            raise 'Try to agree an offer that has no proposal'
-        request=Request.objects.filter(id=offer[0].request)
-        if len(request)==0:
-            raise 'Try to agree an offer that has no request'
-        if proposal.number_of_seats<request.nb_requested_seats:
-            discarded(offerID)
-            return NEP
+            threading.Thread(target=callb_ko).start()
+        else:
+            route_points= RoutePoints.objects.filter(proposal=offer.proposal,order__gt=offer.pick_point).order_by('order')
+            for point in route_points:
+                
         offer[0].driver_ok=True
         offer[0].save()
         if offer[0].non_driver_ok:
@@ -252,24 +236,12 @@ class OfferManager(PortObject):
                     
         """
         if msg[0]=='buildoffer':
-            try:
-                self.build_offer(msg[1], msg[2], msg[3], msg[4])
-            except:
-                traceback.print_exc()
-            
+            self.build_offer(msg[1], msg[2], msg[3], msg[4])
+                        
         elif msg[0]=='driveragree':
-            try:
-                ret = self.driver_agree(msg[1])
-            except:
-                threading.Thread(target = msg[3], args = (msg[4],)).start()
-            else:
-                if ret==OK:
-                    threading.Thread(target = msg[2], args = (msg[4],)).start()
-                elif ret==RAA:
-                    threading.Thread(target = msg[3], args = (msg[4],RAA_MSG)).start()
-                elif ret==NEP:
-                    threading.Thread(target = msg[3], args = (msg[4],NEP_MSG)).start()
-                
+            # ('driveragree',offerId,callb_ok,call_ko)
+            ret = self.driver_agree(msg)
+            
         elif msg[0]=='nondriver_agree':
             try:
                 ret = self.nondriver_agree(msg[1])
