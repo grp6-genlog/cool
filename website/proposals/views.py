@@ -106,7 +106,7 @@ def addproposal(request, port_proposal=None,global_address_cache=None):
 
         
     
-def cancelproposal(request, offset):
+def cancelproposal(request, offset, port_proposal):
     try:
         offset = int(offset)
     except ValueError:
@@ -126,7 +126,7 @@ def cancelproposal(request, offset):
     
     user=UserProfile.objects.get(user=request.user)
     proposals = Proposal.objects.filter(user=user, status='P', departure_time__lt=datetime.datetime.today())
-    # TODO
+    #anonymous_send_to()
     return render_to_response('myproposals.html', locals())
     
     

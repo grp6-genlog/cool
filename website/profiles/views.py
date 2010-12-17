@@ -228,15 +228,20 @@ def changepassword(request, port_profile=None):
 def toprofilerecorder(request, port_profile, action):
     if action != 'register' and action != 'edit':
         return render_to_response('404.html', locals())
-    
-    if not request.user.is_authenticated():
-        current_date = datetime.datetime.now()
-        return render_to_response('home.html', locals())
-        
+
     if action == 'register':
+        if request.user.is_authenticated():
+            current_date = datetime.datetime.now() 
+            return render_to_response('home.html', locals())        
+
         form = RegisterForm(request.POST)
     elif action == 'edit':
+        if not request.user.is_authenticated():
+            current_date = datetime.datetime.now() 
+            return render_to_response('home.html', locals())        
+            
         form = EditProfileForm(request.POST)
+    
     form.is_valid()
     form.cleaned_data
     

@@ -70,7 +70,6 @@ urlpatterns += patterns('website.profiles.views',
 urlpatterns += patterns('website.requests.views',
     (r'^requests/$', 'myrequests'),
     (r'^addrequest/$', 'addrequest', {'port_request':global_ports.request_rec_port}),
-    (r'^editrequest/(\d+)/$', 'editrequest'),
     (r'^cancelrequest/(?P<offset>\d+)/$', 'cancelrequest', {'port_request':global_ports.request_rec_port}),
 )
 

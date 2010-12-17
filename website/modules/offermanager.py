@@ -63,7 +63,7 @@ class OfferManager(PortObject):
         offer=Offer()
         offer.request=Request.objects.get(id=requestID)
         offer.proposal=Proposal.objects.get(id=proposalID)
-        offer.status='pending'
+        offer.status='P'
         offer.driver_ok=False
         offer.non_driver_ok=False
         offer.pickup_point_lat=departure[0]
@@ -72,8 +72,8 @@ class OfferManager(PortObject):
         offer.drop_point_lat=arrival[0]
         offer.drop_point_long=arrival[1]
         offer.drop_time = arrival[2]
-        offer.pickup_point = departure[3]
-        offer.drop_point = arrival[3]
+        offer.pickup_point = RoutePoints.objects.get(id=departure[3])
+        offer.drop_point = RoutePoints.objects.get(id=arrival[3])
         offer.total_fee=fee
         offer.save()
 
@@ -83,30 +83,32 @@ class OfferManager(PortObject):
         offer=Offer.objects.get(id=offerID)
         offer.driver_ok=True
         offer.save()
-        offersAccepted=Offer.objects.filter(request=offer.request, status='agreedbyboth')
+        offersAccepted=Offer.objects.filter(request=offer.request, status='A')
         if len(offersAccepted)!=0:
             threading.Thread(target=callb_ko).start()
         else:
             if offer.non_driver_ok:
                 route_points= RoutePoints.objects.filter(proposal=offer.proposal,order__gte=offer.pick_point.order,order__lte=offer.drop_point).order_by('order')
-                point1=route_points[0]:
+                point1=route_points[0]
                 for point2 in route_points[1:]:
                     count = offer.request.nb_requested_seats
-                    for offer2 in Offer.objects.filter(proposal=offer.proposal,status='agreedbyboth'):
+                    for offer2 in Offer.objects.filter(proposal=offer.proposal,status='A'):
                         if RoutePoints.filter(proposal=offer2.proposal,order=point1.order) and RoutePoints.filter(proposal=offer2.proposal,order=point2.order):
                             count+=offer2.request.nb_requested_seats
                         if count>offer.proposal.number_of_seats:
                             threading.Thread(target=callb_ko).start()
                     account = offer.request.user.account_balance
-                for offer2 in Offer.objects.filter(status='agreedbyboth',request.user=offer.request.user):
-                    account-=offer2.total_fee
+                
+                for offer2 in Offer.objects.filter(status='A'):
+                    if offer2.request.user.user == request.user:
+                        account-=offer2.total_fee
                 if account<0:
                     offer.non_driver_ok = False
                     offer.save()
                     send_to(self.userNotifier, ('newmsg', requests[0].user, 'The offerID has a response. Not enough money to accept the ride. Please add money on your account.'))
                     threading.Thread(target=callb_ko).start()
                 else:
-                    offer.status='agreedbyboth'
+                    offer.status='A'
                     offer.save()
                     send_to(self.rideManager, ('newacceptedride', offers[0].id))
                     threading.Thread(target=callb_ok).start()
@@ -119,30 +121,31 @@ class OfferManager(PortObject):
         offer=Offer.objects.get(id=offerID)
         offer.non_driver_ok=True
         offer.save()
-        offersAccepted=Offer.objects.filter(request=offer.request, status='agreedbyboth')
+        offersAccepted=Offer.objects.filter(request=offer.request, status='A')
         if len(offersAccepted)!=0:
             threading.Thread(target=callb_ko).start()
         else:
             if offer.driver_ok:
                 route_points= RoutePoints.objects.filter(proposal=offer.proposal,order__gte=offer.pick_point.order,order__lte=offer.drop_point).order_by('order')
-                point1=route_points[0]:
+                point1=route_points[0]
                 for point2 in route_points[1:]:
                     count = offer.request.nb_requested_seats
-                    for offer2 in Offer.objects.filter(proposal=offer.proposal,status='agreedbyboth'):
+                    for offer2 in Offer.objects.filter(proposal=offer.proposal,status='A'):
                         if RoutePoints.filter(proposal=offer2.proposal,order=point1.order) and RoutePoints.filter(proposal=offer2.proposal,order=point2.order):
                             count+=offer2.request.nb_requested_seats
                         if count>offer.proposal.number_of_seats:
                             threading.Thread(target=callb_ko).start()
                     account = offer.request.user.account_balance
-                for offer2 in Offer.objects.filter(status='agreedbyboth',request.user=offer.request.user):
-                    account-=offer2.total_fee
+                for offer2 in Offer.objects.filter(status='A'):
+                    if offer2.request.user.user == request.user:
+                        account-=offer2.total_fee
                 if account<0:
                     offer.non_driver_ok = False
                     offer.save()
                     send_to(self.userNotifier, ('newmsg', requests[0].user, 'The offerID has a response. Not enough money to accept the ride. Please add money on your account.'))
                     threading.Thread(target=callb_ko).start()
                 else:
-                    offer.status='agreedbyboth'
+                    offer.status='A'
                     offer.save()
                     send_to(self.rideManager, ('newacceptedride', offers[0].id))
                     threading.Thread(target=callb_ok).start()
@@ -156,7 +159,7 @@ class OfferManager(PortObject):
         @post:    the offer status is set to 'discarded'
         """
         offer=Offer.objects.get(id=offerID)
-        offer.status='discarded'
+        offer.status='D'
         offer.save()
         
     def routine(self, src, msg):
@@ -242,12 +245,12 @@ Compute the fee for the route between departure and arrival
 @post: the fee computed is returned
 """
 def compute_fee(proposal, departure, arrival):
-    dep = RoutePoints.object.get(id=departure)
-    arr = RoutePoints.object.get(id=arrival)
+    dep = RoutePoints.objects.get(id=departure)
+    arr = RoutePoints.objects.get(id=arrival)
     total=0.
     last = dep
     for index in range(dep.order+1,arr.order):
-        tmp = RoutePoints.object.get(order=index,proposal=proposal)
+        tmp = RoutePoints.objects.get(order=index,proposal=proposal)
         total+=get_distance((last.latitude,last.longitude),(tmp.latitude,tmp.longitude))
         last= tmp
     return total*proposal.money_per_km
