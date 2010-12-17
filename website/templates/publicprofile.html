@@ -7,45 +7,14 @@ Profile
 {% endblock %}
 
 {% block content %}
-{% if info_offers|length == 0 %}
-    You don't have any ride planned.<br/>
-{% else %}
-    <span style="text-weight:bold;font-size:1.1em;">Rides for which you are the driver</span>
-    <br/><br/>
-    {% for ride in info_rides %}
+    <span style="text-weight:bold;font-size:1.2em;">{{other.user.first_name}} {{other.user.last_name}}<span/><br/><br/>
+    Gender: {{other.gender}}<br/>
+    Age: {{age}} years old<br/>
+    Smoker: {% if other.smoker %}Yes{% else %}No{% endif %}<br/>
+    {% if com_offer.status=='A' %}
+        Car plate: {{other.car_id}}<br/>
+        Car description: {{other.car_description}}<br/>
+        Phone number: {{other.phone_number}}<br/>
+    {% endif %}
     
-        {% if ride.driver %}
-    
-            <b>Ride planned with <a href="/profile/{{ ride.other.user.user.id }}/">{{ ride.other.user.first_name }} {{ ride.other.user.last_name }}</a></b><br/>
-            You should pick up the passenger on {{ ride.date_pick }} at {{ ride.pick_point }} (<a href="http://maps.google.com/maps?f=q&source=s_q&hl=en&geocode=&q={{ ride.pick_point }}">See on Google Maps</a>)<br/>
-            And drop him at {{ ride.drop_point }} (<a href="http://maps.google.com/maps?f=q&source=s_q&hl=en&geocode=&q={{ ride.drop_point }}">See on Google Maps</a>)<br/>
-            {{ nb_seat }} seat{% if nb_seat > 1 %}s{% endif %} reserved.<br/>
-            You will earn : {{ ride.fee }}€<br/>
-            <form method="link" action="/cancelride/{{ ride.id }}/"><input type="submit" value="Cancel ride" /></form>
-            <br/>
-            <i>This choice is definitive, people are depending on you, please take it carefully.</i>
-        {% endif %}
-        <br/><br/>
-    {% endfor %}
-    
-    <hr>
-    
-    <span style="text-weight:bold;font-size:1.1em;">Rides for which you are the passenger</span>
-    <br/><br/>
-    {% for ride in info_rides %}
-    
-        {% if not ride.driver %}
-    
-            <b>Ride planned with <a href="/profile/{{ ride.other.user.user.id }}/">{{ ride.other.user.first_name }} {{ ride.other.user.last_name }}</a></b><br/>
-            You will be picked up on {{ ride.date_pick }} at {{ ride.pick_point }} (<a href="http://maps.google.com/maps?f=q&source=s_q&hl=en&geocode=&q={{ ride.pick_point }}">See on Google Maps</a>)<br/>
-            And be dropped at {{ ride.drop_point }} (<a href="http://maps.google.com/maps?f=q&source=s_q&hl=en&geocode=&q={{ ride.drop_point }}">See on Google Maps</a>)<br/>
-            You have reserved {{ nb_seat }} seat{% if nb_seat > 1 %}s{% endif %}.<br/>
-            You will pay : {{ ride.fee }}€<br/>
-            <form method="link" action="/cancelride/{{ ride.id }}/"><input type="submit" value="Cancel ride" /></form>
-            <br/>
-            <i>This choice is definitive, people made arrangements for you, please take it carefully.</i>
-        {% endif %}
-        <br/><br/>
-    {% endfor %}
-{% endif %}
 {% endblock %}
