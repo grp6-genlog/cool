@@ -76,7 +76,7 @@ class PaymentManager(PortObject):
             return False
         else:
             user.account_balance-=amount
-            self.transfer_money(bankAccount,str(userId),amount))
+            self.transfer_money(bankAccount,str(userId),amount)
             user.save()
             return True
         

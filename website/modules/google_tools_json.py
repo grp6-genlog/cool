@@ -44,7 +44,7 @@ def get_distance((src_lat,src_lon),(dst_lat,dst_lon)):
 def address_to_location(address):
     doc=get_json_geocoding_doc(address, False)
     parsed_doc=json.loads(doc.read())
-     if check_status(parsed_doc)==OK:
+    if check_status(parsed_doc)==OK:
         return get_location_from_doc(parsed_doc)
     else:
         return -1

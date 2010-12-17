@@ -3,16 +3,17 @@ from django.http import HttpResponseRedirect
 from django import forms
 
 from website.profiles.models import UserProfile
-from website.offers.models import Proposal
+from website.proposals.models import Proposal
 from website.requests.models import Request
+from website.offers.models import Offer
 from django.contrib.auth.models import User
 
 
 from portobject import PortObject
 from guiutils import WaitCallbacks
-from website.google_tools_json import *
+from google_tools_json import *
 
-import datetime, time
+import datetime, time, threading
 
 gui_port = PortObject()
 
@@ -70,14 +71,14 @@ def myoffers(request):
                                 
             pick_point_js = json.loads(location_to_address(str(of.pickup_point_lat)+","+str(of.pickup_point_long)).read())
             if len(pick_point_js)==0:
-		        pick_point = "No address"
-		    else:
-		        pick_point = pick_point_js['results'][0]['formatted_address']
+                pick_point = "No address"
+            else:
+                pick_point = pick_point_js['results'][0]['formatted_address']
             drop_point_js = json.loads(location_to_address(str(of.drop_point_lat)+","+str(of.drop_point_long)).read())
             if len(drop_point_js)==0:
-		        drop_point = "No address"
-		    else:
-		        drop_point = drop_point_js['results'][0]['formatted_address']
+                drop_point = "No address"
+            else:
+                drop_point = drop_point_js['results'][0]['formatted_address']
             
             infos = {
                 'driver':True, 'status':of.driver_ok, 'other':of.request.user,
@@ -88,7 +89,7 @@ def myoffers(request):
             
             self.insert_offer(info_offers, infos)
             
-    for req in user.request_set.all()
+    for req in user.request_set.all():
         new_offers = Offer.objects.filter(request=req, status='Pending')
         for of in new_offers:
             route_points = of.proposal.routepoints_set.all()
@@ -102,8 +103,17 @@ def myoffers(request):
                                  of.proposal.arrival_time,
                                  route_points,
                                 (of.drop_point_lat, of.drop_point_long))
-            pick_point = ""
-            drop_point = ""
+            
+            pick_point_js = json.loads(location_to_address(str(of.pickup_point_lat)+","+str(of.pickup_point_long)).read())
+            if len(pick_point_js)==0:
+                pick_point = "No address"
+            else:
+                pick_point = pick_point_js['results'][0]['formatted_address']
+            drop_point_js = json.loads(location_to_address(str(of.drop_point_lat)+","+str(of.drop_point_long)).read())
+            if len(drop_point_js)==0:
+                drop_point = "No address"
+            else:
+                drop_point = drop_point_js['results'][0]['formatted_address']
             
             infos = {
                 'driver':False, 'status':of.non_driver_ok, 'other':of.proposal.user,
@@ -115,8 +125,8 @@ def myoffers(request):
             self.insert_offer(info_offers, infos)
     
     
-    notification = WaitCallbacksProposal.get_message(user)
-    WaitCallbacksProposal.erase_message(user)
+    notification = WaitCallbacksOffer.get_message(user)
+    WaitCallbacksOffer.erase_message(user)
     return render_to_response('myoffers.html', locals())
     
     
@@ -185,18 +195,18 @@ def responseoffer(request, offset, port_offer, accept):
                                            request.user))
             
             wait_counter = 0
-            while WaitCallbacksProposal.is_pending(request.user) and wait_counter < 10:
+            while WaitCallbacksOffer.is_pending(request.user) and wait_counter < 10:
                 time.sleep(0.1)
                 wait_counter += 1
             
-            if WaitCallbacksProposal.status(request.user) == 'success':
-                WaitCallbacksProposal.free(request.user)
+            if WaitCallbacksOffer.status(request.user) == 'success':
+                WaitCallbacksOffer.free(request.user)
                 
                 return redirect('/offers/')
                 
             else:
-                print WaitCallbacksProposal.status(request.user)
-                WaitCallbacksProposal.free(request.user)
+                print WaitCallbacksOffer.status(request.user)
+                WaitCallbacksOffer.free(request.user)
                 
                 
                 return redirect('/offers/')
@@ -204,12 +214,12 @@ def responseoffer(request, offset, port_offer, accept):
 
         
 def successcall(user, message=None):
-    WaitCallbacksProposal.update(user, 'success')
+    WaitCallbacksOffer.update(user, 'success')
     
 def failurecall(user, message=None):
     if message:
-        WaitCallbacksProposal.update_message(user, message)
-    WaitCallbacksProposal.update(user, 'fail')
+        WaitCallbacksOffer.update_message(user, message)
+    WaitCallbacksOffer.update(user, 'fail')
         
     
 def editrequest(request, offset):

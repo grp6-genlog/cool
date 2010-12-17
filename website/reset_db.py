@@ -17,4 +17,6 @@ Ride.objects.all().delete()
 
 user = User.objects.create_user('mart', 'mart@mart.net', 'martin')
 user.is_superuser = True
+user.is_staff = True
+user.is_active = True
 user.save()
