@@ -72,6 +72,8 @@ class OfferManager(PortObject):
         offer.drop_point_lat=arrival[0]
         offer.drop_point_long=arrival[1]
         offer.drop_time = arrival[2]
+        offer.pickup_point = departure[3]
+        offer.drop_point = arrival[3]
         offer.total_fee=fee
         offer.save()
 
@@ -80,101 +82,72 @@ class OfferManager(PortObject):
         # ('driveragree',offerId,callb_ok,call_ko)
         offer=Offer.objects.get(id=offerID)
         offer.driver_ok=True
-
+        offer.save()
         offersAccepted=Offer.objects.filter(request=offer.request, status='agreedbyboth')
         if len(offersAccepted)!=0:
             threading.Thread(target=callb_ko).start()
         else:
-            route_points= RoutePoints.objects.filter(proposal=offer.proposal,order__gt=offer.pick_point).order_by('order')
-            for point in route_points:
-                
-        offer[0].driver_ok=True
-        offer[0].save()
-        if offer[0].non_driver_ok:
-            return agree_by_both(offerID)
-        return OK
+            if offer.non_driver_ok:
+                route_points= RoutePoints.objects.filter(proposal=offer.proposal,order__gte=offer.pick_point.order,order__lte=offer.drop_point).order_by('order')
+                point1=route_points[0]:
+                for point2 in route_points[1:]:
+                    count = offer.request.nb_requested_seats
+                    for offer2 in Offer.objects.filter(proposal=offer.proposal,status='agreedbyboth'):
+                        if RoutePoints.filter(proposal=offer2.proposal,order=point1.order) and RoutePoints.filter(proposal=offer2.proposal,order=point2.order):
+                            count+=offer2.request.nb_requested_seats
+                        if count>offer.proposal.number_of_seats:
+                            threading.Thread(target=callb_ko).start()
+                    account = offer.request.user.account_balance
+                for offer2 in Offer.objects.filter(status='agreedbyboth',request.user=offer.request.user):
+                    account-=offer2.total_fee
+                if account<0:
+                    offer.non_driver_ok = False
+                    offer.save()
+                    send_to(self.userNotifier, ('newmsg', requests[0].user, 'The offerID has a response. Not enough money to accept the ride. Please add money on your account.'))
+                    threading.Thread(target=callb_ko).start()
+                else:
+                    offer.status='agreedbyboth'
+                    offer.save()
+                    send_to(self.rideManager, ('newacceptedride', offers[0].id))
+                    threading.Thread(target=callb_ok).start()
+            else:
+                threading.Thread(target=callb_ok).start()
 
-    def nondriver_agree(self,offer):
-        """
-        Change the nonDriverOk status for the offer into true if it doesn't exist an other offer such as the request is the same, and the status is bothAgree
-        @post:     if it doesn't exist an other offer such as the request is the same, and the status is agreedByBoth and there is enough space in the car:
-                    the nonDriverOk for this offer is set to true
-                else
-                    the status for this offer is changed to cancelled
-        @ret:    error code in {OK,RAA,NEP}"""
-        offer=Offer.objects.filter(id=offerID)
-        if len(offer)==0:
-            raise 'Try to agree an offer that not exists'
-        offersAccepted=Offer.objects.filter(request=offer[0].request, status='A')
+
+    def nondriver_agree(self,(msg,offerID,callb_ok,callb_ko)):
+        # ('nondriveragree',offerId,callb_ok,call_ko)
+        offer=Offer.objects.get(id=offerID)
+        offer.non_driver_ok=True
+        offer.save()
+        offersAccepted=Offer.objects.filter(request=offer.request, status='agreedbyboth')
         if len(offersAccepted)!=0:
-            discarded(offerID)
-            return RAA
-        proposal=Proposal.objects.filter(id=offer[0].proposal)
-        if len(proposal)==0:
-            raise 'Try to agree an offer that has no proposal'
-        request=Request.objects.filter(id=offer[0].request)
-        if len(request)==0:
-            raise 'Try to agree an offer that has no request'
-        if proposal.number_of_seats<request.nb_requested_seats:
-            discarded(offerID)
-            return NEP
-        offer[0].non_driver_ok=True
-        offer[0].save()
-        if offer[0].driver_ok:
-            return agree_by_both(offerID)
-        return OK
-
-        
-
-    def agree_by_both(self,offerID):
-        """
-        Try to change the status of the offer to agreedByBoth
-        @pre:    offerID exists in the db
-                the status of driverOk and nonDriverOk are both True
-        @post:    if they are enough seats in the car and the nonDriver has enough money on his account
-                        the offer status is set to agreedByBoth
-            else
-                if NEM:
-                        nonDriverOK status is set to false
-                    a msg is sent to UserNotifier :
-                           ('newmsg','The offerID has a response. Not enough money to accept the ride. Please add money on your account.')
-                the offer status is set to pending
-        @ret:    error code in {OK,NEP,NEM}
-        """
-        offers=Offer.objects.filter(id=offerID)
-        if len(offers)==0:
-            raise "Try to accept an offer that doesn't exist"
-        enoughSeats=False
-        enoughMoney=False
-        #Get the proposal, request linked to the offer
-        requests=Request.objects.filter(id=offers[0].request)
-        if len(requests)==0:
-            raise 'Try to agree an offer where the request is invalid'
-        proposals=Proposal.objects.filter(id=offers[0].proposal)
-        if len(proposals)==0:
-            raise 'Try to agree an offer where the profile is invalid'
-        #Check enough money
-        profiles=UserProfile.objects.filter(id=requests[0].user)
-        if len(profiles)==0:
-            raise 'Try to agree an offer where the profile is invalid'
-        if profiles[0].account_balance>=offers[0].total_fee:
-            enoughMoney=True
-        #Check enough seats
-        if proposals[0].number_of_seats>=requests[0].nb_requested_seats:
-            enoughSeats=True
-        if enoughSeats and enoughMoney:
-            offers[0].status='A'
-            offers[0].save()
-            return OK
-        elif not enoughSeats:
-            discarded(offerID)
-            return NEP
+            threading.Thread(target=callb_ko).start()
         else:
-            offers[0].non_driver_ok=False
-            send_to(self.userNotifier, ('newmsg', requests[0].user, 'The offerID has a response. Not enough money to accept the ride. Please add money on your account.'))
-            return NEM
-        send_to(self.rideManager, ('newacceptedride', offers[0].id))
-        return OK
+            if offer.driver_ok:
+                route_points= RoutePoints.objects.filter(proposal=offer.proposal,order__gte=offer.pick_point.order,order__lte=offer.drop_point).order_by('order')
+                point1=route_points[0]:
+                for point2 in route_points[1:]:
+                    count = offer.request.nb_requested_seats
+                    for offer2 in Offer.objects.filter(proposal=offer.proposal,status='agreedbyboth'):
+                        if RoutePoints.filter(proposal=offer2.proposal,order=point1.order) and RoutePoints.filter(proposal=offer2.proposal,order=point2.order):
+                            count+=offer2.request.nb_requested_seats
+                        if count>offer.proposal.number_of_seats:
+                            threading.Thread(target=callb_ko).start()
+                    account = offer.request.user.account_balance
+                for offer2 in Offer.objects.filter(status='agreedbyboth',request.user=offer.request.user):
+                    account-=offer2.total_fee
+                if account<0:
+                    offer.non_driver_ok = False
+                    offer.save()
+                    send_to(self.userNotifier, ('newmsg', requests[0].user, 'The offerID has a response. Not enough money to accept the ride. Please add money on your account.'))
+                    threading.Thread(target=callb_ko).start()
+                else:
+                    offer.status='agreedbyboth'
+                    offer.save()
+                    send_to(self.rideManager, ('newacceptedride', offers[0].id))
+                    threading.Thread(target=callb_ok).start()
+            else:
+                threading.Thread(target=callb_ok).start()
 
     def discarded(self,offerID):
         """
@@ -182,11 +155,9 @@ class OfferManager(PortObject):
         @pre:    offerID exists in the db
         @post:    the offer status is set to 'discarded'
         """
-        offers=Offer.objects.filter(id=offerID)
-        if len(offers)==0:
-            raise "Try to accept an offer that doesn't exist"
-        offers[0].status='D'
-        offers[0].save()
+        offer=Offer.objects.get(id=offerID)
+        offer.status='discarded'
+        offer.save()
         
     def routine(self, src, msg):
         """
@@ -232,8 +203,7 @@ class OfferManager(PortObject):
                                     False otherwise with a message of explaination
                     - post discarded
                 for 'cancelrequest':
-                    -
-                    
+                    -                    
         """
         if msg[0]=='buildoffer':
             self.build_offer(msg[1], msg[2], msg[3], msg[4])
