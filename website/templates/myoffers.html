@@ -21,9 +21,20 @@ My offers
             And to drop at {{ offer.drop_point }} (<a href="http://maps.google.com/maps?f=q&source=s_q&hl=en&geocode=&q={{ offer.drop_point }}">See on Google Maps</a>)<br/>
             {{ nb_seat }} seat{% if nb_seat > 1 %}s{% endif %} requested.<br/>
             Money earned : {{ offer.fee }}€<br/>
-            {% if offer.status %}
-                <form method="link" action="/acceptoffer/{{ offer.id }}/"><input type="submit" value="Accept offer" /></form>
-                <form method="link" action="/discardoffer/{{ offer.id }}/"><input type="submit" value="Discard offer" /></form>
+            {% if not offer.status %}
+                <div class="submit-row">
+                <form method="link" action="/acceptoffer/{{ offer.id }}/" style="display:inline">
+                <label style="margin-left:25px;">
+                    <input type="submit" value="Accept offer" />
+                </label>
+                </form>
+                
+                <form method="link" action="/discardoffer/{{ offer.id }}/" style="display:inline">
+                <label style="margin-left:25px;">
+                    <input type="submit" value="Discard offer" /></form>
+                </label>
+                </div>
+                
                 <br/>
                 <i>This choice engages you to a ride, please take it carefully.</i>
             {% else %}
@@ -49,7 +60,7 @@ My offers
             and dropped at {{ offer.date_drop.hour }}:{{ offer.date_drop.minute }} at {{ offer.drop_point }} (<a href="http://maps.google.com/maps?f=q&source=s_q&hl=en&geocode=&q={{ offer.drop_point }}">See on Google Maps</a>)<br/>
             {{ nb_seat }} seat{% if nb_seat > 1 %}s{% endif %} requested.<br/>
             Money required : {{ offer.fee }}<br/>
-            {% if offer.status %}
+            {% if not offer.status %}
                 <form method="link" action="/acceptoffer/{{ offer.id }}/"><input type="submit" value="Accept offer" /></form>
                 <form method="link" action="/discardoffer/{{ offer.id }}/"><input type="submit" value="Discard offer" /></form>
                 <br/>

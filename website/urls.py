@@ -80,6 +80,8 @@ urlpatterns += patterns('website.proposals.views',
 
 urlpatterns += patterns('website.offers.views',
     (r'^offers/$', 'myoffers',{'global_address_cache':global_address_cache}),
-    (r'^acceptoffer/(?P<offset>\d+)/$', 'responseoffer', {'port_offer':global_ports.offer_port, 'accept':True,'global_address_cache':global_address_cache}),
-    (r'^discardoffer/(?P<offset>\d+)/$', 'responseoffer', {'port_offer':global_ports.offer_port, 'accept':False,'global_address_cache':global_address_cache}),
+    (r'^acceptoffer/(?P<offset>\d+)/$', 'responseoffer', {'port_offer':global_ports.offer_port,
+                                                          'accept':True,'global_address_cache':global_address_cache}),
+    (r'^discardoffer/(?P<offset>\d+)/$', 'responseoffer', {'port_offer':global_ports.offer_port,
+                                                           'accept':False,'global_address_cache':global_address_cache}),
 )

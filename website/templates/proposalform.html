@@ -14,7 +14,7 @@
 		var addressMarker;
 		var points = [];
 		var clickCounter = 1;
-		var currZoom = 13;
+		var currZoom = 8;
 //		var addresses = [];
  
 		function initialize() {
@@ -47,7 +47,7 @@
 						}
 						document.getElementById("status").value = str;
 						if (clickCounter>1){
-							currZoom = map.getZoom();
+							//currZoom = map.getZoom();
 							gdir.loadFromWaypoints(points,{getSteps:true,travelMode:G_TRAVEL_MODE_DRIVING});
 						}
 						clickCounter++;
@@ -158,14 +158,14 @@ My proposals
         <span style="font-style:italic; font-size:11px;">Mandatory fields are in bold</span><br/>
         </div>
         
-<div id="map_canvas" style="margin: 1em 1em; width:400px; height:300px; "></div> 
+<div id="map_canvas" style="margin: 1em 1em; width:600px; height:400px; "></div> 
 <div id="doSomething" style="margin: 1em 1em;" > 
 </div> 
 <input type='hidden' id='status' name='status' value=''> 
 <div id="directions1" width=200></div> 
 <div id="directions" width=200></div> 
     <div class="submit-row">
-            <label style="margin-left:-200px;">
+            <label>
             <input name="submit" type="submit" value="Refresh Map" on click="return refreshMap();"/>
             </label>
         </div>
