@@ -31,7 +31,7 @@ class RoutePoints(models.Model):
     order = models.IntegerField()
 
     def __unicode__(self):
-        return u'%s %s' % (self.Latitude, self.Longitude, self.order) # %s ???
+        return u'%s %s %s' % (self.latitude, self.longitude, self.order) # %s ???
         
     class Meta:
         ordering = ['order']

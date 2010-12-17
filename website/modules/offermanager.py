@@ -219,22 +219,22 @@ class OfferManager(PortObject):
             try:
                 ret = self.nondriver_agree(msg[1])
             except:
-                threading.Thread(target = msg[3], args = (msg[4],)).start()
+                threading.Thread(target = msg[3], ).start()
             else:
                 if ret==OK:
-                    threading.Thread(target = msg[2], args = (msg[4],)).start()
+                    threading.Thread(target = msg[2], ).start()
                 elif ret==RAA:
-                    threading.Thread(target = msg[3], args = (msg[4],RAA_MSG)).start()
+                    threading.Thread(target = msg[3], args = (RAA_MSG)).start()
                 elif ret==NEP:
-                    threading.Thread(target = msg[3], args = (msg[4],NEP_MSG)).start()
+                    threading.Thread(target = msg[3], args = (NEP_MSG)).start()
                 
         elif msg[0]=='refuseoffer':
             try:
                 self.discarded(msg[1])
             except:
-                threading.Thread(target = msg[3], args = (msg[4],)).start()
+                threading.Thread(target = msg[3], ).start()
             else:
-                threading.Thread(target = msg[2], args = (msg[4],)).start()
+                threading.Thread(target = msg[2], ).start()
                     
 
 """

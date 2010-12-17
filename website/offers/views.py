@@ -22,7 +22,9 @@ class WaitCallbacksOffer(WaitCallbacks):
                       
 
 """
-    Display the list of offers of the authenticated
+    Display the list of offers of the authenticated user waiting for approval
+    of one or the two participant
+    If he isn't connected, display the home page
 """
 def myoffers(request, global_address_cache=None):
     if not request.user.is_authenticated():
@@ -119,26 +121,32 @@ def insert_offer(offer_l, new_o):
     offer_l.append(new_o)
     
  
-
+"""
+    Response to an offer
+    offer : the id of the offer specified in the url
+    port_offer : the port_object to the offer manager
+    accept : boolean containing the response
+    global_address_cache : cache address for optimisation
+"""
 def responseoffer(request, offset, port_offer, accept, global_address_cache):
 
     try:
         offset = int(offset)
     except:
         notification = {'content':'Invalid call', 'success':False}
-        return render_to_response('error.html', locals())
+        return render_to_response('home.html', locals())
     else:
     
         try:
             offer = Offer.objects.get(id=offset)
         except:
             notification = {'content':'Invalid call', 'success':False}
-            return render_to_response('error.html', locals())
+            return render_to_response('home.html', locals())
         else:
         
             if offer.status != 'P':
-                notification = {'content':'Invalid call', 'success':False}
-                return render_to_response('error.html', locals())
+                notification = {'content':'Invalid call'+offer.status, 'success':False}
+                return render_to_response('home.html', locals())
             
             if request.user != offer.proposal.user.user and request.user != offer.request.user.user:
                 notification = {'content':'Invalid call', 'success':False}
@@ -152,7 +160,6 @@ def responseoffer(request, offset, port_offer, accept, global_address_cache):
                     message = "nondriver_agree"
             else:
                 message = "refuseoffer"
-            
             
             WaitCallbacksOffer.declare(request.user)
             
