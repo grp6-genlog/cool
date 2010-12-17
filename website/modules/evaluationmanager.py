@@ -83,12 +83,12 @@ class EvaluationManager(PortObject):
 			  no evaluation is now possible
 		"""
 		if msg[0]=='startevaluation':
-			buildEmptyEvaluation(msg[1], msg[2])
+			self.buildEmptyEvaluation(msg[1], msg[2])
 		elif msg[0]=='evaluate':
-			res=updateEvaluation(msg[1], msg[2], msg[3])
+			res=self.updateEvaluation(msg[1], msg[2], msg[3])
 			msg[4](res)
 		elif msg[0]=='closeevaluation':
-			lockEvaluation(msg[1])
+			self.lockEvaluation(msg[1])
 
 #timer description
 class delayAction:
