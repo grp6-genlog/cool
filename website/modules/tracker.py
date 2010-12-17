@@ -191,30 +191,6 @@ class Tracker(PortObject):
                     pass                           
         threading.Timer(5.,lambda:self.check_all_rides()).start()
 
-    def start_ride(self,instructionID,callb_ok,callb_ko):
-        """
-        add the ride related to instructionID in the list.
-        
-        @pre : rides_list is initialized
-               DB is initialized
-               
-               instructionID is a id in the instructions table in the DB
-               callb_ok is a procedure
-               callb_ko is a procedure
-        
-        @post : (instruction,manual_mode,callb_ok,callb_ko,tcp_connection_driver,tcp_connection_ndriver) has been
-                added to the rides_list.
-                      instruction=instructionID
-                      callb_ok=//
-                      callb_ko=//
-                      tcp_connection_* is a tcp connection between * and tracker
-                a message is sent to the driver by UserNotifier :
-                      ('newmsg',"Don't forget your ride : instructionID")
-                a thread is launched with the following 30 min dellayed message through the tcp connection 'ridestarted?'
-                during the add, the lock has been raised
-        """
-        pass
-
     def routine(self,msg):
         """
         There is two messages received by tracker : 
@@ -224,9 +200,8 @@ class Tracker(PortObject):
         """
         if msg[0]:
             ride = Ride.objects.get(id=msg[1])
-            offer = Offer.objects.get(id=ride.offer)
-            driver = Proposal.objects.get(id=offer.proposal).user
-            ndriver = Request.objects.get(id=offer.request).user
+            driver = ride.offer.proposal.user
+            ndriver = ride.offer.request.user
             lock.acquire()
             info = (msg[1],datetime.datetime(offer.pickup_time),False,msg[2],msg[3],driver,ndriver,SPENDING,offer.pickup_point_lat,offer.pickup_point_long,False)
             rides_list.append(info)
