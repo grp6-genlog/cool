@@ -7,14 +7,21 @@ Profile
 {% endblock %}
 
 {% block content %}
-    <span style="text-weight:bold;font-size:1.2em;">{{other.user.first_name}} {{other.user.last_name}}<span/><br/><br/>
+    <span style="font-weight:bold; font-size:1.2em;">{{other.user.first_name}} {{other.user.last_name}}</span>
+    <br/><br/>
     Gender: {{other.gender}}<br/>
     Age: {{age}} years old<br/>
     Smoker: {% if other.smoker %}Yes{% else %}No{% endif %}<br/>
-    {% if com_offer.status=='A' %}
+    {% if com_offer.status == 'A' %}
         Car plate: {{other.car_id}}<br/>
         Car description: {{other.car_description}}<br/>
         Phone number: {{other.phone_number}}<br/>
     {% endif %}
-    
+    {% for eval in evaluations %}
+        From: {{ eval.user_from.user.first_name }} {{ eval.user_from.user.last_name }}<br/>
+        Date: {{ eval.ride_time }}<br/>
+        Rating: {{ eval.rating }}<br/>
+        <i>{{ eval.content }}</i>
+        <br/><br/>
+    {% endfor %}
 {% endblock %}

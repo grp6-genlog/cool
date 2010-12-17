@@ -16,7 +16,7 @@ My offers
     
         {% if offer.driver %}
     
-            <b>Proposition of ride with <a href="/profile/{{ offer.other.user.user.id }}/">{{ offer.other.user.first_name }} {{ offer.other.user.last_name }}</a></b><br/>
+            <b>Proposition of ride with <a href="/profile/{{ offer.other.user.id }}/">{{ offer.other.user.first_name }} {{ offer.other.user.last_name }}</a></b><br/>
             Pickup request on {{ offer.date_pick }} at {{ offer.pick_point }} (<a href="http://maps.google.com/maps?f=q&source=s_q&hl=en&geocode=&q={{ offer.pick_point }}">See on Google Maps</a>)<br/>
             And to drop at {{ offer.drop_point }} (<a href="http://maps.google.com/maps?f=q&source=s_q&hl=en&geocode=&q={{ offer.drop_point }}">See on Google Maps</a>)<br/>
             {{ nb_seat }} seat{% if nb_seat > 1 %}s{% endif %} requested.<br/>
@@ -28,8 +28,10 @@ My offers
                 <i>This choice engages you to a ride, please take it carefully.</i>
             {% else %}
                 <i>You have already accepted this offer, you must wait for the approval of the passenger.<br/>
-                You will be warned if this offer is accepted.</i>
+                You will be warned if this offer is accepted.</i><br/>
             {% endif %}
+            <br/>
+
         {% endif %}
         <br/><br/>
     {% endfor %}
@@ -42,7 +44,7 @@ My offers
     
         {% if not offer.driver %}
     
-            <b>Proposition of ride with <a href="/profile/{{ offer.other.user.user.id }}/">{{ offer.other.user.first_name }} {{ offer.other.user.last_name }}</a></b><br/>
+            <b>Proposition of ride with <a href="/profile/{{ offer.other.user.id }}/">{{ offer.other.user.first_name }} {{ offer.other.user.last_name }}</a></b><br/>
             You will be picked up on {{ offer.date_pick }} at {{ offer.pick_point }} (<a href="http://maps.google.com/maps?f=q&source=s_q&hl=en&geocode=&q={{ offer.pick_point }}">See on Google Maps</a>)<br/>
             and dropped at {{ offer.date_drop.hour }}:{{ offer.date_drop.minute }} at {{ offer.drop_point }} (<a href="http://maps.google.com/maps?f=q&source=s_q&hl=en&geocode=&q={{ offer.drop_point }}">See on Google Maps</a>)<br/>
             {{ nb_seat }} seat{% if nb_seat > 1 %}s{% endif %} requested.<br/>
@@ -56,8 +58,8 @@ My offers
                 <i>You have already accepted this offer, you must wait for the approval of the driver.<br/>
                 You will be warned if this offer is accepted.</i>
             {% endif %}
+            <br/><br/>
         {% endif %}
-        <br/><br/>
     {% endfor %}
 {% endif %}
 {% endblock %}
