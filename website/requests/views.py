@@ -17,12 +17,8 @@ gui_port = PortObject()
 
 class RequestForm(forms.Form):
     departure_point = forms.CharField()
-    #departure_point_lat = forms.FloatField(label=u'Latitude departure')
-    #departure_point_long = forms.FloatField(label=u'Longitude departure')
     departure_range = forms.FloatField()
     arrival_point = forms.CharField()
-    #arrival_point_lat = forms.FloatField(label=u'Latitude arrival')
-    #arrival_point_long = forms.FloatField(label=u'Longitude arrival')
     arrival_range = forms.FloatField()
     arrival_time = forms.DateTimeField()
     max_delay = forms.TimeField(label=u'Maximum margin delay', initial="HH:MM")
@@ -40,6 +36,20 @@ def myrequests(request):
     
     user=UserProfile.objects.get(user=request.user)
     requests = user.request_set.all()
+    request_list = []
+    for req in requests:
+        print json.loads(location_to_address(str(req.departure_point_lat)+","+str(req.departure_point_long)).read())['results'][0]['formatted_address']
+        d = {
+            'departure_point': json.loads(location_to_address(str(req.departure_point_lat)+","+str(req.departure_point_long)).read())['results'][0]['formatted_address'],
+            'departure_range' : req.departure_range,
+            'arrival_point' : json.loads(location_to_address(str(req.arrival_point_lat)+","+str(req.arrival_point_long)).read())['results'][0]['formatted_address'],
+            'arrival_range' : req.arrival_range,
+            'arrival_time': req.arrival_time,
+            'max_delay': req.max_delay,
+            'nb_requested_seats': req.nb_requested_seats,
+            'cancellation_margin' : req.cancellation_margin,
+        }
+        request_list.append(d)
     return render_to_response('myrequests.html', locals())
     
 def addrequest(request, port_request=None):
@@ -51,15 +61,18 @@ def addrequest(request, port_request=None):
         if form.is_valid():
             
             departure_point = address_to_location(request.POST.get('departure_point', 0))
-            #departure_point_lat = request.POST.get('departure_point_lat', 0)
-            #departure_point_long = request.POST.get('departure_point_long', 0)
+            if arrival_point == -1:
+                form._errors["departure_point"] = form.error_class(["No address found"])
+                return render_to_response('requestform.html', locals())
+                
             departure_range = request.POST.get('departure_range', 0)
 
             arrival_point = address_to_location(request.POST.get('arrival_point', 0))
+            if arrival_point == -1:
+                form._errors["arrival_point"] = form.error_class(["No address found"])
+                return render_to_response('requestform.html', locals())
             
             UserID = UserProfile.objects.get(user=request.user)
-            #arrival_point_lat = request.POST.get('arrival_point_lat', 0)
-            #arrival_point_long = request.POST.get('arrival_point_long', 0)
             arrival_range = request.POST.get('arrival_range', 0)
             arrival_time = request.POST.get('arrival_time', datetime.datetime.today())
             max_delay = request.POST.get('max_delay', datetime.datetime.today())
@@ -89,7 +102,7 @@ def addrequest(request, port_request=None):
                 return render_to_response('error.html', locals())
         else:
             return render_to_response('requestform.html', locals())
-    else:    
+    else:
         form = RequestForm()
         
         return render_to_response('requestform.html', locals())

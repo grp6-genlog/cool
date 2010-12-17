@@ -12,10 +12,10 @@ My requests
     <a href="/addrequest/">Add a request</a>
 {% else %}
     <a href="/addrequest/"><img src="/img_f/add.gif" /> Add a request</a><br/><br/>
-    {% for req in requests %}
+    {% for req in request_list %}
         <b>{{ req.arrival_time }}</b><br/>
-        <b>From</b> : {{ req.departure_point_lat }}-{{ req.departure_point_lat }} (whithin {{ req.departure_range }} km)<br/>
-        <b>To</b> : {{ req.arrival_point_lat }}-{{ req.arrival_point_lat }} (whithin {{ req.arrival_range }} km)<br/>
+        <b>From</b> : {{ req.departure_point }} (whithin {{ req.departure_range }} km)<br/>
+        <b>To</b> : {{ req.arrival_point }} (whithin {{ req.arrival_range }} km)<br/>
         {{ req.nb_requested_seats }} seat{% if req.nb_requested_seats > 1 %}s{% endif %} requested.<br/>
         If no match found, will be canceled {{ req.cancellation_margin }}<br/>
         <a href="/cancelrequest/{{ req.id }}/"><img src="/img_f/delete.gif" /> cancel</a>
