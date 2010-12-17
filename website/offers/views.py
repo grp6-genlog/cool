@@ -13,7 +13,7 @@ from portobject import PortObject
 from guiutils import WaitCallbacks
 from google_tools_json import *
 
-import datetime, time
+import datetime, time, utils
 
 gui_port = PortObject()
 
@@ -33,24 +33,32 @@ def myoffers(request):
         new_offers = Offer.objects.filter(proposal=prop, status='P')
         for of in new_offers:
             route_points = of.proposal.routepoints_set.all()
+            index_pickup = 0
+            index_drop = 0
+            for i in xrange(len(route_points)):
+                if route_points[i].latitude == of.pickup_point_lat and route_points[i].longitude == of.pickup_point_long:
+                    index_pickup = i
+                if route_points[i].latitude == of.drop_point_lat and route_points[i].longitude == of.drop_point_long:
+                    index_drop = i
             
-            date_pick = get_time(of.proposal.departure_time,
-                                 of.proposal.arrival_time,
-                                 route_points,
-                                (of.pickup_point_lat, of.pickup_point_long))
+            date_pick = utils.get_time_at_point([(el.latitude,el.longitude) for el in route_points],
+                                            index_pickup,
+                                            of.proposal.departure_time,
+                                            of.proposal.arrival_time)
             
-            date_drop = get_time(of.proposal.departure_time,
-                                 of.proposal.arrival_time,
-                                 route_points,
-                                (of.drop_point_lat, of.drop_point_long))
-                                
+            date_drop = utils.get_time_at_point([(el.latitude,el.longitude) for el in route_points],
+                                            index_drop,
+                                            of.proposal.departure_time,
+                                            of.proposal.arrival_time)
+            print date_pick, date_drop
+            
             pick_point_js = json.loads(location_to_address(str(of.pickup_point_lat)+","+str(of.pickup_point_long)).read())
-            if len(pick_point_js)==0:
+            if len(pick_point_js['results'])==0:
                 pick_point = "No address"
             else:
                 pick_point = pick_point_js['results'][0]['formatted_address']
             drop_point_js = json.loads(location_to_address(str(of.drop_point_lat)+","+str(of.drop_point_long)).read())
-            if len(drop_point_js)==0:
+            if len(drop_point_js['results'])==0:
                 drop_point = "No address"
             else:
                 drop_point = drop_point_js['results'][0]['formatted_address']
@@ -62,22 +70,33 @@ def myoffers(request):
                 'fee': of.total_fee, 'id':of.id, 'nb_seat': of.request.nb_requested_seats
             }
             
-            self.insert_offer(info_offers, infos)
+            insert_offer(info_offers, infos)
             
     for req in user.request_set.all():
         new_offers = Offer.objects.filter(request=req, status='P')
         for of in new_offers:
             route_points = of.proposal.routepoints_set.all()
             
-            date_pick = get_time(of.proposal.departure_time,
-                                 of.proposal.arrival_time,
-                                 route_points,
-                                (of.pickup_point_lat, of.pickup_point_long))
+            index_pickup = 0
+            index_drop = 0
+            for i in xrange(len(route_points)):
+                if route_points[i].latitude == of.pickup_point_lat and route_points[i].longitude == of.pickup_point_long:
+                    index_pickup = i
+                if route_points[i].latitude == of.drop_point_lat and route_points[i].longitude == of.drop_point_long:
+                    index_drop = i
             
-            date_drop = get_time(of.proposal.departure_time,
-                                 of.proposal.arrival_time,
-                                 route_points,
-                                (of.drop_point_lat, of.drop_point_long))
+            
+            date_pick = utils.get_time_at_point(route_points,
+                                            0,
+                                            index_pickup,
+                                            of.proposal.departure_time,
+                                            of.proposal.arrival_time)
+            
+            date_drop = utils.get_time_at_point(route_points,
+                                            index_pickup,
+                                            index_drop,
+                                            of.proposal.departure_time,
+                                            of.proposal.arrival_time)
             
             pick_point_js = json.loads(location_to_address(str(of.pickup_point_lat)+","+str(of.pickup_point_long)).read())
             if len(pick_point_js)==0:
@@ -97,9 +116,9 @@ def myoffers(request):
                 'fee': of.total_fee, 'id':of.id
             }
             
-            self.insert_offer(info_offers, infos)
+            insert_offer(info_offers, infos)
     
-    
+    print "len :"+str(len(info_offers))
     notification = WaitCallbacksOffer.get_message(user)
     WaitCallbacksOffer.erase_message(user)
     return render_to_response('myoffers.html', locals())
@@ -109,8 +128,10 @@ def myoffers(request):
 def insert_offer(offer_l, new_o):
     for i in xrange(len(offer_l)):
          if offer_l[i]['date_pick'] > new_o['date_pick']:
-             rp_list.insert(i,new_o)
+             offer_l.insert(i,new_o)
              break
+    if not offer_l:
+        offer_l.append(new_o)
     
     
 def get_time(dep_time, arr_time, checkpoints, pick_point):

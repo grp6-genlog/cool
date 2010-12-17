@@ -20,7 +20,7 @@ My offers
             Pickup request on {{ offer.date_pick }} at {{ offer.pick_point }} (<a href="http://maps.google.com/maps?f=q&source=s_q&hl=en&geocode=&q={{ offer.pick_point }}">See on Google Maps</a>)<br/>
             And to drop at {{ offer.drop_point }} (<a href="http://maps.google.com/maps?f=q&source=s_q&hl=en&geocode=&q={{ offer.drop_point }}">See on Google Maps</a>)<br/>
             {{ nb_seat }} seat{% if nb_seat > 1 %}s{% endif %} requested.<br/>
-            Money earned : {{ offer.fee }}<br/>
+            Money earned : {{ offer.fee }}€<br/>
             {% if offer.status %}
                 <form method="link" action="/acceptoffer/{{ offer.id }}/"><input type="submit" value="Accept offer" /></form>
                 <form method="link" action="/discardoffer/{{ offer.id }}/"><input type="submit" value="Discard offer" /></form>

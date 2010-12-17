@@ -7,7 +7,7 @@ from website.requests.models import Request
 from website.proposals.models import Proposal, RoutePoints
 from google_tools_json import *
 
-import threading
+import threading, traceback
 
 OK=0
 RAA=-1
@@ -42,7 +42,7 @@ class OfferManager(PortObject):
         self.userNotifier=userNotifier
         self.rideManager=rideManager
     
-    def build_offer(requestID,proposalID,departure,arrival):
+    def build_offer(self,requestID,proposalID,departure,arrival):
         """
         Create a new offer in the database (a new entry in the offer table) for the request and the proposal.
         @pre: requestID is the ID of a request in db
@@ -55,16 +55,29 @@ class OfferManager(PortObject):
                         nonDriverOk = false
         """
         proposals=Proposal.objects.filter(id=proposalID)
+        
         if len(proposals)==0:
             raise "Try to build an offer from a proposal that doesn't exist"
         fee=compute_fee(proposalID, departure, arrival, proposals[0].money_per_km)
-        offer=Offer(request=requestID, proposal=proposalID, status='P', driver_ok=False, nondriver_ok=False,
-                pickup_point_lat=departure[0], pickup_point_long=departure[1], drop_point_lat=arrival[0],
-                drop_point_long=arrival[1], total_fee=fee)
+        
+        offer=Offer()
+        offer.request=Request.objects.get(id=requestID)
+        offer.proposal=Proposal.objects.get(id=proposalID)
+        offer.status='P'
+        offer.driver_ok=False
+        offer.non_driver_ok=False
+        offer.pickup_point_lat=departure[0]
+        offer.pickup_point_long=departure[1]
+        offer.pickup_time = departure[2]
+        offer.drop_point_lat=arrival[0]
+        offer.drop_point_long=arrival[1]
+        offer.drop_time = arrival[2]
+        offer.total_fee=fee
+        
         offer.save()
 
 
-    def driver_agree(offerID):
+    def driver_agree(self,offerID):
         """
         Change the DriverOk status for the offer into true if it doesn't exist an other offer such as the request is the same, and the status is bothAgree
 
@@ -97,7 +110,7 @@ class OfferManager(PortObject):
             return agree_by_both(offerID)
         return OK
 
-    def nondriver_agree(offer):
+    def nondriver_agree(self,offer):
         """
         Change the nonDriverOk status for the offer into true if it doesn't exist an other offer such as the request is the same, and the status is bothAgree
         @post:     if it doesn't exist an other offer such as the request is the same, and the status is agreedByBoth and there is enough space in the car:
@@ -129,7 +142,7 @@ class OfferManager(PortObject):
 
         
 
-    def agree_by_both(offerID):
+    def agree_by_both(self,offerID):
         """
         Try to change the status of the offer to agreedByBoth
         @pre:    offerID exists in the db
@@ -179,7 +192,7 @@ class OfferManager(PortObject):
         send_to(self.rideManager, ('newacceptedride', offers[0].id))
         return OK
 
-    def discarded(offerID):
+    def discarded(self,offerID):
         """
         the offer has been refused by a user
         @pre:    offerID exists in the db
@@ -240,13 +253,13 @@ class OfferManager(PortObject):
         """
         if msg[0]=='buildoffer':
             try:
-                build_offer(msg[1], msg[2], msg[3], msg[4])
+                self.build_offer(msg[1], msg[2], msg[3], msg[4])
             except:
-                print "error buildoffer"
+                traceback.print_exc()
             
         elif msg[0]=='driveragree':
             try:
-                ret = driver_agree(msg[1])
+                ret = self.driver_agree(msg[1])
             except:
                 threading.Thread(target = msg[3], args = (msg[4],)).start()
             else:
@@ -259,7 +272,7 @@ class OfferManager(PortObject):
                 
         elif msg[0]=='nondriver_agree':
             try:
-                ret = nondriver_agree(msg[1])
+                ret = self.nondriver_agree(msg[1])
             except:
                 threading.Thread(target = msg[3], args = (msg[4],)).start()
             else:
@@ -272,7 +285,7 @@ class OfferManager(PortObject):
                 
         elif msg[0]=='refuseoffer':
             try:
-                discarded(msg[1])
+                self.discarded(msg[1])
             except:
                 threading.Thread(target = msg[3], args = (msg[4],)).start()
             else:
@@ -293,9 +306,9 @@ def compute_fee(proposalID, departure, arrival, amount):
     arr=0
     for i in xrange(0,len(routes)):
         #look for the first RoutePoint
-        if routes[i].latitude==departure[0] and routes[i].longitutde==departure[1]:
+        if routes[i].latitude==departure[0] and routes[i].longitude==departure[1]:
             dep=i
-        elif routes[i].latitude==arrival[0] and routes[i].longitutde==arrival[1]:
+        elif routes[i].latitude==arrival[0] and routes[i].longitude==arrival[1]:
             arr=i
         i+=1
     if arr<dep:

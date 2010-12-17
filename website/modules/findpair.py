@@ -67,7 +67,24 @@ class FindPair(PortObject):
                 for (i,j) in valid_pair:
                     #delete all not in time arrival
                     if total_seconds(abs(get_time_at_point([(r.latitude,r.longitude) for r in route_points],j,infos.departure_time,infos.arrival_time)-request.arrival_time)) < request.max_delay:
-                        self.send_to(self.offermanager_port,('buildoffer',request.id,infos.id,(route_points[i].latitude,route_points[i].longitude,get_time_at_point([(r.latitude,r.longitude) for r in route_points],i,infos.departure_time,infos.arrival_time)),(route_points[j].latitude,route_points[j].longitude,get_time_at_point([(r.latitude,r.longitude) for r in route_points],j,infos.departure_time,infos.arrival_time))))
+                        self.send_to(self.offermanager_port, ('buildoffer',
+                                     request.id,
+                                     infos.id, 
+                                     (
+                                        route_points[i].latitude,
+                                        route_points[i].longitude,
+                                        get_time_at_point([(r.latitude,r.longitude) for r in route_points], 
+                                                            i,
+                                                            infos.departure_time,infos.arrival_time)
+                                     ),
+                                     (
+                                        route_points[j].latitude,
+                                        route_points[j].longitude,
+                                        get_time_at_point([(r.latitude,r.longitude) for r in route_points],
+                                                            j,
+                                                            infos.departure_time,infos.arrival_time)
+                                      )
+                                ))
 
 
     def match_request(self,requestID):
