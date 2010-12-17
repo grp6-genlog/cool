@@ -99,8 +99,8 @@ class AddressCache():
     
     def get_address(self,coord):
         rep = str(coord[0])+','+str(coord[1])
-        if rep in dico:
-            return dico[rep][0]
+        if rep in self.dico:
+            return self.dico[rep][0]
         else:
             addr = json.loads(google_tools_json.location_to_address(rep).read())
             address = None
@@ -108,7 +108,8 @@ class AddressCache():
                 address = "No address"
             else:
                 address = addr['results'][0]['formatted_address']
-            lock.acquire()
-            dico[rep] = (address,datetime.datetime.now())
-            lock.release()
+
+            with self.lock:
+                self.dico[rep] = (address,datetime.datetime.now())
+
             return address

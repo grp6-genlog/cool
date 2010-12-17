@@ -52,8 +52,8 @@ def myoffers(request,global_address_cache=None):
                                             of.proposal.arrival_time)
             print date_pick, date_drop
             
-            pick_point = global_address_cache((of.pickup_point_lat,of.pickup_point_long))
-            drop_point = global_address_cache((of.drop_point_lat,of.drop_point_long))
+            pick_point = global_address_cache.get_address((of.pickup_point_lat,of.pickup_point_long))
+            drop_point = global_address_cache.get_address((of.drop_point_lat,of.drop_point_long))
             
             infos = {
                 'driver':True, 'status':of.driver_ok, 'other':of.request.user,
@@ -90,8 +90,8 @@ def myoffers(request,global_address_cache=None):
                                             of.proposal.departure_time,
                                             of.proposal.arrival_time)
             
-            pick_point = global_address_cache((of.pickup_point_lat,of.pickup_point_long))
-            drop_point = global_address_cache((of.drop_point_lat,of.drop_point_long))
+            pick_point = global_address_cache.get_address((of.pickup_point_lat,of.pickup_point_long))
+            drop_point = global_address_cache.get_address((of.drop_point_lat,of.drop_point_long))
             
             infos = {
                 'driver':False, 'status':of.non_driver_ok, 'other':of.proposal.user,
@@ -109,7 +109,7 @@ def myoffers(request,global_address_cache=None):
     
     
     
-def insert_offer(offer_l, new_o,global_address_cache):
+def insert_offer(offer_l, new_o):
     for i in xrange(len(offer_l)):
          if offer_l[i]['date_pick'] > new_o['date_pick']:
              offer_l.insert(i,new_o)
