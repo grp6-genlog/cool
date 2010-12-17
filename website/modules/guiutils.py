@@ -4,6 +4,9 @@ import threading
 class WaitCallbacks(object):
     _active = {}
     _active_lock = threading.Lock()
+    _message = {}
+    _message_lock = threading.Lock()
+
     
 
     @classmethod
@@ -38,5 +41,31 @@ class WaitCallbacks(object):
         with cls._active_lock:
             if u in cls._active:
                 return cls._active.get(u)
+            else:
+                return None
+                
+
+
+    @classmethod
+    def erase_message(cls, u):
+        with cls._message_lock:
+            if u in cls._message:
+                cls._message.pop(u)
+
+    @classmethod
+    def update_message(cls, u, msg):
+        with cls._message_lock:
+            cls._message.update({u:status})
+    
+    @classmethod
+    def message_present(cls, u):
+        with cls._message_lock:
+            return u in cls._message
+            
+    @classmethod
+    def get_message(cls, u):
+        with cls._message_lock:
+            if u in cls._message:
+                return cls._message.get(u)
             else:
                 return None

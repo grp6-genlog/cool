@@ -80,7 +80,7 @@ class RequestRecorder(PortObject):
                 traceback.print_exc()
                 threading.Thread(target = msg[3], args = (msg[4],)).start()
             else:  
-                self.send_to(self.findpair_port, ('newRequest', req_id))
+                self.send_to(self.findpair_port, ('newrequest', req_id))
                 threading.Thread(target = msg[2], args = (msg[4],)).start()
         else:
             print 'RequestRecorder received an unexpected message'

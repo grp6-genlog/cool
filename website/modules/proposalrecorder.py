@@ -3,7 +3,7 @@
 
 from portobject import *
 from proposals.models import *
-import threading
+import threading, traceback
 
 USERID = 0
 ROUTEPOINTS =1
@@ -69,8 +69,8 @@ class ProposalRecorder(PortObject):
                 
                 order = 0
                 for routePoint in lfields[ROUTEPOINTS]:
-                    rp = RoutePoint()
-                    rp.proposal = prop_id
+                    rp = RoutePoints()
+                    rp.proposal = prop
                     rp.latitude = routePoint[0]
                     rp.longitude = routePoint[1]
                     rp.order = order
@@ -79,9 +79,10 @@ class ProposalRecorder(PortObject):
                     order += 1
 
             except:
+                traceback.print_exc()
                 threading.Thread(target = msg[3], args = (msg[4],)).start()
             else:  
-                self.send_to(self.findpair_port, ('newProposal', prop_id))
+                self.send_to(self.findpair_port, ('newproposal', prop_id))
                 threading.Thread(target = msg[2], args = (msg[4],)).start()
         else:
             print 'ProposalRecorder received an unexpected message'
