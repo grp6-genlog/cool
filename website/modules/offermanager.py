@@ -38,6 +38,7 @@ class OfferManager(PortObject):
             self.usernotifier_port=userNotifier
             self.ridemananger_port=rideManager
         """
+        PortObject.__init__(self)
         self.userNotifier=userNotifier
         self.rideManager=rideManager
     
@@ -241,9 +242,7 @@ class OfferManager(PortObject):
             try:
                 build_offer(msg[1], msg[2], msg[3], msg[4])
             except:
-                threading.Thread(target = msg[3], args = (msg[4],)).start()
-            else:
-                threading.Thread(target = msg[2], args = (msg[4],)).start()
+                print "error buildoffer"
             
         elif msg[0]=='driveragree':
             try:

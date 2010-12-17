@@ -9,7 +9,7 @@ from website.requests.models import Request
 from website.offers.models import Offer
 from website.rides.models import Ride
 from math import sqrt
-from utils import get_distance,get_time_at_point
+from utils import get_distance,get_time_at_point, total_seconds
 
 
     
@@ -49,14 +49,15 @@ class FindPair(PortObject):
         """
         infos=Proposal.objects.get(id=propID)
         requests=Request.objects.filter(nb_requested_seats__lte=infos.number_of_seats)
+        print "len req:"+str(len(requests))
         for request in requests:
             found = False
-            for offer in Offer.objects.filter(request=request.id):
-                if Ride.objects.filter(offer=offer.id):
+            for offer in Offer.objects.filter(request=request):
+                if Ride.objects.filter(offer=offer):
                     found=True
                     break
             if not found:
-                route_points = RoutePoints.object.filter(proposal=propID).order_by('order')
+                route_points = RoutePoints.objects.filter(proposal=infos).order_by('order')
                 valid_pair = list()
                 for i in xrange(len(route_points)-2):
                     if get_distance((request.departure_point_lat,request.departure_point_long),(route_points[i].latitude,route_points[i].longitude))<request.departure_range:
@@ -65,8 +66,8 @@ class FindPair(PortObject):
                                 valid_pair.append((i,j))
                 for (i,j) in valid_pair:
                     #delete all not in time arrival
-                    if abs(get_time_at_point([(r.latitude,r.longitude) for r in route_points],j,infos.departure_time,infos.arrival_time)-request.arrival_time).total_seconds()<request.max_delay:
-                        send_to(self.offermanager_port,('buildoffer',request.id,propID,(points[i].latitude,points[i].longitude,get_time_at_point([(r.latitude,r.longitude) for r in route_points],i,infos.departure_time,infos.arrival_time)),(points[j].latitude,points[j].longitude,get_time_at_point([(r.latitude,r.longitude) for r in route_points],j,infos.departure_time,infos.arrival_time))))
+                    if total_seconds(abs(get_time_at_point([(r.latitude,r.longitude) for r in route_points],j,infos.departure_time,infos.arrival_time)-request.arrival_time)) < request.max_delay:
+                        self.send_to(self.offermanager_port,('buildoffer',request.id,infos.id,(route_points[i].latitude,route_points[i].longitude,get_time_at_point([(r.latitude,r.longitude) for r in route_points],i,infos.departure_time,infos.arrival_time)),(route_points[j].latitude,route_points[j].longitude,get_time_at_point([(r.latitude,r.longitude) for r in route_points],j,infos.departure_time,infos.arrival_time))))
 
 
     def match_request(self,requestID):
@@ -85,7 +86,7 @@ class FindPair(PortObject):
         request=Request.objects.get(id=requestID)
         proposals=Proposal.objects.filter(number_of_seats__gte=request.nb_requested_seats)
         for infos in proposals:
-            route_points = RoutePoints.object.filter(proposal=propID).order_by('order')
+            route_points = RoutePoints.objects.filter(proposal=infos).order_by('order')
             valid_pair = list()
             for i in xrange(len(route_points)-2):
                 if get_distance((request.departure_point_lat,request.departure_point_long),(route_points[i].latitude,route_points[i].longitude))<request.departure_range:
@@ -94,8 +95,8 @@ class FindPair(PortObject):
                             valid_pair.append((i,j))
             for (i,j) in valid_pair:
                 #delete all not in time arrival
-                if abs(get_time_at_point([(r.latitude,r.longitude) for r in route_points],j,infos.departure_time,infos.arrival_time)-request.arrival_time).total_seconds()<request.max_delay:
-                    send_to(self.offermanager_port,('buildoffer',request.id,propID,(points[i].latitude,points[i].longitude,get_time_at_point([(r.latitude,r.longitude) for r in route_points],i,infos.departure_time,infos.arrival_time)),(points[j].latitude,points[j].longitude,get_time_at_point([(r.latitude,r.longitude) for r in route_points],j,infos.departure_time,infos.arrival_time))))
+                if total_seconds(abs(get_time_at_point([(r.latitude,r.longitude) for r in route_points],j,infos.departure_time,infos.arrival_time)-request.arrival_time)) < request.max_delay:
+                    self.send_to(self.offermanager_port,('buildoffer',requestID,infos.id,(route_points[i].latitude,route_points[i].longitude,get_time_at_point([(r.latitude,r.longitude) for r in route_points],i,infos.departure_time,infos.arrival_time)),(route_points[j].latitude,route_points[j].longitude,get_time_at_point([(r.latitude,r.longitude) for r in route_points],j,infos.departure_time,infos.arrival_time))))
 
 
               
