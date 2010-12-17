@@ -1,5 +1,5 @@
 #!/usr/bin/python
-import math
+import math,datetime
 
 def distance_on_unit_sphere(lat1, long1, lat2, long2):
     # Convert latitude and longitude to 
@@ -34,4 +34,13 @@ def get_distance((src_lat,src_lon),(dst_lat,dst_lon)):
     return distance_on_unit_sphere(src_lat,src_lon,dst_lat,dst_lon)*6368
 
 
-    
+def get_time_at_point(points,arrindex,deptime,arrtime):
+    total_dist=0.
+    ride_dist=0.
+    pos1 = points[0]
+    for index in range(1,len(points)):
+        dist = getdistance(pos1,points[index])
+        total_dist+=dist
+        if index<=arrindex:
+            ride_dist+=dist
+    return deptime + ((arrtime-deptime)*ride_dist)/total_dist

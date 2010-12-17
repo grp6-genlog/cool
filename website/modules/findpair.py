@@ -9,7 +9,7 @@ from website.requests.models import Request
 from website.offers.models import Offer
 from website.rides.models import Ride
 from math import sqrt
-from utils import get_distance
+from utils import get_distance,get_time_at_point
 
 
     
@@ -48,7 +48,7 @@ class FindPair(PortObject):
                     ('buildoffer',requestID,proposalID) with requestID, the database ID of the matching request
         """
         infos=Proposal.objects.get(id=propID)
-        requests=Request.objects.filter(arrival_time__gt=infos.departure_time,nb_requested_seats__lt=infos.number_of_seats)
+        requests=Request.objects.filter(nb_requested_seats__lt=infos.number_of_seats)
         for request in requests:
             found = False
             for offer in Offer.objects.filter(request=request.id):
@@ -56,28 +56,17 @@ class FindPair(PortObject):
                     found=True
                     break
             if not found:
-                d=None
-                p=None
-                pup=None
-                dp=None
-                i=0
-                j=0
-                c=0
-                for rp in RoutePoints.object.filter(proposal=propID):
-                    disdep = get_distance((request.departure_point_lat,request.departure_point_long),(rp.latitude,rp.longitude))
-                    disarr = get_distance((request.arrival_point_lat,request.arrival_point_long),(rp.latitude,rp.longitude))
-                    if(disdep<=rp.departure_range and (d==None or disdep<d)):
-                        d=disdep
-                        pup=(rp.latitude,rp.longitude)
-                        i=c
-                    if(disarr<= rp.arrival_range and p==None or disarr<p):
-                        p=disarr
-                        dp=(rp.latitude,rp.longitude)
-                        j=c
-                    c+=1
-                            
-                if pup!=None and dp!=None and i<j:
-                    send_to(self.offermanager_port,('buildoffer',request.id,propID,pup,dp))
+                route_points = RoutePoints.object.filter(proposal=propID).order_by('order')
+                valid_pair = list()
+                for i in xrange(len(route_points)-2):
+                    if get_distance((request.departure_point_lat,request.departure_point_long),(route_points[i].latitude,route_points[i].longitude))<request.departure_range:
+                        for j in range(i+1,len(route_points)):
+                            if get_distance((request.arrival_point_lat,request.arrival_point_long),(route_points[j].latitude,route_points[j].longitude))<request.arrival_range:
+                                valid_pair.append((i,j))
+                for (i,j) in valid_pair:
+                    #delete all not in time arrival
+                    if abs(get_time_at_point([(r.latitude,r.longitude) for r in route_points],j,infos.departure_time,infos.arrival_time)-request.arrival_time).total_seconds()<request.max_delay:
+                        send_to(self.offermanager_port,('buildoffer',request.id,propID,(points[i].latitude,points[i].longitude,get_time_at_point([(r.latitude,r.longitude) for r in route_points],i,infos.departure_time,infos.arrival_time)),(points[j].latitude,points[j].longitude,get_time_at_point([(r.latitude,r.longitude) for r in route_points],j,infos.departure_time,infos.arrival_time))))
 
 
     def match_request(self,requestID):
