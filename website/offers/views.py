@@ -25,7 +25,7 @@ def myoffers(request,global_address_cache=None):
     if not request.user.is_authenticated():
         return redirect('/home/')
     
-    user=UserProfile.objects.get(user=request.user)
+    user = UserProfile.objects.get(user=request.user)
     info_offers = []
     
     for prop in user.proposal_set.all():
@@ -60,8 +60,9 @@ def myoffers(request,global_address_cache=None):
                 'date_drop':date_drop, 'drop_point': drop_point,
                 'fee': of.total_fee, 'id':of.id, 'nb_seat': of.request.nb_requested_seats
             }
-            
+            print "I'm very slow..."
             insert_offer(info_offers, infos)
+            print "DOOOOOOOOOOOOOOOOOOOWN"
             
     for req in user.request_set.all():
         new_offers = Offer.objects.filter(request=req, status='P')

@@ -13,6 +13,7 @@ NBSEATS = 4
 MONEYPERKM = 5
 DEPTIME = 6
 ARRTIME = 7
+STATUS = 8
 
 class ProposalRecorder(PortObject):
     findpair_port=None # the communication port of FindPair
@@ -30,7 +31,8 @@ class ProposalRecorder(PortObject):
         """
         The msg treatement routine.
         The only acceptable message is the pair ('recordproposal',[UserID,RoutePoints,CarDescription,
-                                                                  CarID,NumberOfSeats,MoneyPerKm,DepartureTime,ArrivalTime],
+                                                                  CarID,NumberOfSeats,MoneyPerKm,DepartureTime,
+                                                                  ArrivalTime,Status],
                                                                   SuccessCallBack,FailureCallBack)
         @pre : DB is initialized and is the SQL database
                findpair_port is the FindPair module's port
@@ -42,6 +44,7 @@ class ProposalRecorder(PortObject):
                NumberOfSeats is a integer
                MoneyPerKm is a float
                DepartureTime is a datetime.date
+               Status is a String either 'P' either 'C'
                SuccessCallBack is a procedure 
                FailureCallBack is a procedure
       
@@ -63,6 +66,7 @@ class ProposalRecorder(PortObject):
                 prop.money_per_km = lfields[MONEYPERKM]
                 prop.departure_time = lfields[DEPTIME]
                 prop.arrival_time = lfields[ARRTIME]
+                prop.status = lfields[STATUS]
                 
                 prop.save()
                 prop_id = prop.id

@@ -33,7 +33,7 @@ def myproposals(request):
         return redirect('/home/')
     
     user=UserProfile.objects.get(user=request.user)
-    proposals = user.proposal_set.all()
+    proposals = Proposal.objects.filter(user=user, status='P', departure_time__lt=datetime.datetime.today())
     return render_to_response('myproposals.html', locals())
     
     
@@ -63,11 +63,12 @@ def addproposal(request, port_proposal=None,global_address_cache=None):
             money_per_km = form.cleaned_data['money_per_km']
             departure_time = form.cleaned_data['departure_time']
             arrival_time = form.cleaned_data['arrival_time']
+            status = 'P'
             
             WaitCallbacksProposal.declare(request.user)
             
             gui_port.send_to(port_proposal,('recordproposal',[UserID,route_points_list,car_description,car_id,
-                                                            number_of_seats,money_per_km,departure_time,arrival_time],
+                                                            number_of_seats,money_per_km,departure_time,arrival_time,status],
                                            successcall,
                                            failurecall,
                                            request.user))
@@ -119,9 +120,14 @@ def cancelproposal(request, offset):
     if prop.user.user != request.user:
         return render_to_response('error.html', locals())
         
+    if prop.status != 'P' or prop.departure_time < datetime.datetime.today():
+        return render_to_response('error.html', locals())
+            
     
-        
-    return render_to_response('home.html', locals())
+    user=UserProfile.objects.get(user=request.user)
+    proposals = Proposal.objects.filter(user=user, status='P', departure_time__lt=datetime.datetime.today())
+    # TODO
+    return render_to_response('myproposals.html', locals())
     
     
 def successcall(user):

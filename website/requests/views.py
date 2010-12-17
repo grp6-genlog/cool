@@ -35,7 +35,7 @@ def myrequests(request):
         return redirect('/home/')
     
     user=UserProfile.objects.get(user=request.user)
-    requests = user.request_set.all()
+    requests = Request.objects.filter(user=user, status='P', arrival_time__gt=datetime.datetime.today())
     request_list = []
     for req in requests:
         
@@ -48,6 +48,7 @@ def myrequests(request):
             'max_delay': str(req.max_delay/3600)+":"+str((req.max_delay % 3660) / 60),
             'nb_requested_seats': req.nb_requested_seats,
             'cancellation_margin' : req.cancellation_margin,
+            'id' : req.id,
         }
         request_list.append(d)
     return render_to_response('myrequests.html', locals())
@@ -82,12 +83,13 @@ def addrequest(request, port_request=None):
             max_delay = int(max_delay.hour*3600 + max_delay.minute * 60)
             nb_requested_seats = request.POST.get('nb_requested_seats', 1)
             cancellation_margin = request.POST.get('cancellation_margin', datetime.datetime.today())
+            status = 'P'
             
             WaitCallbacksRequest.declare(request.user)
             
             gui_port.send_to(port_request,('recordrequest',[UserID,departure_point,departure_range,
                                                             arrival_point,arrival_range,arrival_time,max_delay,
-                                                            nb_requested_seats,cancellation_margin],
+                                                            nb_requested_seats,cancellation_margin,status],
                                            successcall,
                                            failurecall,
                                            request.user))
@@ -111,7 +113,28 @@ def addrequest(request, port_request=None):
         
         return render_to_response('requestform.html', locals())
 
-
+def cancelrequest(request, offset):
+    # TODO
+    try:
+        offset = int(offset)
+    except ValueError:
+        return render_to_response('error.html', locals())
+    
+    try:
+        prop = Proposal.object.get(id=offset)
+    except:
+        return render_to_response('error.html', locals())
+        
+    if prop.user.user != request.user:
+        return render_to_response('error.html', locals())
+        
+    if prop.status != 'P' or prop.departure_time < datetime.datetime.today():
+        return render_to_response('error.html', locals())
+            
+    
+    user=UserProfile.objects.get(user=request.user)
+    proposals = Proposal.objects.filter(user=user, status='P', departure_time__lt=datetime.datetime.today())
+    return render_to_response('myproposals.html', locals())
 
 def successcall(user):
     WaitCallbacksRequest.update(user, 'success')
@@ -119,16 +142,3 @@ def successcall(user):
 def failurecall(user):
     WaitCallbacksRequest.update(user, 'fail')
         
-    
-def editrequest(request, offset):
-    try:
-        offset = int(offset)
-    except:
-        return render_to_response('error.html', locals())
-    
-    try:
-        req = Request.object.get(id=offset)
-    except:
-        error_msg = "No request found"
-        return render_to_response('error.html', locals())
-    return render_to_response('home.html', locals())

@@ -18,7 +18,9 @@ My requests
         <b>To</b> : {{ req.arrival_point }} (whithin {{ req.arrival_range }} km) (<a href="http://maps.google.com/maps?f=q&source=s_q&hl=en&geocode=&q={{ req.departure_point }}">See on Google Maps</a>)<br/>
         {{ req.nb_requested_seats }} seat{% if req.nb_requested_seats > 1 %}s{% endif %} requested.<br/>
         If no match found, will be canceled {{ req.cancellation_margin }}<br/>
-        <a href="/cancelrequest/{{ req.id }}/"><img src="/img_f/delete.gif" /> cancel</a>
+        <div style="margin-left:30px;margin-top:10px;">
+            <a href="/cancelrequest/{{ req.id }}/"><img src="/img_f/delete.gif" /> Cancel</a>
+        </div>
         <br/><br/>
     {% endfor %}
 {% endif %}
