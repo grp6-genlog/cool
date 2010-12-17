@@ -9,9 +9,8 @@ from website.offers.models import Offer
 from django.contrib.auth.models import User
 
 
-from portobject import PortObject
+from portobject import *
 from guiutils import WaitCallbacks
-from google_tools_json import *
 
 import datetime, time, utils
 
@@ -50,7 +49,7 @@ def myoffers(request,global_address_cache=None):
                                             index_drop,
                                             of.proposal.departure_time,
                                             of.proposal.arrival_time)
-            print date_pick, date_drop
+            
             
             pick_point = global_address_cache.get_address((of.pickup_point_lat,of.pickup_point_long))
             drop_point = global_address_cache.get_address((of.drop_point_lat,of.drop_point_long))
@@ -102,7 +101,7 @@ def myoffers(request,global_address_cache=None):
             
             insert_offer(info_offers, infos)
     
-    print "len :"+str(len(info_offers))
+    
     notification = WaitCallbacksOffer.get_message(user)
     WaitCallbacksOffer.erase_message(user)
     return render_to_response('myoffers.html', locals())
@@ -113,67 +112,51 @@ def insert_offer(offer_l, new_o):
     for i in xrange(len(offer_l)):
          if offer_l[i]['date_pick'] > new_o['date_pick']:
              offer_l.insert(i,new_o)
-             break
-    if not offer_l:
-        offer_l.append(new_o)
+             return
+             
+    offer_l.append(new_o)
     
-    
-def get_time(dep_time, arr_time, checkpoints, pick_point):
-    points_str = []
-    cpt_point = 0
-    for point in checkpoints:
-        points_str.append(str(point.latitude)+","+str(point.longitude))
-        if point.latitude == pick_point[0] and point.longitude == pick_point[1]:
-            point_index = cpt_point
-        cpt_point += 1
-        
-    distance = distance_origin_dest(points_str[0], points_str[-1], points_str[1:-1])
-    
-    total_time = (arr_time - dep_time).seconds + (arr_time - dep_time).days*60*60*24
-    
-    time_per_point = total_time / (len(checkpoints)-1)
-    
-    return datetime.timedelta(seconds=(time_per_point * point_index)) + dep_time
-    
+ 
 
-def responseoffer(request, offset, port_offer, accept,global_address_cache):
+def responseoffer(request, offset, port_offer, accept, global_address_cache):
 
     try:
         offset = int(offset)
     except:
         notification = {'content':'Invalid call', 'success':False}
-        return render_to_response('myproposals.html', locals())
+        return render_to_response('error.html', locals())
     else:
     
         try:
             offer = Offer.objects.get(id=offset)
         except:
             notification = {'content':'Invalid call', 'success':False}
-            return render_to_response('myproposals.html', locals())
+            return render_to_response('error.html', locals())
         else:
         
             if offer.status != 'P':
                 notification = {'content':'Invalid call', 'success':False}
-                return render_to_response('myproposals.html', locals())
+                return render_to_response('error.html', locals())
             
-            if request.user != offer.proposal.user and request.user != offer.request.user:
+            if request.user != offer.proposal.user.user and request.user != offer.request.user.user:
                 notification = {'content':'Invalid call', 'success':False}
-                return render_to_response('myproposals.html', locals())
+                return render_to_response('error.html', locals())
+                
             
             if accept:
-                if request.user == offer.proposal.user:
+                if request.user == offer.proposal.user.user:
                     message = "driveragree"
                 else:
-                    message = "nondriveragree"
+                    message = "nondriver_agree"
             else:
                 message = "refuseoffer"
             
+            
             WaitCallbacksOffer.declare(request.user)
             
-            gui_port.send_to(port_offer,(message,offer.id,
-                                           successcall,
-                                           failurecall,
-                                           request.user))
+            anonymous_send_to(port_offer,(message,offer.id,
+                                           lambda:successcall(request.user),
+                                           lambda:failurecall(request.user)))
             
             wait_counter = 0
             while WaitCallbacksOffer.is_pending(request.user) and wait_counter < 10:

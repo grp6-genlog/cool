@@ -76,10 +76,13 @@ urlpatterns += patterns('website.requests.views',
 urlpatterns += patterns('website.proposals.views',
     (r'^proposals/$', 'myproposals'),
     (r'^addproposal/$', 'addproposal', {'port_proposal':global_ports.proposal_rec_port,'global_address_cache':global_address_cache}),
+    (r'^cancelproposal/(?P<offset>\d+)/$', 'cancelproposal'),
 )
 
 urlpatterns += patterns('website.offers.views',
     (r'^offers/$', 'myoffers',{'global_address_cache':global_address_cache}),
-    (r'^acceptoffer/(?P<offset>\d+)/$', 'responseoffer', {'port_offer':global_ports.offer_port, 'accept':True,'global_address_cache':global_address_cache}),
-    (r'^discardoffer/(?P<offset>\d+)/$', 'responseoffer', {'port_offer':global_ports.offer_port, 'accept':False,'global_address_cache':global_address_cache}),
+    (r'^acceptoffer/(?P<offset>\d+)/$', 'responseoffer', {'port_offer':global_ports.offer_port,
+                                                          'accept':True,'global_address_cache':global_address_cache}),
+    (r'^discardoffer/(?P<offset>\d+)/$', 'responseoffer', {'port_offer':global_ports.offer_port,
+                                                           'accept':False,'global_address_cache':global_address_cache}),
 )

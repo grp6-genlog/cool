@@ -16,9 +16,11 @@ class Offer(models.Model):
     non_driver_ok = models.BooleanField(default=False)
     pickup_point_lat = models.FloatField()
     pickup_point_long = models.FloatField()
+    pickup_point = models.ForeignKey('proposals.RoutePoints', related_name='pick_point_set')
     pickup_time = models.DateTimeField()
     drop_point_lat = models.FloatField()
     drop_point_long = models.FloatField()
+    drop_point = models.ForeignKey('proposals.RoutePoints', related_name='drop_point_set')
     drop_time = models.DateTimeField()
     total_fee = models.FloatField()
     

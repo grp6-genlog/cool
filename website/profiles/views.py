@@ -12,6 +12,7 @@ from website.profiles.models import UserProfile
 from website.offers.models import Offer
 from website.requests.models import Request
 from website.proposals.models import Proposal
+from website.evaluations.models import Evaluation
 from django.contrib.auth.models import User
 
 import datetime, time
@@ -226,7 +227,9 @@ def changepassword(request, port_profile=None):
         
 def toprofilerecorder(request, port_profile, action):
     if action != 'register' and action != 'edit':
-        return render_to_response('404.html', locals())if not request.user.is_authenticated():
+        return render_to_response('404.html', locals())
+    
+    if not request.user.is_authenticated():
         current_date = datetime.datetime.now()
         return render_to_response('home.html', locals())
         
@@ -339,7 +342,7 @@ def publicprofile(request, offset):
     for other_r in other_requests:
         other_offers = other_r.offer_set.all()
         for other_o in other_offers:
-            if other_o.proposal in user_proposals and (other_o.status = 'P' or other_o.status = 'A'):
+            if ((other_o.proposal in user_proposals) and (other_o.status == 'P' or other_o.status == 'A')):
                 b = True
                 com_offer = other_o
                 break
@@ -349,7 +352,7 @@ def publicprofile(request, offset):
         for other_p in other_proposals:
             other_offers = other_p.request_set.all()
             for other_o in other_offers:
-                if other_o.request in user_requests and (other_o.status = 'P' or other_o.status = 'A'):
+                if (other_o.request in user_requests) and (other_o.status == 'P' or other_o.status == 'A'):
                     b = True
                     com_offer = other_o
                     break
@@ -359,6 +362,7 @@ def publicprofile(request, offset):
         return render_to_response('error.html', locals())
     else:
         age = int(abs(datetime.date.today() - other.date_of_birth).days/(365*0.75 + 366*0.25))
+        evaluations = other.user_to.all()
         return render_to_response('publicprofile.html', locals())
         
         
