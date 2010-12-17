@@ -48,7 +48,7 @@ class FindPair(PortObject):
                     ('buildoffer',requestID,proposalID) with requestID, the database ID of the matching request
         """
         infos=Proposal.objects.get(id=propID)
-        requests=Request.objects.filter(nb_requested_seats__lt=infos.number_of_seats)
+        requests=Request.objects.filter(nb_requested_seats__lte=infos.number_of_seats)
         for request in requests:
             found = False
             for offer in Offer.objects.filter(request=request.id):
@@ -82,34 +82,20 @@ class FindPair(PortObject):
                 for each proposal matching the specified request, a message is sent to OfferManager through its port:
                     ('buildoffer',requestID,proposalID) with proposalID, the database ID of the matching proposal
         """
-        try:
-            infos=Request.objects.get(id=requestID)
-            
-            proposals=Proposal.objects.filter(departure_time__lt=infos.departure_time, number_of_seats__gte=infos.requested_seats)
-            for proposal in proposals:
-                d=None
-                p=None
-                pup=None
-                dp=None
-                i=0
-                j=0
-                c=0
-                for rp in RoutePoints.object.filter(proposal=proposal.id):
-                    disdep = get_distance((infos.departure_point_lat,infos.departure_point_long),(rp.latitude,rp.longitude))
-                    disarr = get_distance((infos.arrival_point_lat,infos.arrival_point_long),(rp.latitude,rp.longitude))
-                    if(disdep<=rp.departure_range and d==None or disdep<d):
-                        d=disdep
-                        pup=(rp.latitude,rp.longitude)
-                        i=c
-                    if(disarr<= rp.arrival_range and p==None or disarr<p):
-                        p=disarr
-                        dp=(rp.latitude,rp.longitude)
-                        j=c
-                    c+=1
-                if pup!=None and dp!=None and i<j:
-                    send_to(self.offermanager_port,('buildoffer',requestId,proposal.id,pup,dp))
-        except:
-            print("Error on match request\n")
+        request=Request.objects.get(id=requestID)
+        proposals=Proposal.objects.filter(number_of_seats__gte=request.nb_requested_seats)
+        for infos in proposals:
+            route_points = RoutePoints.object.filter(proposal=propID).order_by('order')
+            valid_pair = list()
+            for i in xrange(len(route_points)-2):
+                if get_distance((request.departure_point_lat,request.departure_point_long),(route_points[i].latitude,route_points[i].longitude))<request.departure_range:
+                    for j in range(i+1,len(route_points)):
+                        if get_distance((request.arrival_point_lat,request.arrival_point_long),(route_points[j].latitude,route_points[j].longitude))<request.arrival_range:
+                            valid_pair.append((i,j))
+            for (i,j) in valid_pair:
+                #delete all not in time arrival
+                if abs(get_time_at_point([(r.latitude,r.longitude) for r in route_points],j,infos.departure_time,infos.arrival_time)-request.arrival_time).total_seconds()<request.max_delay:
+                    send_to(self.offermanager_port,('buildoffer',request.id,propID,(points[i].latitude,points[i].longitude,get_time_at_point([(r.latitude,r.longitude) for r in route_points],i,infos.departure_time,infos.arrival_time)),(points[j].latitude,points[j].longitude,get_time_at_point([(r.latitude,r.longitude) for r in route_points],j,infos.departure_time,infos.arrival_time))))
 
 
               
