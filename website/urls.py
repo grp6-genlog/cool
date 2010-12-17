@@ -7,7 +7,7 @@ from django.contrib import admin
 admin.autodiscover()
 
 
-import os, sys  
+import os, sys
 
     
 sys.path.insert(0, os.path.join(settings.PROJECT_PATH,'modules'))
@@ -22,6 +22,7 @@ from paymentmanager import PaymentManager
 from evaluationmanager import EvaluationManager
 from usernotifier import UserNotifier
 from tracker import Tracker
+import guiutils
 
 class PortObjects(object):
 
@@ -39,6 +40,8 @@ class PortObjects(object):
         
 
 global_ports = PortObjects()
+global_address_cache = guiutils.AddressCache()
+global_address_cache.load('addresses.cache')
 
 
 urlpatterns = patterns('',
@@ -72,11 +75,11 @@ urlpatterns += patterns('website.requests.views',
 
 urlpatterns += patterns('website.proposals.views',
     (r'^proposals/$', 'myproposals'),
-    (r'^addproposal/$', 'addproposal', {'port_proposal':global_ports.proposal_rec_port}),
+    (r'^addproposal/$', 'addproposal', {'port_proposal':global_ports.proposal_rec_port,'global_address_cache':global_address_cache}),
 )
 
 urlpatterns += patterns('website.offers.views',
-    (r'^offers/$', 'myoffers'),
-    (r'^acceptoffer/(?P<offset>\d+)/$', 'responseoffer', {'port_offer':global_ports.offer_port, 'accept':True}),
-    (r'^discardoffer/(?P<offset>\d+)/$', 'responseoffer', {'port_offer':global_ports.offer_port, 'accept':False}),
+    (r'^offers/$', 'myoffers',{'global_address_cache':global_address_cache}),
+    (r'^acceptoffer/(?P<offset>\d+)/$', 'responseoffer', {'port_offer':global_ports.offer_port, 'accept':True,'global_address_cache':global_address_cache}),
+    (r'^discardoffer/(?P<offset>\d+)/$', 'responseoffer', {'port_offer':global_ports.offer_port, 'accept':False,'global_address_cache':global_address_cache}),
 )

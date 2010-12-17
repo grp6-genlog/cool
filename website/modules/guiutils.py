@@ -1,5 +1,6 @@
-import threading
-
+import threading,pickle
+import google_tools_json,json
+import datetime
 
 class WaitCallbacks(object):
     _active = {}
@@ -69,3 +70,45 @@ class WaitCallbacks(object):
                 return cls._message.get(u)
             else:
                 return None
+
+class AddressCache():
+    dico = None
+    lock = None
+    
+    def __init__(self):
+        self.dico = dict()
+        self.lock = threading.Lock()
+
+    def load(self,filename):
+        try:
+            f_in = open(filename,'r')
+            self.lock.acquire()
+            self.dico = pickle.load(f_in)
+            self.lock.release()
+            f_in.close()
+        except:
+            pass
+    
+    def save(self,filename):
+        try:
+            f_out = open(filename,'w')
+            pickle.dump(self.dico,f_out)
+            f_out.close()
+        except:
+            pass
+    
+    def get_address(self,coord):
+        rep = str(coord[0])+','+str(coord[1])
+        if rep in dico:
+            return dico[rep][0]
+        else:
+            addr = json.loads(google_tools_json.location_to_address(rep).read())
+            address = None
+            if len(addr['results'])==0:
+                address = "No address"
+            else:
+                address = addr['results'][0]['formatted_address']
+            lock.acquire()
+            dico[rep] = (address,datetime.datetime.now())
+            lock.release()
+            return address
