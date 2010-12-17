@@ -6,7 +6,7 @@ from website.offers.models import Offer
 from website.requests.models import Request
 from website.proposals.models import Proposal, RoutePoints
 from google_tools_json import *
-
+from utils import get_distance
 import threading, traceback
 
 OK=0
@@ -58,12 +58,12 @@ class OfferManager(PortObject):
         
         if len(proposals)==0:
             raise "Try to build an offer from a proposal that doesn't exist"
-        fee=compute_fee(proposalID, departure, arrival, proposals[0].money_per_km)
+        fee=compute_fee(proposals[0], departure[3], arrival[3])
         
         offer=Offer()
         offer.request=Request.objects.get(id=requestID)
         offer.proposal=Proposal.objects.get(id=proposalID)
-        offer.status='P'
+        offer.status='pending'
         offer.driver_ok=False
         offer.non_driver_ok=False
         offer.pickup_point_lat=departure[0]
@@ -299,25 +299,15 @@ Compute the fee for the route between departure and arrival
       is connected to the internet
 @post: the fee computed is returned
 """
-def compute_fee(proposalID, departure, arrival, amount):
-    routes=RoutePoints.objects.filter(proposal=proposalID) #all the RoutePoints in proposalID
-    routes=sorted(routes, key=lambda route:route.id) #sort the RoutePoints from the smallest to the highest
-    dep=0
-    arr=0
-    for i in xrange(0,len(routes)):
-        #look for the first RoutePoint
-        if routes[i].latitude==departure[0] and routes[i].longitude==departure[1]:
-            dep=i
-        elif routes[i].latitude==arrival[0] and routes[i].longitude==arrival[1]:
-            arr=i
-        i+=1
-    if arr<dep:
-        raise "The route has no sense, it's in reverse order"
-    #cut the requested route
-    request_route=routes[dep:(arr+1)]
-    #format the route before passing it to google
-    formated_route=map(lambda route_point:"%f,%f" % (route_point.latitude, route_point.longitude), request_route)
-    #request to google map
-    distance=distance_origin_dest(formated_route[0], formated_route[-1], formated_route[1:-1])
-    return (distance/1000.0)*amount
+def compute_fee(proposal, departure, arrival):
+    dep = RoutePoints.object.get(id=departure)
+    arr = RoutePoints.object.get(id=arrival)
+    total=0.
+    last = dep
+    for index in range(dep.order+1,arr.order):
+        tmp = RoutePoints.object.get(order=index,proposal=proposal)
+        total+=get_distance((last.latitude,last.longitude),(tmp.latitude,tmp.longitude))
+        last= tmp
+    return total*proposal.money_per_km
+
 
