@@ -7,7 +7,7 @@ from website.requests.models import Request
 from website.proposals.models import Proposal, RoutePoints
 from google_tools_json import *
 from utils import get_distance
-import threading, traceback
+import threading, traceback, datetime
 
 OK=0
 RAA=-1
@@ -78,13 +78,14 @@ class OfferManager(PortObject):
         offer.save()
 
 
-    def driver_agree(self, offerID,callb_ok,callb_ko):
+    def driver_agree(self, offerID, userID, callb_ok,callb_ko):
         # ('driveragree',offerId,callb_ok,call_ko)
         offer=Offer.objects.get(id=offerID)
         offer.driver_ok=True
         offer.save()
         offersAccepted=Offer.objects.filter(request=offer.request, status='A')
         if len(offersAccepted)!=0:
+            print "len != 0"
             threading.Thread(target=callb_ko).start()
         else:
             if offer.non_driver_ok:
@@ -96,17 +97,18 @@ class OfferManager(PortObject):
                         if RoutePoints.objects.filter(proposal=offer2.proposal,order=point1.order) and RoutePoints.objects.filter(proposal=offer2.proposal,order=point2.order):
                             count+=offer2.request.nb_requested_seats
                         if count>offer.proposal.number_of_seats:
+                            print "count>offer"
                             threading.Thread(target=callb_ko).start()
                     account = offer.request.user.account_balance
                 
                 for offer2 in Offer.objects.filter(status='A'):
-                    if offer2.request.user.user == request.user:
+                    if offer2.request.user.user == userID:
                         account-=offer2.total_fee
-                if account<0:
-                    offer.non_driver_ok = False
+                        
+                if offer.proposal.departure_time < datetime.datetime.today():
+                    offer.status='D'
                     offer.save()
-                    print "not enough money"
-                    self.send_to(self.userNotifier, ('newmsg', requests[0].user, 'The offerID has a response. Not enough money to accept the ride. Please add money on your account.'))
+                    print "too late"
                     threading.Thread(target=callb_ko).start()
                 else:
                     offer.status='A'
@@ -118,13 +120,13 @@ class OfferManager(PortObject):
                 threading.Thread(target=callb_ok).start()
 
 
-    def nondriver_agree(self, offerID, callb_ok, callb_ko):
+    def nondriver_agree(self, offerID, userID, callb_ok, callb_ko):
         # ('nondriveragree',offerId,callb_ok,call_ko)
         offer=Offer.objects.get(id=offerID)
         offer.non_driver_ok=True
         offer.save()
         offersAccepted=Offer.objects.filter(request=offer.request, status='A')
-        
+        print offersAccepted
         if len(offersAccepted)!=0:
             print "len != 0"
             threading.Thread(target=callb_ko).start()
@@ -142,19 +144,27 @@ class OfferManager(PortObject):
                             threading.Thread(target=callb_ko).start()
                     account = offer.request.user.account_balance
                 for offer2 in Offer.objects.filter(status='A'):
-                    if offer2.request.user.user == request.user:
+                    if offer2.request.user.user == userID:
                         account-=offer2.total_fee
                 if account<0:
                     offer.non_driver_ok = False
                     offer.save()
                     print "not enough money"
-                    self.send_to(self.userNotifier, ('newmsg', requests[0].user, 'The offerID has a response. Not enough money to accept the ride. Please add money on your account.'))
+                    self.send_to(self.userNotifier, ('newmsg', userID, "You don't have enough money to accept the ride. Please add money on your account."))
                     threading.Thread(target=callb_ko).start()
+                
+                
+                elif offer.proposal.departure_time < datetime.datetime.today():
+                    offer.status='D'
+                    offer.save()
+                    print "too late"
+                    threading.Thread(target=callb_ko).start()
+
                 else:
                     offer.status='A'
                     offer.save()
                     print "accepted"
-                    self.send_to(self.rideManager, ('newacceptedride', offers[0].id))
+                    self.send_to(self.rideManager, ('newacceptedride', offer.id))
                     threading.Thread(target=callb_ok).start()
             else:
                 threading.Thread(target=callb_ok).start()
@@ -219,10 +229,10 @@ class OfferManager(PortObject):
             self.build_offer(msg[1], msg[2], msg[3], msg[4])
                         
         elif msg[0]=='driver_agree':
-            ret = self.driver_agree(msg[1], msg[2], msg[3])
+            ret = self.driver_agree(msg[1], msg[2], msg[3], msg[4])
             
         elif msg[0]=='non_driver_agree':
-            ret = self.nondriver_agree(msg[1], msg[2], msg[3])
+            ret = self.nondriver_agree(msg[1], msg[2], msg[3], msg[4])
                 
         elif msg[0]=='refuseoffer':
             try:

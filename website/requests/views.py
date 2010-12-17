@@ -78,11 +78,21 @@ def addrequest(request, port_request=None):
             
             UserID = UserProfile.objects.get(user=request.user)
             arrival_range = request.POST.get('arrival_range', 0)
+            if arrival_time < datetime.datetime.today():
+                form._errors["arrival_time"] = form.error_class(["Arrival time already passed"])
+                return render_to_response('requestform.html', locals())
+                
             arrival_time = request.POST.get('arrival_time', datetime.datetime.today())
+            
             max_delay = form.cleaned_data['max_delay']
             max_delay = int(max_delay.hour*3600 + max_delay.minute * 60)
             nb_requested_seats = request.POST.get('nb_requested_seats', 1)
-            cancellation_margin = request.POST.get('cancellation_margin', datetime.datetime.today())
+            cancellation_margin = request.POST.get('cancellation_margin', None)
+            
+            if abs(cancellaton_margin - (arrival_time - datetime.timedelta(second=max_delay))) < datetime.timedelta(minute=30):
+                form._errors["cancellation_margin"] = form.error_class(["Specify a cancellation margin earlier"])
+                return render_to_response('requestform.html', locals())
+            
             status = 'P'
             
             WaitCallbacksRequest.declare(request.user)

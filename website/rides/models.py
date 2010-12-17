@@ -6,5 +6,5 @@ class Ride(models.Model):
     ride_started = models.BooleanField(default=False)
     
     def __unicode__(self):
-        return u'%s %s' % (self.offer.request.user.name, self.offer.proposal.user.name)
+        return u'%s %s' % (self.offer.request.user.user.username, self.offer.proposal.user.user.username)
     
