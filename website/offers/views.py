@@ -13,38 +13,13 @@ from portobject import PortObject
 from guiutils import WaitCallbacks
 from google_tools_json import *
 
-import datetime, time, threading
+import datetime, time
 
 gui_port = PortObject()
 
 
 class WaitCallbacksOffer(WaitCallbacks):
-    _message = {}
-    _message_lock = threading.Lock()
-    
-    @classmethod
-    def erase_message(cls, u):
-        with cls._message_lock:
-            if u in cls._message:
-                cls._message.pop(u)
-
-    @classmethod
-    def update_message(cls, u, msg):
-        with cls._message_lock:
-            cls._message.update({u:status})
-    
-    @classmethod
-    def message_present(cls, u):
-        with cls._message_lock:
-            return u in cls._message
-            
-    @classmethod
-    def get_message(cls, u):
-        with cls._message_lock:
-            if u in cls._message:
-                return cls._message.get(u)
-            else:
-                return None
+    pass
                       
 
 def myoffers(request):
@@ -90,7 +65,7 @@ def myoffers(request):
             self.insert_offer(info_offers, infos)
             
     for req in user.request_set.all():
-        new_offers = Offer.objects.filter(request=req, status='Pending')
+        new_offers = Offer.objects.filter(request=req, status='P')
         for of in new_offers:
             route_points = of.proposal.routepoints_set.all()
             
@@ -148,7 +123,7 @@ def get_time(dep_time, arr_time, checkpoints, pick_point):
         cpt_point += 1
         
     distance = distance_origin_dest(points_str[0], points_str[-1], points_str[1:-1])
-    total_time = (dep_time - arr_time).seconds + (dep_time - arr_time).days*60*60*24
+    total_time = (abs(arr_time - dep_time)).seconds + (abs(arr_time - nh dep_time)).days*60*60*24
     
     time_per_point = total_time / (len(checkpoints)-1)
     

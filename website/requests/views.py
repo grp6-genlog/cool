@@ -45,7 +45,7 @@ def myrequests(request):
             'arrival_point' : json.loads(location_to_address(str(req.arrival_point_lat)+","+str(req.arrival_point_long)).read())['results'][0]['formatted_address'],
             'arrival_range' : req.arrival_range,
             'arrival_time': req.arrival_time,
-            'max_delay': req.max_delay,
+            'max_delay': str(req.max_delay/3600)+":"+str((req.max_delay % 3660) / 60),
             'nb_requested_seats': req.nb_requested_seats,
             'cancellation_margin' : req.cancellation_margin,
         }
@@ -75,7 +75,8 @@ def addrequest(request, port_request=None):
             UserID = UserProfile.objects.get(user=request.user)
             arrival_range = request.POST.get('arrival_range', 0)
             arrival_time = request.POST.get('arrival_time', datetime.datetime.today())
-            max_delay = request.POST.get('max_delay', datetime.datetime.today())
+            max_delay = request.POST.get('max_delay', 0)
+            max_delay = max_delay.hour*3600 + max_delay.minute * 60
             nb_requested_seats = request.POST.get('nb_requested_seats', 1)
             cancellation_margin = request.POST.get('cancellation_margin', datetime.datetime.today())
             

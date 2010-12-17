@@ -13,9 +13,9 @@ My requests
 {% else %}
     <a href="/addrequest/"><img src="/img_f/add.gif" /> Add a request</a><br/><br/>
     {% for req in request_list %}
-        <b>{{ req.arrival_time }}</b><br/>
-        <b>From</b> : {{ req.departure_point }} (whithin {{ req.departure_range }} km)<br/>
-        <b>To</b> : {{ req.arrival_point }} (whithin {{ req.arrival_range }} km)<br/>
+        <b>{{ req.arrival_time }}</b> (within {{ req.max_delay }} of delay)<br/>
+        <b>From</b> : {{ req.departure_point }} (whithin {{ req.departure_range }} km) (<a href="http://maps.google.com/maps?f=q&source=s_q&hl=en&geocode=&q={{ req.departure_point }}">See on Google Maps</a>)<br/>
+        <b>To</b> : {{ req.arrival_point }} (whithin {{ req.arrival_range }} km) (<a href="http://maps.google.com/maps?f=q&source=s_q&hl=en&geocode=&q={{ req.departure_point }}">See on Google Maps</a>)<br/>
         {{ req.nb_requested_seats }} seat{% if req.nb_requested_seats > 1 %}s{% endif %} requested.<br/>
         If no match found, will be canceled {{ req.cancellation_margin }}<br/>
         <a href="/cancelrequest/{{ req.id }}/"><img src="/img_f/delete.gif" /> cancel</a>
