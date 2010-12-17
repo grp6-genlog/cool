@@ -123,7 +123,8 @@ def get_time(dep_time, arr_time, checkpoints, pick_point):
         cpt_point += 1
         
     distance = distance_origin_dest(points_str[0], points_str[-1], points_str[1:-1])
-    total_time = (abs(arr_time - dep_time)).seconds + (abs(arr_time - nh dep_time)).days*60*60*24
+    
+    total_time = (arr_time - dep_time).seconds + (arr_time - dep_time).days*60*60*24
     
     time_per_point = total_time / (len(checkpoints)-1)
     

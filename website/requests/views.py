@@ -10,7 +10,7 @@ from portobject import PortObject
 from guiutils import WaitCallbacks
 from google_tools_json import *
 
-import datetime, time
+import datetime, time, re
 
 gui_port = PortObject()
 
@@ -38,7 +38,7 @@ def myrequests(request):
     requests = user.request_set.all()
     request_list = []
     for req in requests:
-        print json.loads(location_to_address(str(req.departure_point_lat)+","+str(req.departure_point_long)).read())['results'][0]['formatted_address']
+        
         d = {
             'departure_point': json.loads(location_to_address(str(req.departure_point_lat)+","+str(req.departure_point_long)).read())['results'][0]['formatted_address'],
             'departure_range' : req.departure_range,
@@ -52,6 +52,8 @@ def myrequests(request):
         request_list.append(d)
     return render_to_response('myrequests.html', locals())
     
+    
+    
 def addrequest(request, port_request=None):
     if not request.user.is_authenticated():
         return redirect('/home/', request=request)
@@ -59,9 +61,10 @@ def addrequest(request, port_request=None):
     if request.method == 'POST':
         form = RequestForm(request.POST)
         if form.is_valid():
+            form.cleaned_data
             
             departure_point = address_to_location(request.POST.get('departure_point', 0))
-            if arrival_point == -1:
+            if departure_point == -1:
                 form._errors["departure_point"] = form.error_class(["No address found"])
                 return render_to_response('requestform.html', locals())
                 
@@ -75,8 +78,8 @@ def addrequest(request, port_request=None):
             UserID = UserProfile.objects.get(user=request.user)
             arrival_range = request.POST.get('arrival_range', 0)
             arrival_time = request.POST.get('arrival_time', datetime.datetime.today())
-            max_delay = request.POST.get('max_delay', 0)
-            max_delay = max_delay.hour*3600 + max_delay.minute * 60
+            max_delay = form.cleaned_data['max_delay']
+            max_delay = int(max_delay.hour*3600 + max_delay.minute * 60)
             nb_requested_seats = request.POST.get('nb_requested_seats', 1)
             cancellation_margin = request.POST.get('cancellation_margin', datetime.datetime.today())
             
@@ -120,8 +123,8 @@ def failurecall(user):
 def editrequest(request, offset):
     try:
         offset = int(offset)
-    except ValueError:
-        raise Http404()
+    except:
+        return render_to_response('error.html', locals())
     
     try:
         req = Request.object.get(id=offset)

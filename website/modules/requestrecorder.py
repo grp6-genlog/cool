@@ -75,6 +75,7 @@ class RequestRecorder(PortObject):
                 req.cancellation_margin = lfields[CANCMARG]
 
                 req.save()
+
                 req_id = req.id
             except:
                 traceback.print_exc()

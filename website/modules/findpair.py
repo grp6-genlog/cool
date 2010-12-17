@@ -4,7 +4,7 @@ from portobject import *
 
 from django.contrib.auth.models import User
 from website.profiles.models import UserProfile
-from website.proposals.models import Proposal
+from website.proposals.models import Proposal, RoutePoints
 from website.requests.models import Request
 from website.offers.models import Offer
 from website.rides.models import Ride
