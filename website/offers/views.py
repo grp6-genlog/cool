@@ -155,9 +155,8 @@ def responseoffer(request, offset, port_offer, accept, global_address_cache):
             WaitCallbacksOffer.declare(request.user)
             
             anonymous_send_to(port_offer,(message,offer.id,
-                                           successcall,
-                                           failurecall,
-                                           request.user))
+                                           lambda:successcall(request.user),
+                                           lambda:failurecall(request.user)))
             
             wait_counter = 0
             while WaitCallbacksOffer.is_pending(request.user) and wait_counter < 10:

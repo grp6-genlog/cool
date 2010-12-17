@@ -104,22 +104,29 @@ def addproposal(request, port_proposal=None,global_address_cache=None):
 
 
         
+    
+def cancelproposal(request, offset):
+    try:
+        offset = int(offset)
+    except ValueError:
+        return render_to_response('error.html', locals())
+    
+    try:
+        prop = Proposal.object.get(id=offset)
+    except:
+        return render_to_response('error.html', locals())
+        
+    if prop.user.user != request.user:
+        return render_to_response('error.html', locals())
+        
+    
+        
+    return render_to_response('home.html', locals())
+    
+    
 def successcall(user):
     WaitCallbacksProposal.update(user, 'success')
     
 def failurecall(user):
     WaitCallbacksProposal.update(user, 'fail')
-        
-    
-def editrequest(request, offset):
-    try:
-        offset = int(offset)
-    except ValueError:
-        raise Http404()
-    
-    try:
-        req = Request.object.get(id=offset)
-    except:
-        error_msg = "No request found"
-        return render_to_response('error.html', locals())
-    return render_to_response('home.html', locals())
+

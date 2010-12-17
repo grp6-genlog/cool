@@ -19,23 +19,14 @@ My offers
             <b>Proposition of ride with <a href="/profile/{{ offer.other.user.id }}/">{{ offer.other.user.first_name }} {{ offer.other.user.last_name }}</a></b><br/>
             Pickup request on {{ offer.date_pick }} at {{ offer.pick_point }} (<a href="http://maps.google.com/maps?f=q&source=s_q&hl=en&geocode=&q={{ offer.pick_point }}">See on Google Maps</a>)<br/>
             And to drop at {{ offer.drop_point }} (<a href="http://maps.google.com/maps?f=q&source=s_q&hl=en&geocode=&q={{ offer.drop_point }}">See on Google Maps</a>)<br/>
-            {{ nb_seat }} seat{% if nb_seat > 1 %}s{% endif %} requested.<br/>
-            Money earned : {{ offer.fee }}€<br/>
             {% if not offer.status %}
-                <div class="submit-row">
-                <form method="link" action="/acceptoffer/{{ offer.id }}/" style="display:inline">
-                <label style="margin-left:25px;">
-                    <input type="submit" value="Accept offer" />
-                </label>
-                </form>
-                
-                <form method="link" action="/discardoffer/{{ offer.id }}/" style="display:inline">
-                <label style="margin-left:25px;">
-                    <input type="submit" value="Discard offer" /></form>
-                </label>
+                {{ nb_seat }} seat{% if nb_seat > 1 %}s{% endif %} requested.<br/>
+                Money earned : {{ offer.fee }}€<br/>
+                <div style="margin-top:10px;margin-bottom:10px;">
+                    <a style="margin-left:30px;" href="/acceptoffer/{{ offer.id }}/"><img src="/img_f/validate.gif" /> Accept offer</a>
+                    <a style="margin-left:30px;" href="/discardoffer/{{ offer.id }}/"><img src="/img_f/delete.gif" /> Discard offer</a>
                 </div>
                 
-                <br/>
                 <i>This choice engages you to a ride, please take it carefully.</i>
             {% else %}
                 <i>You have already accepted this offer, you must wait for the approval of the passenger.<br/>

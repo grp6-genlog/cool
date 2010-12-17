@@ -19,8 +19,10 @@ My proposals
         <b>Money per km</b> : {{ req.money_per_km }}<br/>
         <b>Departure time</b> : {{ req.departure_time }}<br/>
         <b>Arrival time</b> : {{ req.arrival_time }}<br/>
-        <a href="/cancelproposal/{{ req.id }}/"><img src="/img_f/delete.gif" /> cancel</a>
-        <br/><br/>
+        <div style="margin-left:30px;">
+            <a href="/cancelproposal/{{ req.id }}/"><img src="/img_f/delete.gif" /> cancel</a>
+        </div>
+        <br/>
     {% endfor %}
 {% endif %}
 {% endblock %}
