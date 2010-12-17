@@ -155,11 +155,12 @@ def responseoffer(request, offset, port_offer, accept, global_address_cache):
             
             if accept:
                 if request.user == offer.proposal.user.user:
-                    message = "driveragree"
+                    message = "driver_agree"
                 else:
-                    message = "nondriver_agree"
+                    message = "non_driver_agree"
             else:
                 message = "refuseoffer"
+            
             
             WaitCallbacksOffer.declare(request.user)
             

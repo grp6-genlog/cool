@@ -78,7 +78,7 @@ class OfferManager(PortObject):
         offer.save()
 
 
-    def driver_agree(self,(msg,offerID,callb_ok,callb_ko)):
+    def driver_agree(self, offerID,callb_ok,callb_ko):
         # ('driveragree',offerId,callb_ok,call_ko)
         offer=Offer.objects.get(id=offerID)
         offer.driver_ok=True
@@ -88,12 +88,12 @@ class OfferManager(PortObject):
             threading.Thread(target=callb_ko).start()
         else:
             if offer.non_driver_ok:
-                route_points= RoutePoints.objects.filter(proposal=offer.proposal,order__gte=offer.pick_point.order,order__lte=offer.drop_point).order_by('order')
+                route_points= RoutePoints.objects.filter(proposal=offer.proposal,order__gte=offer.pickup_point.order,order__lte=offer.drop_point.order).order_by('order')
                 point1=route_points[0]
                 for point2 in route_points[1:]:
                     count = offer.request.nb_requested_seats
                     for offer2 in Offer.objects.filter(proposal=offer.proposal,status='A'):
-                        if RoutePoints.filter(proposal=offer2.proposal,order=point1.order) and RoutePoints.filter(proposal=offer2.proposal,order=point2.order):
+                        if RoutePoints.objects.filter(proposal=offer2.proposal,order=point1.order) and RoutePoints.objects.filter(proposal=offer2.proposal,order=point2.order):
                             count+=offer2.request.nb_requested_seats
                         if count>offer.proposal.number_of_seats:
                             threading.Thread(target=callb_ko).start()
@@ -105,35 +105,40 @@ class OfferManager(PortObject):
                 if account<0:
                     offer.non_driver_ok = False
                     offer.save()
-                    send_to(self.userNotifier, ('newmsg', requests[0].user, 'The offerID has a response. Not enough money to accept the ride. Please add money on your account.'))
+                    print "not enough money"
+                    self.send_to(self.userNotifier, ('newmsg', requests[0].user, 'The offerID has a response. Not enough money to accept the ride. Please add money on your account.'))
                     threading.Thread(target=callb_ko).start()
                 else:
                     offer.status='A'
                     offer.save()
-                    send_to(self.rideManager, ('newacceptedride', offers[0].id))
+                    print "accepted"
+                    self.send_to(self.rideManager, ('newacceptedride', offer.id))
                     threading.Thread(target=callb_ok).start()
             else:
                 threading.Thread(target=callb_ok).start()
 
 
-    def nondriver_agree(self,(msg,offerID,callb_ok,callb_ko)):
+    def nondriver_agree(self, offerID, callb_ok, callb_ko):
         # ('nondriveragree',offerId,callb_ok,call_ko)
         offer=Offer.objects.get(id=offerID)
         offer.non_driver_ok=True
         offer.save()
         offersAccepted=Offer.objects.filter(request=offer.request, status='A')
+        
         if len(offersAccepted)!=0:
+            print "len != 0"
             threading.Thread(target=callb_ko).start()
         else:
             if offer.driver_ok:
-                route_points= RoutePoints.objects.filter(proposal=offer.proposal,order__gte=offer.pick_point.order,order__lte=offer.drop_point).order_by('order')
+                route_points = RoutePoints.objects.filter(proposal=offer.proposal,order__gte=offer.pickup_point.order,order__lte=offer.drop_point.order).order_by('order')
                 point1=route_points[0]
                 for point2 in route_points[1:]:
                     count = offer.request.nb_requested_seats
                     for offer2 in Offer.objects.filter(proposal=offer.proposal,status='A'):
-                        if RoutePoints.filter(proposal=offer2.proposal,order=point1.order) and RoutePoints.filter(proposal=offer2.proposal,order=point2.order):
+                        if RoutePoints.objects.filter(proposal=offer2.proposal,order=point1.order) and RoutePoints.objects.filter(proposal=offer2.proposal,order=point2.order):
                             count+=offer2.request.nb_requested_seats
                         if count>offer.proposal.number_of_seats:
+                            print "count>offer"
                             threading.Thread(target=callb_ko).start()
                     account = offer.request.user.account_balance
                 for offer2 in Offer.objects.filter(status='A'):
@@ -142,12 +147,14 @@ class OfferManager(PortObject):
                 if account<0:
                     offer.non_driver_ok = False
                     offer.save()
-                    send_to(self.userNotifier, ('newmsg', requests[0].user, 'The offerID has a response. Not enough money to accept the ride. Please add money on your account.'))
+                    print "not enough money"
+                    self.send_to(self.userNotifier, ('newmsg', requests[0].user, 'The offerID has a response. Not enough money to accept the ride. Please add money on your account.'))
                     threading.Thread(target=callb_ko).start()
                 else:
                     offer.status='A'
                     offer.save()
-                    send_to(self.rideManager, ('newacceptedride', offers[0].id))
+                    print "accepted"
+                    self.send_to(self.rideManager, ('newacceptedride', offers[0].id))
                     threading.Thread(target=callb_ok).start()
             else:
                 threading.Thread(target=callb_ok).start()
@@ -211,22 +218,11 @@ class OfferManager(PortObject):
         if msg[0]=='buildoffer':
             self.build_offer(msg[1], msg[2], msg[3], msg[4])
                         
-        elif msg[0]=='driveragree':
-            # ('driveragree',offerId,callb_ok,call_ko)
-            ret = self.driver_agree(msg)
+        elif msg[0]=='driver_agree':
+            ret = self.driver_agree(msg[1], msg[2], msg[3])
             
-        elif msg[0]=='nondriver_agree':
-            try:
-                ret = self.nondriver_agree(msg[1])
-            except:
-                threading.Thread(target = msg[3], ).start()
-            else:
-                if ret==OK:
-                    threading.Thread(target = msg[2], ).start()
-                elif ret==RAA:
-                    threading.Thread(target = msg[3], args = (RAA_MSG)).start()
-                elif ret==NEP:
-                    threading.Thread(target = msg[3], args = (NEP_MSG)).start()
+        elif msg[0]=='non_driver_agree':
+            ret = self.nondriver_agree(msg[1], msg[2], msg[3])
                 
         elif msg[0]=='refuseoffer':
             try:
