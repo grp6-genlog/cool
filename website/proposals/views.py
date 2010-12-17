@@ -37,7 +37,7 @@ def myproposals(request):
     return render_to_response('myproposals.html', locals())
     
     
-def addproposal(request, port_proposal=None):
+def addproposal(request, port_proposal=None,global_address_cache=None):
     if not request.user.is_authenticated():
         return redirect('/home/', request=request)
 
@@ -52,7 +52,8 @@ def addproposal(request, port_proposal=None):
             route_points_bad = re.split('\|',re.sub(r",", '' , re.sub(r"\(", '', re.sub(r"\)", '', request.POST.get('status', '')))))
             for rp in route_points_bad:
                 if rp != '':
-                    rp_l = re.split(' ', rp)
+                    rp_l = rp.split()
+                    global_address_cache.get_address(rp_l)
                     route_points_list.append((float(rp_l[0]),float(rp_l[1])))
             
             UserID = UserProfile.objects.get(user=request.user)

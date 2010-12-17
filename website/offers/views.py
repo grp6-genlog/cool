@@ -22,7 +22,7 @@ class WaitCallbacksOffer(WaitCallbacks):
     pass
                       
 
-def myoffers(request):
+def myoffers(request,global_address_cache=None):
     if not request.user.is_authenticated():
         return redirect('/home/')
     
@@ -52,16 +52,8 @@ def myoffers(request):
                                             of.proposal.arrival_time)
             print date_pick, date_drop
             
-            pick_point_js = json.loads(location_to_address(str(of.pickup_point_lat)+","+str(of.pickup_point_long)).read())
-            if len(pick_point_js['results'])==0:
-                pick_point = "No address"
-            else:
-                pick_point = pick_point_js['results'][0]['formatted_address']
-            drop_point_js = json.loads(location_to_address(str(of.drop_point_lat)+","+str(of.drop_point_long)).read())
-            if len(drop_point_js['results'])==0:
-                drop_point = "No address"
-            else:
-                drop_point = drop_point_js['results'][0]['formatted_address']
+            pick_point = global_address_cache((of.pickup_point_lat,of.pickup_point_long))
+            drop_point = global_address_cache((of.drop_point_lat,of.drop_point_long))
             
             infos = {
                 'driver':True, 'status':of.driver_ok, 'other':of.request.user,
@@ -98,16 +90,8 @@ def myoffers(request):
                                             of.proposal.departure_time,
                                             of.proposal.arrival_time)
             
-            pick_point_js = json.loads(location_to_address(str(of.pickup_point_lat)+","+str(of.pickup_point_long)).read())
-            if len(pick_point_js)==0:
-                pick_point = "No address"
-            else:
-                pick_point = pick_point_js['results'][0]['formatted_address']
-            drop_point_js = json.loads(location_to_address(str(of.drop_point_lat)+","+str(of.drop_point_long)).read())
-            if len(drop_point_js)==0:
-                drop_point = "No address"
-            else:
-                drop_point = drop_point_js['results'][0]['formatted_address']
+            pick_point = global_address_cache((of.pickup_point_lat,of.pickup_point_long))
+            drop_point = global_address_cache((of.drop_point_lat,of.drop_point_long))
             
             infos = {
                 'driver':False, 'status':of.non_driver_ok, 'other':of.proposal.user,
@@ -125,7 +109,7 @@ def myoffers(request):
     
     
     
-def insert_offer(offer_l, new_o):
+def insert_offer(offer_l, new_o,global_address_cache):
     for i in xrange(len(offer_l)):
          if offer_l[i]['date_pick'] > new_o['date_pick']:
              offer_l.insert(i,new_o)
@@ -152,7 +136,7 @@ def get_time(dep_time, arr_time, checkpoints, pick_point):
     return datetime.timedelta(seconds=(time_per_point * point_index)) + dep_time
     
 
-def responseoffer(request, offset, port_offer, accept):
+def responseoffer(request, offset, port_offer, accept,global_address_cache):
 
     try:
         offset = int(offset)
