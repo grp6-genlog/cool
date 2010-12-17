@@ -22,12 +22,8 @@ class PaymentManager(PortObject):
                 money more
         """
         ride = Ride.objects.get(id=instructionID)
-        offer = Offer.objects.get(id=ride.offer)
-        proposal = Proposal.objects.get(id=offer.proposal)
-        request = Request.objects.get(id=offer.request)
-        driver=UserProfile.objects.get(id=proposal.user)
-        ndriver=UserProfile.objects.get(id=request.user)
-        
+        driver=ride.offer.proposal.user
+        ndriver=ride.offer.request.user        
         ndriver.account_balance=ndriver.account_balance-fee
         driver.account_balance=driver.acount_balance+fee
         driver.save()
