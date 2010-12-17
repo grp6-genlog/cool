@@ -17,11 +17,16 @@ Profile
         Car description: {{other.car_description}}<br/>
         Phone number: {{other.phone_number}}<br/>
     {% endif %}
-    {% for eval in evaluations %}
-        From: {{ eval.user_from.user.first_name }} {{ eval.user_from.user.last_name }}<br/>
-        Date: {{ eval.ride_time }}<br/>
-        Rating: {{ eval.rating }}<br/>
-        <i>{{ eval.content }}</i>
-        <br/><br/>
-    {% endfor %}
+    <br/><br/>
+    {% if evaluations %}
+        {% for eval in evaluations %}
+            From: {{ eval.user_from.user.first_name }} {{ eval.user_from.user.last_name }}<br/>
+            Date: {{ eval.ride_time }}<br/>
+            Rating: {{ eval.rating }}<br/>
+            <i>{{ eval.content }}</i>
+            <br/><br/>
+        {% endfor %}
+    {% else %}
+            This user hasn't any evaluation yet.
+    {% endif %}
 {% endblock %}

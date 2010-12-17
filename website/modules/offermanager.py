@@ -249,7 +249,7 @@ def compute_fee(proposal, departure, arrival):
     arr = RoutePoints.objects.get(id=arrival)
     total=0.
     last = dep
-    for index in range(dep.order+1,arr.order):
+    for index in range(dep.order+1, arr.order+1):
         tmp = RoutePoints.objects.get(order=index,proposal=proposal)
         total+=get_distance((last.latitude,last.longitude),(tmp.latitude,tmp.longitude))
         last= tmp

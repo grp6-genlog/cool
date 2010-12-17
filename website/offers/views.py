@@ -21,7 +21,10 @@ class WaitCallbacksOffer(WaitCallbacks):
     pass
                       
 
-def myoffers(request,global_address_cache=None):
+"""
+    Display the list of offers of the authenticated
+"""
+def myoffers(request, global_address_cache=None):
     if not request.user.is_authenticated():
         return redirect('/home/')
     
@@ -60,9 +63,9 @@ def myoffers(request,global_address_cache=None):
                 'date_drop':date_drop, 'drop_point': drop_point,
                 'fee': of.total_fee, 'id':of.id, 'nb_seat': of.request.nb_requested_seats
             }
-            print "I'm very slow..."
+
             insert_offer(info_offers, infos)
-            print "DOOOOOOOOOOOOOOOOOOOWN"
+
             
     for req in user.request_set.all():
         new_offers = Offer.objects.filter(request=req, status='P')
@@ -78,14 +81,12 @@ def myoffers(request,global_address_cache=None):
                     index_drop = i
             
             
-            date_pick = utils.get_time_at_point(route_points,
-                                            0,
+            date_pick = utils.get_time_at_point([(el.latitude,el.longitude) for el in route_points],
                                             index_pickup,
                                             of.proposal.departure_time,
                                             of.proposal.arrival_time)
             
-            date_drop = utils.get_time_at_point(route_points,
-                                            index_pickup,
+            date_drop = utils.get_time_at_point([(el.latitude,el.longitude) for el in route_points],
                                             index_drop,
                                             of.proposal.departure_time,
                                             of.proposal.arrival_time)
@@ -172,7 +173,6 @@ def responseoffer(request, offset, port_offer, accept, global_address_cache):
             else:
                 print WaitCallbacksOffer.status(request.user)
                 WaitCallbacksOffer.free(request.user)
-                
                 
                 return redirect('/offers/')
 

@@ -35,7 +35,7 @@ def home(request):
             else:
                 notifications = [{'error':True, 'content':'Invalid form'}]
         else:
-            form = LoginForm(initial={'login': 'login'})
+            form = LoginForm()
 
     return render_to_response('home.html', locals())
     

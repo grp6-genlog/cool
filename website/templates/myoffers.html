@@ -33,9 +33,8 @@ My offers
                 You will be warned if this offer is accepted.</i><br/>
             {% endif %}
             <br/>
-
-        {% endif %}
         <br/><br/>
+        {% endif %}
     {% endfor %}
     
     <hr>
@@ -52,9 +51,10 @@ My offers
             {{ nb_seat }} seat{% if nb_seat > 1 %}s{% endif %} requested.<br/>
             Money required : {{ offer.fee }}<br/>
             {% if not offer.status %}
-                <form method="link" action="/acceptoffer/{{ offer.id }}/"><input type="submit" value="Accept offer" /></form>
-                <form method="link" action="/discardoffer/{{ offer.id }}/"><input type="submit" value="Discard offer" /></form>
-                <br/>
+                <div style="margin-top:10px;margin-bottom:10px;">
+                    <a style="margin-left:30px;" href="/acceptoffer/{{ offer.id }}/"><img src="/img_f/validate.gif" /> Accept offer</a>
+                    <a style="margin-left:30px;" href="/discardoffer/{{ offer.id }}/"><img src="/img_f/delete.gif" /> Discard offer</a>
+                </div>
                 <i>This choice engages you to a ride, please take it carefully.</i>
             {% else %}
                 <i>You have already accepted this offer, you must wait for the approval of the driver.<br/>
