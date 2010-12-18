@@ -51,7 +51,7 @@ class EvaluationManager(PortObject):
 			   DB in initialized
 		@post : the empty evaluation for userID and instructionID is now present in DB
 		"""
-		rides=Ride.objects.filter(offer=Offer.objects.get(id=instructionID))
+		rides=Ride.objects.get(id=instructionID))
 		if len(rides)==0:
 			raise "The ride doesn't exist for this offer"
 		proposals=Proposal.objects.filter(id=rides[0].proposal)
