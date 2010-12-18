@@ -127,6 +127,7 @@ def cancelproposal(request, offset, port_proposal):
     
     user=UserProfile.objects.get(user=request.user)
     proposals = Proposal.objects.filter(user=user, status='P', departure_time__lt=datetime.datetime.today())
+    # TODO
     #anonymous_send_to()
     return render_to_response('myproposals.html', locals())
     
