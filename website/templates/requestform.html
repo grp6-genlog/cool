@@ -26,6 +26,34 @@ My requests
         
         
         <div class="form-row">
+            {{ form.departure_point.errors }}
+            <span class="required">
+                {{ form.departure_point.label_tag }}
+            </span>
+            {{ form.departure_point }}
+        </div>
+	<div class="form-row">
+            {{ form.departure_range.errors }}
+            <span class="required">
+                {{ form.departure_range.label_tag }}
+            </span>
+            {{ form.departure_range }}
+        </div>
+	<div class="form-row">
+            {{ form.arrival_point.errors }}
+            <span class="required">
+                {{ form.arrival_point.label_tag }}
+            </span>
+            {{ form.arrival_point }}
+        </div>
+	<div class="form-row">
+            {{ form.arrival_range.errors }}
+            <span class="required">
+                {{ form.arrival_range.label_tag }}
+            </span>
+            {{ form.arrival_range }}
+        </div>
+	<div class="form-row">
             {{ form.arrival_time.errors }}
             <span class="required">
                 {{ form.arrival_time.label_tag }}
@@ -34,40 +62,12 @@ My requests
             Using the format yyyy-mm-dd HH:MM
         </div>
         <div class="form-row">
-            {{ form.departure_point.errors }}
-            <span class="required">
-                {{ form.departure_point.label_tag }}
-            </span>
-            {{ form.departure_point }}
-        </div>
-        <div class="form-row">
-            {{ form.departure_range.errors }}
-            <span class="required">
-                {{ form.departure_range.label_tag }}
-            </span>
-            {{ form.departure_range }}
-        </div>
-        <div class="form-row">
-            {{ form.arrival_point.errors }}
-            <span class="required">
-                {{ form.arrival_point.label_tag }}
-            </span>
-            {{ form.arrival_point }}
-        </div>
-        <div class="form-row">
-            {{ form.arrival_range.errors }}
-            <span class="required">
-                {{ form.arrival_range.label_tag }}
-            </span>
-            {{ form.arrival_range }}
-        </div>
-        <div class="form-row">
             {{ form.max_delay.errors }}
             <span class="required">
                 {{ form.max_delay.label_tag }}
             </span>
             {{ form.max_delay }}<br/><br/>
-            eg : if 01:00, can arrive one hour before or after the specified arrival time.
+            EG: if 01:00, can arrive one hour before or after the specified arrival time.
         </div>
         <div class="form-row">
             {{ form.nb_requested_seats.errors }}
