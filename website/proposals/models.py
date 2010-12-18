@@ -21,7 +21,7 @@ class Proposal(models.Model):
         return u'%s %s %d' % (self.user.user.first_name, self.user.user.last_name, self.id)
     
     class Meta:
-        ordering = ['user']
+        ordering = ['departure_time']
         
         
 class RoutePoints(models.Model):
