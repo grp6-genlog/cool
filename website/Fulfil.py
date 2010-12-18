@@ -62,12 +62,20 @@ def match_proposal(propID):
                     #delete all not in time arrival
                 if total_seconds(abs(get_time_at_point([(r.latitude,r.longitude) for r in route_points],j,infos.departure_time,infos.arrival_time)-request.arrival_time)) < request.max_delay:
                     build_offer(request.id, infos.id,
-                                (route_points[i].latitude, route_points[i].longitude,
-                                 get_time_at_point([(r.latitude,r.longitude) for r in route_points], 
-                                                   i, infos.departure_time,infos.arrival_time)),
-                                (route_points[j].latitude, route_points[j].longitude,
-                                 get_time_at_point([(r.latitude,r.longitude) for r in route_points],
-                                                   j,infos.departure_time,infos.arrival_time)))
+                                (
+                                    route_points[i].latitude,
+                                    route_points[i].longitude,
+                                    get_time_at_point([(r.latitude,r.longitude) for r in route_points],
+                                                   i,infos.departure_time,infos.arrival_time),
+                                    route_points[i].id
+                                ),
+                                (
+                                    route_points[j].latitude,
+                                    route_points[j].longitude,
+                                    get_time_at_point([(r.latitude,r.longitude) for r in route_points],
+                                                   j,infos.departure_time,infos.arrival_time),
+                                    route_points[j].id
+                                 ))
 
 def build_offer(requestID,proposalID,departure,arrival):
     """
@@ -136,13 +144,15 @@ def match_request(requestID):
                                 route_points[i].latitude,
                                 route_points[i].longitude,
                                 get_time_at_point([(r.latitude,r.longitude) for r in route_points],
-                                               i,infos.departure_time,infos.arrival_time),route_points[i].id
+                                               i,infos.departure_time,infos.arrival_time),
+                                route_points[i].id
                             ),
                             (
                                 route_points[j].latitude,
                                 route_points[j].longitude,
                                 get_time_at_point([(r.latitude,r.longitude) for r in route_points],
-                                               j,infos.departure_time,infos.arrival_time),route_points[j].id
+                                               j,infos.departure_time,infos.arrival_time),
+                                route_points[j].id
                              ))
 
 def printlist(mylist):
@@ -181,7 +191,7 @@ def create_profile(user, nb_seats, birthdate, smoke_bool, communities, moneyperk
     p.money_per_km = moneyperkm
     p.gender = gender
     p.bank_account_number = bank_account
-    p.account_balance = 0
+    p.account_balance = random.randint(0,500)
     p.car_id = car_id
     p.phone_number = phone_nb
     p.car_description = car_desc
@@ -255,7 +265,7 @@ def create_users(nb_users, male_first_name_list, female_first_name_list, last_na
         server_ind = random.randint(0, len(server_list) - 1)
         email = first_name + '.' + last_name + '@' + server_list[server_ind] + '.com'
         pwd_ind = random.randint(0, len(pwd_list) - 1)
-        password = pwd_list[pwd_ind] + str(random.randint(0,999))
+        password = uname #pwd_list[pwd_ind] + str(random.randint(0,999))
         com_ind_list = list()
         for i in xrange(random.randint(1,5)):
             com_ind_list.append(random.randint(0, len(communities_list) - 1))
@@ -389,6 +399,6 @@ def main():
 
     route_points_list = [(51.104901597287146, 3.4269104339182377),(51.111799359288014, 5.239654574543238),(50.51133060530523, 5.267120394855738),(49.968182569011724, 5.458557195961475),(50.09380282770382, 3.5038147307932377),(50.86629801972728, 4.800201449543238),(50.85589612171209, 3.2236633636057377),(50.158601346149815, 4.513732977211475),(51.15316431532614, 5.898834262043238),(51.50463952950513, 4.502746649086475),(50.78093392042112, 2.5032349303364754),(50.732283037120425, 3.9204712584614754),(50.572073903534324, 6.095764227211475),(50.65572944615896, 4.623596258461475),(51.14765110760071, 4.294006414711475),(51.374523601460275, 4.843322820961475),(50.32722825732965, 5.216857977211475),(50.42531856595681, 4.074279852211475),(49.69890426086907, 5.568420477211475),(50.41131808144422, 5.810119695961475)]
         
-    create_users(2000, male_name_list, female_name_list, last_name_list, server_list, pwd_list, communities_list, car_desc_list, route_points_list)
+    create_users(1000, male_name_list, female_name_list, last_name_list, server_list, pwd_list, communities_list, car_desc_list, route_points_list)
 
 main()

@@ -100,6 +100,22 @@ Please fill the form below
             {{ form.gender }}
         </div>
         <div class="form-row">
+            {{ form.bank_account_number.errors }}
+            <span class="required">
+                {{ form.bank_account_number.label_tag }}
+            </span>
+            {{ form.bank_account_number }}<br/>
+            Will be used to fill your account on the website<br/>
+            Use the IBAN format
+        </div>
+        <div class="form-row">
+            {{ form.phone_number.errors }}
+            <span class="required">
+                {{ form.phone_number.label_tag }}
+            </span>
+            {{ form.phone_number }}
+        </div>
+        <div class="form-row">
             {{ form.smoker.errors }}
             {{ form.smoker.label_tag }}
             {{ form.smoker }}
@@ -109,20 +125,6 @@ Please fill the form below
             {{ form.communities.label_tag }}
             {{ form.communities }}<br/>
             Groups you are belonging to, separated by a coma
-        </div>
-        <div class="form-row">
-            {{ form.bank_account_number.errors }}
-            <span class="required">
-                {{ form.bank_account_number.label_tag }}
-            </span>
-            {{ form.bank_account_number }}
-        </div>
-        <div class="form-row">
-            {{ form.phone_number.errors }}
-            <span class="required">
-                {{ form.phone_number.label_tag }}
-            </span>
-            {{ form.phone_number }}
         </div>
         <div class="form-row">
             {{ form.car_id.errors }}
