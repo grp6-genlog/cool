@@ -40,9 +40,6 @@ def home(request):
     return render_to_response('home.html', locals())
     
 
-    
-def hello(request):
-    return render_to_response('hello.html', locals())
 
 
 def logout(request):

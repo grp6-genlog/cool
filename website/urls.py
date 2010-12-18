@@ -27,6 +27,7 @@ import guiutils
 class PortObjects(object):
 
     def __init__(self):
+        print "starting objects"
         self.profile_rec_port = ProfileRecorder().get_port()
         self.user_notif_port = UserNotifier().get_port()
         self.payment_port = PaymentManager().get_port()
@@ -56,7 +57,6 @@ urlpatterns = patterns('',
 urlpatterns += patterns('website.views',
     (r'^$', 'home'),
     (r'^home/$', 'home'),
-    (r'^hello/$','hello'),
     (r'^logout/$', 'logout'),
 )
 
