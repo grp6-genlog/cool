@@ -5,6 +5,8 @@ from portobject import *
 import smtplib
 
 class UserNotifier(PortObject):
+    fromaddr = 'carpooling.cool@gmail.com'
+    server = None
 
     def __init__(self):
         """
@@ -14,7 +16,9 @@ class UserNotifier(PortObject):
           initialize the port object
         """
         PortObject.__init__(self)
-
+        self.server = smtplib.SMTP('smtp.gmail.com:587')  
+        self.server.starttls()  
+        self.server.login('carpooling.cool','genlogiscool')  
 
     def SendMessageToUser(self,db,userID=None,message=None):
         """
@@ -25,35 +29,32 @@ class UserNotifier(PortObject):
         
         @post:    The message has been sent to user using his desired device
         """
-        u= UserProfile.objects.get(user=userID)
-        mail=u.email
-          
-        fromaddr = 'carpooling@gmail.com'  
-        toaddrs  = 'mail'  
-        username = 'username'  
-        password = 'password'  
-    
-        server = smtplib.SMTP('smtp.gmail.com:587')  
-        server.starttls()  
-        server.login(username,password)  
-        server.sendmail(fromaddr, toaddrs, message)  
-        server.quit()  
-
+        u = UserProfile.objects.get(id=userID)
+        mail = u.user.email
+        tries = 50
+        while tries>0:
+            try:
+                self.server.sendmail(self.fromaddr, mail, message)  
+                break
+            except:
+                self.server = smtplib.SMTP('smtp.gmail.com:587')  
+                self.server.starttls()  
+                self.server.login('carpooling.cool','genlogiscool')  
+            tries-=1
 
     def routine(self,msg):
         """
-    The only acceptable msg is ('newmsg',userID,strmessage)
-    @pre : dbconn is initialized
-
-           userID is the id of a user in the dbconn
-           strmessage is a string
-
-    @post : the send_message_to_user is called.
-    """
+        The only acceptable msg is ( newmsg ,userID,strmessage)
+        @pre : dbconn is initialized
+        userID is the id of a user in the dbconn
+        strmessage is a string
+        @post : the send_message_to_user is called.
+        """
         if msg[0]=='newmsg':
-          try:
-              userID=msg[1]
-              message=msg[2]
-              SendMessageToUser(db,userID,message)
-          except:
-            print "error newmsg"
+            try:
+                userID=msg[1]
+                message=msg[2]
+                SendMessageToUser(db,userID,message)
+            except:
+                print "error newmsg"
+                
