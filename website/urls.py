@@ -85,5 +85,10 @@ urlpatterns += patterns('website.offers.views',
 
 urlpatterns += patterns('website.rides.views',
     (r'^rides/$', 'myrides', {'global_address_cache':global_address_cache}),
-    (r'^cancelrides/(?P<offset>\d+)/$', 'cancelride', {'port_offer':global_ports.offer_port}),
+    (r'^cancelride/(?P<offset>\d+)/$', 'cancelride', {'ride_port':global_ports.ride_port,}),
+)
+
+urlpatterns += patterns('website.evaluations.views',
+    (r'^rides/$', 'myrides', {'global_address_cache':global_address_cache}),
+    (r'^cancelride/(?P<offset>\d+)/$', 'cancelride', {'ride_port':global_ports.ride_port,}),
 )

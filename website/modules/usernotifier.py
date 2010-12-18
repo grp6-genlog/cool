@@ -34,9 +34,7 @@ class UserNotifier(PortObject):
         """
         u = UserProfile.objects.get(id=userID)
         mail = u.user.email
-        # mail = "notexist@email.com"
         tries = 50
-        print "sending email to "+mail
         while tries>0:
             try:
                 self.server.sendmail(self.fromaddr, mail, message)  

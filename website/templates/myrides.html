@@ -7,6 +7,19 @@ My rides
 {% endblock %}
 
 {% block content %}
+
+    {% if notification.content %}
+        {% if notification.success %}
+            <span style="color:green;">
+        {% else %}
+            <span style="color:red;">
+        {% endif %}
+        
+        {{ notification.content }}
+        </span>
+        <br/><br/>
+    {% endif %}
+
 {% if info_offers|length == 0 %}
     You don't have any ride planned.<br/>
 {% else %}
@@ -22,7 +35,7 @@ My rides
             {{ nb_seat }} seat{% if nb_seat > 1 %}s{% endif %} reserved.<br/>
             You will earn : {{ ride.fee }}€<br/>
             <div style="margin-top:10px;margin-bottom:10px;">
-                    <a style="margin-left:30px;" href="/discardoffer/{{ offer.id }}/"><img src="/img_f/delete.gif" /> Cancel ride</a>
+                    <a style="margin-left:30px;" href="/cancelride/{{ ride.id }}/" onclick="return confirm('Are you sure to cancel the ride ?\nThis can not be undone !');"><img src="/img_f/delete.gif" /> Cancel ride</a>
                 </div>
             <br/>
             <i>This choice is definitive, people are depending on you, please take it carefully.</i>

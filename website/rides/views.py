@@ -111,9 +111,9 @@ def myrides(request, global_address_cache=None):
 
             insert_ride(info_rides, infos)
     
-    
-    notification = WaitCallbacksRide.get_message(user)
-    WaitCallbacksRide.erase_message(user)
+    if WaitCallbacksRide.message_present(request.user):
+        notification = WaitCallbacksRide.get_message(user)
+        WaitCallbacksRide.erase_message(user)
     return render_to_response('myrides.html', locals())
     
     
@@ -134,27 +134,27 @@ def insert_ride(offer_l, new_o):
     accept : boolean containing the response
     global_address_cache : cache address for optimisation
 """
-def cancelride(request, offset, port_offer, global_address_cache):
+def cancelride(request, offset, ride_port):
 
     try:
         offset = int(offset)
     except:
-        notification = {'content':'Invalid call', 'success':False}
+        notification = {'content':'Invalid call, not a ride', 'success':False}
         return render_to_response('home.html', locals())
     else:
     
         try:
-            offer = Offer.objects.get(id=offset)
+            ride = Ride.objects.get(id=offset)
         except:
-            notification = {'content':'Invalid call', 'success':False}
+            notification = {'content':'Invalid call, no ride corresponding', 'success':False}
             return render_to_response('home.html', locals())
         else:
         
-            if offer.status != 'A':
-                notification = {'content':'Invalid call'+offer.status, 'success':False}
+            if ride.offer.status != 'A':
+                notification = {'content':'Invalid call, ride not agreed', 'success':False}
                 return render_to_response('home.html', locals())
             
-            if request.user != offer.proposal.user.user and request.user != offer.request.user.user:
+            if request.user != ride.offer.proposal.user.user and request.user != ride.offer.request.user.user:
                 notification = {'content':'Invalid call', 'success':False}
                 return render_to_response('error.html', locals())
                 
@@ -163,7 +163,7 @@ def cancelride(request, offset, port_offer, global_address_cache):
             WaitCallbacksRide.declare(request.user)
             
             up = UserProfile.objects.get(user=request.user)
-            anonymous_send_to(port_offer,(message,offer.id,up.id,
+            anonymous_send_to(ride_port,(message,ride.id,
                                            lambda:successcall(request.user),
                                            lambda:failurecall(request.user)))
             
@@ -172,16 +172,19 @@ def cancelride(request, offset, port_offer, global_address_cache):
                 time.sleep(0.1)
                 wait_counter += 1
             
+            ride = Ride.objects.get(id=offset)
             if WaitCallbacksRide.status(request.user) == 'success':
                 WaitCallbacksRide.free(request.user)
-                
-                return redirect('/offers/')
+                if ride.offer.status == 'C':
+                    WaitCallbacksRide.update_message(request.user, {'content':'The ride has been cancelled','success':True})
+
+                return redirect('/rides/')
                 
             else:
                 print WaitCallbacksRide.status(request.user)
                 WaitCallbacksRide.free(request.user)
                 
-                return redirect('/offers/')
+                return redirect('/rides/')
 
 
         

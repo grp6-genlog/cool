@@ -7,7 +7,7 @@ from website.rides.models import Ride
 from website.proposals.models import Proposal
 from website.requests.models import Request
 from datetime import *
-from threading import Timer
+import threading
 
 class RideManager(PortObject):
 
@@ -130,14 +130,14 @@ class RideManager(PortObject):
         """
         ride=Ride.objects.get(id=instructionID)
         if ride.ride_started:
-            return 1
+            return 0
 
-        ride.offer.status('C')
+        ride.offer.status ='C'
         ride.offer.save()        
         self.send_to(self.usernotifier_port, ('newmsg', ride.offer.request.user.id, 'The ride %d has been cancelled' % instructionID))
         self.send_to(self.usernotifier_port, ('newmsg', ride.offer.proposal.user.id, 'The ride %d has been cancelled' % instructionID))
         #self.send_to(self.tracker_port,('cancelride',ride.id))
-        return 0
+        return 1
         
     def routine(self,src,msg):
         """
@@ -151,8 +151,9 @@ class RideManager(PortObject):
         )
         for 'newacceptedride', see self.buildinstruction msg
         """
+
         if msg[0]=='cancelride':
-            if not self.cancel_ride(msg[1]):
+            if self.cancel_ride(msg[1]):
                 threading.Thread(target=msg[2]).start()
             else:
                 threading.Thread(target=msg[3]).start()
@@ -171,12 +172,12 @@ class delayAction:
         self.fun = fun
         self.arg = arg
     def start(self):
-        self.t = Timer(self.delay,self.fun,self.arg)
+        self.t = threading.Timer(self.delay,self.fun,self.arg)
         self.t.start()
     def cancel(self):
         self.t.cancel()
         self.t.join()
     def restart(self):
         self.cancel()
-        self.t = Timer(self.delay,self.fun,self.arg)
+        self.t = threading.Timer(self.delay,self.fun,self.arg)
         self.t.start()
