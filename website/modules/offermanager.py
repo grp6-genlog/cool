@@ -126,7 +126,7 @@ class OfferManager(PortObject):
         offer.non_driver_ok=True
         offer.save()
         offersAccepted=Offer.objects.filter(request=offer.request, status='A')
-        print offersAccepted
+        
         if len(offersAccepted)!=0:
             print "len != 0"
             threading.Thread(target=callb_ko).start()
