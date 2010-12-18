@@ -36,6 +36,7 @@ def myrides(request, global_address_cache=None):
         
         offer_list = Offer.objects.filter(proposal=prop, status='A') # every future offer accepted by both where the user is the driver
         for of in offer_list:
+            print of.id
             ride = Ride.objects.get(offer=of)
             
             route_points = of.proposal.routepoints_set.all()
@@ -58,8 +59,8 @@ def myrides(request, global_address_cache=None):
                                             of.proposal.arrival_time)
             
             
-            pick_point = global_address_cache.get_address((of.pickup_point_lat,of.pickup_point_long))
-            drop_point = global_address_cache.get_address((of.drop_point_lat,of.drop_point_long))
+            pick_point = global_address_cache.get_address((of.pickup_point_lat, of.pickup_point_long))
+            drop_point = global_address_cache.get_address((of.drop_point_lat, of.drop_point_long))
             
             infos = {
                 'driver':True, 'other':of.request.user,

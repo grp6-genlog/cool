@@ -21,7 +21,9 @@ My rides
             And drop him at {{ ride.drop_point }} (<a href="http://maps.google.com/maps?f=q&source=s_q&hl=en&geocode=&q={{ ride.drop_point }}">See on Google Maps</a>)<br/>
             {{ nb_seat }} seat{% if nb_seat > 1 %}s{% endif %} reserved.<br/>
             You will earn : {{ ride.fee }}€<br/>
-            <form method="link" action="/cancelride/{{ ride.id }}/"><input type="submit" value="Cancel ride" /></form>
+            <div style="margin-top:10px;margin-bottom:10px;">
+                    <a style="margin-left:30px;" href="/discardoffer/{{ offer.id }}/"><img src="/img_f/delete.gif" /> Cancel ride</a>
+                </div>
             <br/>
             <i>This choice is definitive, people are depending on you, please take it carefully.</i>
         {% endif %}
