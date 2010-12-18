@@ -166,12 +166,14 @@ def add_in_rp_list(rp, rp_list, order):
         for i in xrange(len(rp_list)):
             if ((rp[0]**2) + (rp[1]**2)) < ((rp_list[i][0]**2) + (rp_list[i][1]**2)):
                 rp_list.insert(i,rp)
-                break
+                return
     else:
         for k in xrange(len(rp_list)):
             if ((rp[0]**2) + (rp[1]**2)) > ((rp_list[k][0]**2) + (rp_list[k][1]**2)):
                 rp_list.insert(k,rp)
-                break
+                return
+                
+    rp_list.append(rp)
 
 def create_user(uname, firstname, lastname, mail, pwd):
     time_now = datetime.datetime.today()
@@ -326,12 +328,11 @@ def create_users(nb_users, male_first_name_list, female_first_name_list, last_na
                 route_p_list.remove((-8000.0,-8000.0))
                 
                 if len(route_p_list) < 2:
-                    print len(route_p_list)
+                    print "less than 2"
                     route_p_list.insert(0,(50.885015567679545, 5.096008367836475))
                     
                 dist = get_distance(route_p_list[0],route_p_list[-1])
                 ar_time = dep_time + datetime.timedelta(minutes=dist*100.0/60.0)
-                print ar_time
                 create_proposal(userprofile, car_id, car_desc, nb_seats, moneyperkm, dep_time, ar_time, route_p_list)
 
 def main():

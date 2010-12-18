@@ -24,8 +24,9 @@ class WaitCallbacksRide(WaitCallbacks):
     If he isn't connected, display the home page
 """
 def myrides(request, global_address_cache=None):
+    return redirect('/home/')
     if not request.user.is_authenticated():
-        return redirect('/home/')
+        return redirect('/home/')        
     
     user = UserProfile.objects.get(user=request.user)
     info_offers = []
@@ -104,8 +105,8 @@ def myrides(request, global_address_cache=None):
             insert_offer(info_offers, infos)
     
     
-    notification = WaitCallbacksOffer.get_message(user)
-    WaitCallbacksOffer.erase_message(user)
+    notification = WaitCallbacksRide.get_message(user)
+    WaitCallbacksRide.erase_message(user)
     return render_to_response('myoffers.html', locals())
     
     
@@ -160,37 +161,37 @@ def responseoffer(request, offset, port_offer, accept, global_address_cache):
                 message = "refuseoffer"
             
             
-            WaitCallbacksOffer.declare(request.user)
+            WaitCallbacksRide.declare(request.user)
             
             anonymous_send_to(port_offer,(message,offer.id,request.user.id,
                                            lambda:successcall(request.user),
                                            lambda:failurecall(request.user)))
             
             wait_counter = 0
-            while WaitCallbacksOffer.is_pending(request.user) and wait_counter < 10:
+            while WaitCallbacksRide.is_pending(request.user) and wait_counter < 10:
                 time.sleep(0.1)
                 wait_counter += 1
             
-            if WaitCallbacksOffer.status(request.user) == 'success':
-                WaitCallbacksOffer.free(request.user)
+            if WaitCallbacksRide.status(request.user) == 'success':
+                WaitCallbacksRide.free(request.user)
                 
                 return redirect('/offers/')
                 
             else:
-                print WaitCallbacksOffer.status(request.user)
-                WaitCallbacksOffer.free(request.user)
+                print WaitCallbacksRide.status(request.user)
+                WaitCallbacksRide.free(request.user)
                 
                 return redirect('/offers/')
 
 
         
 def successcall(user, message=None):
-    WaitCallbacksOffer.update(user, 'success')
+    WaitCallbacksRide.update(user, 'success')
     
 def failurecall(user, message=None):
     if message:
-        WaitCallbacksOffer.update_message(user, message)
-    WaitCallbacksOffer.update(user, 'fail')
+        WaitCallbacksRide.update_message(user, message)
+    WaitCallbacksRide.update(user, 'fail')
         
     
 def editrequest(request, offset):

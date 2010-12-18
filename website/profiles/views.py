@@ -150,16 +150,14 @@ def editprofile(request, port_profile=None):
             
             if request.method == 'POST':
                 form = EditProfileForm(request.POST)
-               
-                valid = form.is_valid()
                 
-                email_addr = form.cleaned_data['email']
-                if request.user.email != email_addr and User.objects.filter(email=email_addr):
-                    form._errors["email"] = form.error_class(["This email address is already used by another user"])
-                    valid = False
-                    
-                if valid:
-                    return toprofilerecorder(request,port_profile,'edit')
+                if form.is_valid():
+                    form.cleaned_data            
+                    email_addr = form.cleaned_data['email']
+                    if request.user.email != email_addr and User.objects.filter(email=email_addr):
+                        form._errors["email"] = form.error_class(["This email address is already used by another user"])
+                        
+                        return toprofilerecorder(request,port_profile,'edit')
             
             else:
                 init = {

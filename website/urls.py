@@ -7,9 +7,7 @@ from django.contrib import admin
 admin.autodiscover()
 
 
-import os, sys
-
-    
+import os, sys    
 sys.path.insert(0, os.path.join(settings.PROJECT_PATH,'modules'))
 
 from profilerecorder import ProfileRecorder
@@ -85,4 +83,8 @@ urlpatterns += patterns('website.offers.views',
                                                           'accept':True,'global_address_cache':global_address_cache}),
     (r'^discardoffer/(?P<offset>\d+)/$', 'responseoffer', {'port_offer':global_ports.offer_port,
                                                            'accept':False,'global_address_cache':global_address_cache}),
+)
+
+urlpatterns += patterns('website.rides.views',
+    (r'^rides/$', 'myrides'),
 )
