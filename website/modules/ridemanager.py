@@ -82,7 +82,8 @@ class RideManager(PortObject):
         print until_ride
         print self.evaluationmanager_port
         print offer.proposal.user.id
-        print offer.ride.id
+        print offer.request.user.id
+        print ride.id
         delay2=delayAction(until_ride, self.send_to, (self.evaluationmanager_port, ('startevaluation', proposal.user.id, ride.id)))
         delay3=delayAction(until_ride, self.send_to, (self.evaluationmanager_port, ('startevaluation', request.user.id, ride.id)))
         
