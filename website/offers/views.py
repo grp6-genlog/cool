@@ -175,7 +175,7 @@ def responseoffer(request, offset, port_offer, accept, global_address_cache):
             if WaitCallbacksOffer.status(request.user) == 'success':
                 WaitCallbacksOffer.free(request.user)
                 
-                return redirect('/offers/')
+                return redirect('/rides/')
                 
             else:
                 print WaitCallbacksOffer.status(request.user)

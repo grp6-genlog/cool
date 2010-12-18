@@ -79,13 +79,8 @@ class RideManager(PortObject):
             delay1=delayAction(half_hour_before, self.send_to, (self.tracker_port, ('startride', ride.id,lambda: self.close_ride(ride.id),lambda: self.cancel_ride(ride.id))))
             delay1.start()
         
-        print until_ride
-        print self.evaluationmanager_port
-        print offer.proposal.user.id
-        print offer.request.user.id
-        print ride.id
-        delay2=delayAction(until_ride, self.send_to, (self.evaluationmanager_port, ('startevaluation', proposal.user.id, ride.id)))
-        delay3=delayAction(until_ride, self.send_to, (self.evaluationmanager_port, ('startevaluation', request.user.id, ride.id)))
+        delay2=delayAction(until_ride, self.send_to, (self.evaluationmanager_port, ('startevaluation', offer.proposal.user.id, ride.id)))
+        delay3=delayAction(until_ride, self.send_to, (self.evaluationmanager_port, ('startevaluation', offer.request.user.id, ride.id)))
         
         delay2.start()
         delay3.start()

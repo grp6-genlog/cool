@@ -86,5 +86,5 @@ urlpatterns += patterns('website.offers.views',
 )
 
 urlpatterns += patterns('website.rides.views',
-    (r'^rides/$', 'myrides'),
+    (r'^rides/$', 'myrides', {'global_address_cache':global_address_cache}),
 )
