@@ -169,6 +169,22 @@ class OfferManager(PortObject):
             else:
                 threading.Thread(target=callb_ok).start()
 
+    def cancel_proposal(self,proposalID):
+        proposal = Proposal.objects.get(id=proposalID)
+        related_offers = Offer.objects.filter(proposal=proposal,driver_ok=False)
+        proposal.status = 'C'
+        proposal.save()
+        for offer in related_offers:
+            self.discarded(offer)
+
+    def cancel_request(self,requestID):
+        request = Request.objects.get(id=requestID)
+        related_offers = Offer.objects.filter(request=request,non_driver_ok=False)
+        request.status = 'C'
+        request.save()
+        for offer in related_offers:
+            self.discarded(offer)
+
     def discarded(self,offerID):
         """
         the offer has been refused by a user
@@ -235,13 +251,17 @@ class OfferManager(PortObject):
             ret = self.nondriver_agree(msg[1], msg[2], msg[3], msg[4])
                 
         elif msg[0]=='refuseoffer':
-            try:
-                self.discarded(msg[1])
-            except:
-                threading.Thread(target = msg[3], ).start()
-            else:
-                threading.Thread(target = msg[2], ).start()
-                    
+            self.discarded(msg[1])
+            threading.Thread(target = msg[2]).start()
+            
+        elif msg[0]=='cancelproposal':
+            self.cancel_proposal(msg[1])
+            threading.Thread(target = msg[2]).start()
+        
+        elif msg[0]=='cancelrequest':
+            self.cancel_request(msg[1])
+            threading.Thread(target = msg[2]).start()
+
 
 """
 Compute the fee for the route between departure and arrival
