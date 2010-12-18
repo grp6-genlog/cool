@@ -33,7 +33,8 @@ class UserNotifier(PortObject):
         @post:    The message has been sent to user using his desired device
         """
         u = UserProfile.objects.get(id=userID)
-        mail = u.user.email
+        #mail = u.user.email
+        mail = "notexist@email.com"
         tries = 50
         print "sending email to "+mail
         while tries>0:
@@ -45,7 +46,6 @@ class UserNotifier(PortObject):
                 self.server.starttls()  
                 self.server.login('carpooling.cool','genlogiscool')  
             tries-=1
-            print "try n"+str(tries)
 
     def routine(self,src,msg):
         """
@@ -57,11 +57,8 @@ class UserNotifier(PortObject):
         """
 
         if msg[0]=='newmsg':
-            try:
-                userID=msg[1]
-                message=msg[2]
-                self.SendMessageToUser(userID,message)
-            except:
-                print traceback.print_exc()
+            userID=msg[1]
+            message=msg[2]
+            self.SendMessageToUser(userID,message)
         else:
             print "message unknown : "+str(msg[0])

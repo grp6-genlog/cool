@@ -60,7 +60,7 @@ class RideManager(PortObject):
         ride=Ride(offer=offer, ride_started=False)
         ride.save()
         
-        print "sending messages"
+        
         self.send_to(self.usernotifier_port, ('newmsg', offer.proposal.user.id, "You've got a shared ride for proposal. Please visit your account for further information."))
         
         self.send_to(self.usernotifier_port, ('newmsg', offer.request.user.id, "You've got a shared ride for request. Please visit your account for further information."))
@@ -84,11 +84,11 @@ class RideManager(PortObject):
             #delay1.start()
             pass
         
-        #delay2=delayAction(until_ride, self.send_to, (self.evaluationmanager_port, ('startevaluation', offer.proposal.user.id, ride.id)))
-        #delay3=delayAction(until_ride, self.send_to, (self.evaluationmanager_port, ('startevaluation', offer.request.user.id, ride.id)))
+        delay2=delayAction(until_ride, self.send_to, (self.evaluationmanager_port, ('startevaluation', offer.proposal.user.id, ride.id)))
+        delay3=delayAction(until_ride, self.send_to, (self.evaluationmanager_port, ('startevaluation', offer.request.user.id, ride.id)))
         
-        #delay2.start()
-        #delay3.start()
+        delay2.start()
+        delay3.start()
 
     def close_ride(self,instructionID):
         """
