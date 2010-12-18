@@ -1,0 +1,80 @@
+{% extends "message.html" %}
+
+{% block title %}My offers{% endblock %}
+
+{% block message %}
+My offers
+{% endblock %}
+
+{% block content %}
+
+    {% if notification.content %}
+        {% if notification.success %}
+            <span style="color:green;">
+        {% else %}
+            <span style="color:red;">
+        {% endif %}
+        
+        {{ notification.content }}
+        </span>
+        <br/><br/>
+    {% endif %}
+
+{% if info_offers|length == 0 %}
+    You don't have any offers waiting for an approval.<br/>
+{% else %}
+    <span style="text-weight:bold;font-size:1.1em;">Offers for which you are the driver</span>
+    <br/><br/>
+    {% for offer in info_offers %}
+    
+        {% if offer.driver %}
+    
+            <b>Proposition of ride with <a href="/profile/{{ offer.other.user.id }}/">{{ offer.other.user.first_name }} {{ offer.other.user.last_name }}</a></b><br/>
+            Pickup request on {{ offer.date_pick }} at {{ offer.pick_point }} (<a href="http://maps.google.com/maps?f=q&source=s_q&hl=en&geocode=&q={{ offer.pick_point }}">See on Google Maps</a>)<br/>
+            And to drop at {{ offer.drop_point }} at {{ offer.date_drop.hour }}:{{ offer.date_drop.minute }} (<a href="http://maps.google.com/maps?f=q&source=s_q&hl=en&geocode=&q={{ offer.drop_point }}">See on Google Maps</a>)<br/>
+            {% if not offer.status %}
+                {{ nb_seat }} seat{% if nb_seat > 1 %}s{% endif %} requested.<br/>
+                Money earned : {{ offer.fee }}€<br/>
+                <div style="margin-top:10px;margin-bottom:10px;">
+                    <a style="margin-left:30px;" href="/acceptoffer/{{ offer.id }}/"><img src="/img_f/validate.gif" /> Accept offer</a>
+                    <a style="margin-left:30px;" href="/discardoffer/{{ offer.id }}/"><img src="/img_f/delete.gif" /> Discard offer</a>
+                </div>
+                
+                <i>This choice engages you to a ride, please take it carefully.</i>
+            {% else %}
+                <i>You have already accepted this offer, you must wait for the approval of the passenger.<br/>
+                You will be warned if this offer is accepted.</i><br/>
+            {% endif %}
+            <br/>
+        <br/><br/>
+        {% endif %}
+    {% endfor %}
+    
+    <hr>
+    
+    <span style="text-weight:bold;font-size:1.1em;">Offers for which you are the passenger</span>
+    <br/><br/>
+    {% for offer in info_offers %}
+    
+        {% if not offer.driver %}
+    
+            <b>Proposition of ride with <a href="/profile/{{ offer.other.user.id }}/">{{ offer.other.user.first_name }} {{ offer.other.user.last_name }}</a></b><br/>
+            You will be picked up on {{ offer.date_pick }} at {{ offer.pick_point }} (<a href="http://maps.google.com/maps?f=q&source=s_q&hl=en&geocode=&q={{ offer.pick_point }}">See on Google Maps</a>)<br/>
+            and dropped at {{ offer.date_drop.hour }}:{{ offer.date_drop.minute }} at {{ offer.drop_point }} (<a href="http://maps.google.com/maps?f=q&source=s_q&hl=en&geocode=&q={{ offer.drop_point }}">See on Google Maps</a>)<br/>
+            {{ nb_seat }} seat{% if nb_seat > 1 %}s{% endif %} requested.<br/>
+            Money required : {{ offer.fee }}<br/>
+            {% if not offer.status %}
+                <div style="margin-top:10px;margin-bottom:10px;">
+                    <a style="margin-left:30px;" href="/acceptoffer/{{ offer.id }}/"><img src="/img_f/validate.gif" /> Accept offer</a>
+                    <a style="margin-left:30px;" href="/discardoffer/{{ offer.id }}/"><img src="/img_f/delete.gif" /> Discard offer</a>
+                </div>
+                <i>This choice engages you to a ride, please take it carefully.</i>
+            {% else %}
+                <i>You have already accepted this offer, you must wait for the approval of the driver.<br/>
+                You will be warned if this offer is accepted.</i>
+            {% endif %}
+            <br/><br/>
+        {% endif %}
+    {% endfor %}
+{% endif %}
+{% endblock %}
