@@ -107,29 +107,49 @@ def addproposal(request, port_proposal=None,global_address_cache=None):
 
         
     
-def cancelproposal(request, offset, port_proposal):
+def cancelproposal(request, offset, port_offer):
     try:
         offset = int(offset)
     except ValueError:
-        return render_to_response('error.html', locals())
+        notification = {'content':'Invalid call, not a proposal', 'success':False}
+        return render_to_response('home.html', locals())
     
     try:
-        prop = Proposal.object.get(id=offset)
+        prop = Proposal.objects.get(id=offset)
     except:
-        return render_to_response('error.html', locals())
+        notification = {'content':'Invalid call, proposal does not exist', 'success':False}
+        return render_to_response('home.html', locals())
         
     if prop.user.user != request.user:
-        return render_to_response('error.html', locals())
+        notification = {'content':'Invalid call, permission denied', 'success':False}
+        return render_to_response('home.html', locals())
         
     if prop.status != 'P' or prop.departure_time < datetime.datetime.today():
-        return render_to_response('error.html', locals())
-            
+        notification = {'content':'Too late to cancel', 'success':False}
+        return render_to_response('home.html', locals())
+
     
-    user=UserProfile.objects.get(user=request.user)
-    proposals = Proposal.objects.filter(user=user, status='P', departure_time__lt=datetime.datetime.today())
-    # TODO
-    #anonymous_send_to()
-    return render_to_response('myproposals.html', locals())
+    WaitCallbacksProposal.declare(request.user)
+                    
+    anonymous_send_to(port_offer,('cancelproposal', offset,
+                                            lambda:successcall(request.user),
+                                            lambda:failurecall(request.user)))
+                    
+    wait_counter = 0
+    while WaitCallbacksProposal.is_pending(request.user) and wait_counter < 10:
+        time.sleep(0.1)
+        wait_counter += 1
+                    
+    if WaitCallbacksProposal.status(request.user) == 'success':
+        WaitCallbacksProposal.free(request.user)
+        notification = {'content':'Proposal canceled', 'success':True}
+        return render_to_response('home.html', locals())
+    else:
+        print WaitCallbacksProposal.status(request.user)
+        WaitCallbacksProposal.free(request.user)
+        notification = {'content':'An error occured, try again later', 'success':False}
+        return render_to_response('home.html', locals())
+
     
     
 def successcall(user):

@@ -68,13 +68,13 @@ urlpatterns += patterns('website.profiles.views',
 urlpatterns += patterns('website.requests.views',
     (r'^requests/$', 'myrequests'),
     (r'^addrequest/$', 'addrequest', {'port_request':global_ports.request_rec_port}),
-    (r'^cancelrequest/(?P<offset>\d+)/$', 'cancelrequest', {'port_request':global_ports.request_rec_port}),
+    (r'^cancelrequest/(?P<offset>\d+)/$', 'cancelrequest', {'port_offer':global_ports.offer_port}),
 )
 
 urlpatterns += patterns('website.proposals.views',
     (r'^proposals/$', 'myproposals'),
     (r'^addproposal/$', 'addproposal', {'port_proposal':global_ports.proposal_rec_port,'global_address_cache':global_address_cache}),
-    (r'^cancelproposal/(?P<offset>\d+)/$', 'cancelproposal', {'port_proposal':global_ports.proposal_rec_port,}),
+    (r'^cancelproposal/(?P<offset>\d+)/$', 'cancelproposal', {'port_offer':global_ports.offer_port}),
 )
 
 urlpatterns += patterns('website.offers.views',

@@ -7,9 +7,11 @@ My requests
 {% endblock %}
 
 {% block content %}
-{% if requests|length == 0 %}
+{% if request_list|length == 0 %}
     You don't have any request waiting for a match.<br/>
-    <a href="/addrequest/">Add a request</a>
+    <div style="margin-left:30px; margin-top:10px;">
+        <a href="/addrequest/"><img src="/img_f/add.gif" /> Add a request</a>
+    </div>
 {% else %}
     <a href="/addrequest/"><img src="/img_f/add.gif" /> Add a request</a><br/><br/>
     {% for req in request_list %}

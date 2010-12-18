@@ -27,14 +27,14 @@ class EvaluationManager(PortObject):
 			   userID is already in database, but empty
 		@post : the evaluation contains now the content
 		"""
-		evals = Evaluation.objects.filter(ride = Ride.objects.get(id = rideID), user_from=UserProfile.objects.get(id=userID))
-		if len(evals)!=1:
-			raise "There isn't any valid offer for this ID"
-		if not evals[0].locked:
-			evals[0].rating = content[0]
-			evals[0].content = content[1]
-			return 0
-		return -1
+        
+		evaluation = Evaluation.objects.get(ride = Ride.objects.get(id = rideID), user_from=UserProfile.objects.get(id=userID))
+		if not evaluation.locked:
+			evaluation.rating = content[0]
+			evaluation.content = content[1]
+			evaluation.save()
+			return 1
+		return 0
 		
 	def lockEvaluation(self,evaluationID):
 		"""Lock the evaluation and evaluate is not more possible for this evaluation
@@ -83,8 +83,11 @@ class EvaluationManager(PortObject):
 		if msg[0] == 'startevaluation':
 			self.buildEmptyEvaluation(msg[1], msg[2])
 		elif msg[0] == 'evaluate':
-			res = self.updateEvaluation(msg[1], msg[2], msg[3])
-			msg[4](res)
+			if self.updateEvaluation(msg[1], msg[2], msg[3]):
+			    threading.Thread(target=msg[4]).start()
+			else:
+			    threading.Thread(target=msg[5]).start()
+
 		elif msg[0] == 'closeevaluation':
 			self.lockEvaluation(msg[1])
 

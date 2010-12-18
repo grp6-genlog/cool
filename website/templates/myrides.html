@@ -35,9 +35,13 @@ My rides
             {{ nb_seat }} seat{% if nb_seat > 1 %}s{% endif %} reserved.<br/>
             You will earn : {{ ride.fee }}€<br/>
             <div style="margin-top:10px; margin-bottom:10px;">
+                {% if ride.status == 'A' %}
                     <a style="margin-left:30px;" href="/cancelride/{{ ride.id }}/" onclick="return confirm('Are you sure to cancel the ride ?\nThis can not be undone !');"><img src="/img_f/delete.gif" /> Cancel ride</a>
                     <br/>
                     <span style="margin-left:10px; font-style:italic;">This choice is definitive, people are depending on you, please take it carefully.</span>
+                {% else %}
+                   <a style="margin-left:30px;" href="/addevaluation/{{ ride.id }}/"><img src="/img_f/edit.gif" /> Evaluate {{ ride.other.user.first_name }}</a>
+                {% endif %}
             </div>
         {% endif %}
         <br/><br/>

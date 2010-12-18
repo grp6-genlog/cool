@@ -28,7 +28,7 @@ My evaluations
     {% for evaluation in evaluation_l %}
         {% if evaluation.ride.offer.proposal.user.user == request.user %}
             <b>Evaluation from:</b> {{ evaluation.user_from.user.first_name }} {{ evaluation.user_from.user.last_name }}<br/>
-            <b>Rating:</b> {% if evaluation.rating %}{{ evaluation.rating }}{% else %}<i>Not yet set</i>{% endif %}<br/>
+            <b>Rating:</b> {% if evaluation.rating %}{{ evaluation.rating }}/5{% else %}<i>Not yet set</i>{% endif %}<br/>
 	        {% if evaluation.content %}<b>Comment:</b> {{ evaluation.content }}<br/>{% endif %}
 	        <b>Date of the ride:</b> {{ evaluation.ride_time }}<br/><br/><br/>
         {% endif %}
@@ -40,7 +40,7 @@ My evaluations
     {% for evaluation in evaluation_l %}
         {% if evaluation.ride.offer.request.user.user == request.user %}
             <b>Evaluation from:</b> {{ evaluation.user_from.user.first_name }} {{ evaluation.user_from.user.last_name }}<br/>
-            <b>Rating:</b> {% if evaluation.rating %}{{ evaluation.rating }}{% else %}<i>Not yet set</i>{% endif %}<br/>
+            <b>Rating:</b> {% if evaluation.rating %}{{ evaluation.rating }}/5{% else %}<i>Not yet set</i>{% endif %}<br/>
 	        <b>Comment:</b> {{ evaluation.content }}<br/>
 	        <b>Date of the ride:</b> {{ evaluation.ride_time }}<br/><br/><br/>
         {% endif %}
