@@ -156,7 +156,7 @@ def cancelride(request, offset, ride_port):
             
             if request.user != ride.offer.proposal.user.user and request.user != ride.offer.request.user.user:
                 notification = {'content':'Invalid call', 'success':False}
-                return render_to_response('error.html', locals())
+                return render_to_response('home.html', locals())
                 
             message = "cancelride"            
             

@@ -29,7 +29,28 @@ def myevaluations(request):
     
     
     
-def addevaluation(request, port_evaluation=None):
+def addevaluation(request, offset, port_evaluation=None):
+    try:
+        offset = int(offset)
+    except:
+        notification = {'content':'Invalid call, not a ride', 'success':False}
+        return render_to_response('home.html', locals())
+    else:
+    
+        try:
+            ride = Ride.objects.get(id=offset)
+        except:
+            notification = {'content':'Invalid call, no ride corresponding', 'success':False}
+            return render_to_response('home.html', locals())
+        else:
+        
+            if ride.offer.status != 'A':
+                notification = {'content':'Invalid call, ride not agreed', 'success':False}
+                return render_to_response('home.html', locals())
+            
+            if request.user != ride.offer.proposal.user.user and request.user != ride.offer.request.user.user:
+                notification = {'content':'Invalid call', 'success':False}
+                
     if not request.user.is_authenticated():
         return redirect('/home/', request=request)
 
