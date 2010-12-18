@@ -30,7 +30,7 @@ class RideManager(PortObject):
               self.evaluationmanager_port = evaluationmanager_port
         """
         self.usernotifier_port = usernotifier_port
-        self.tracker_port = tracker_port
+        #self.tracker_port = tracker_port
         self.paymentmanager_port = paymentmanager_port
         self.evaluationmanager_port = evaluationmanager_port
         PortObject.__init__(self)
