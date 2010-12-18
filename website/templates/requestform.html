@@ -30,28 +30,32 @@ My requests
             <span class="required">
                 {{ form.departure_point.label_tag }}
             </span>
-            {{ form.departure_point }}
+            {{ form.departure_point }}<br/>
+	    Adress from which you wish to be picked up.
         </div>
 	<div class="form-row">
             {{ form.departure_range.errors }}
             <span class="required">
                 {{ form.departure_range.label_tag }}
             </span>
-            {{ form.departure_range }}
+            {{ form.departure_range }}<br/>
+	    Number of kilometers you are able to be picked up around the departure point.
         </div>
 	<div class="form-row">
             {{ form.arrival_point.errors }}
             <span class="required">
                 {{ form.arrival_point.label_tag }}
             </span>
-            {{ form.arrival_point }}
+            {{ form.arrival_point }}<br/>
+	    Adress to which you wish to be dropped.
         </div>
 	<div class="form-row">
             {{ form.arrival_range.errors }}
             <span class="required">
                 {{ form.arrival_range.label_tag }}
             </span>
-            {{ form.arrival_range }}
+            {{ form.arrival_range }}<br/>
+	    Number of kilometers you are able to be picked up around the arrival point.
         </div>
 	<div class="form-row">
             {{ form.arrival_time.errors }}
@@ -59,7 +63,8 @@ My requests
                 {{ form.arrival_time.label_tag }}
             </span>
             {{ form.arrival_time }}<br/>
-            Using the format yyyy-mm-dd HH:MM
+	    Time at which you wish to be dropped at the arrival point.<br/>
+            <i>Using the format yyyy-mm-dd HH:MM</i>
         </div>
         <div class="form-row">
             {{ form.max_delay.errors }}
@@ -67,14 +72,16 @@ My requests
                 {{ form.max_delay.label_tag }}
             </span>
             {{ form.max_delay }}<br/><br/>
-            EG: if 01:00, can arrive one hour before or after the specified arrival time.
+	    Time fork between which you still allow to be dropped at the arrival point.<br/>
+            <i>EG: if 01:00, can arrive one hour before or after the specified arrival time.</i>
         </div>
         <div class="form-row">
             {{ form.nb_requested_seats.errors }}
             <span class="required">
                 {{ form.nb_requested_seats.label_tag }}
             </span>
-            {{ form.nb_requested_seats }}
+            {{ form.nb_requested_seats }}<br/>
+	    The number of seats you need for the ride.
         </div>
         <div class="form-row">
             {{ form.cancellation_margin.errors }}
@@ -82,8 +89,8 @@ My requests
                 {{ form.cancellation_margin.label_tag }}
             </span>
             {{ form.cancellation_margin }}<br/><br/>
-            Using the format yyyy-mm-dd HH:MM<br/>
-            If no match is found at that time, the request will be cancelled.
+            Date until which you allow the system to find rides matching your request.<br/>
+	    <i>Using the format yyyy-mm-dd HH:MM</i><br/>
         </div>
         <span style="font-style:italic; font-size:11px;">Mandatory fields are in bold</span><br/>
         <div class="submit-row">
