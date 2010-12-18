@@ -5,6 +5,9 @@ from portobject import *
 from evaluations.models import Evaluation
 from rides.models import Ride
 from offers.models import Offer
+from profiles.models import UserProfile
+from django.contrib.auth.models import User
+
 
 class EvaluationManager(PortObject):
 	
@@ -15,7 +18,7 @@ class EvaluationManager(PortObject):
 		"""
 		PortObject.__init__(self)
 		
-	def updateEvaluation(self,instructionID, userID, content):
+	def updateEvaluation(self,rideID, userID, content):
 		"""Make an evaluation for a user with id userID and related with the instructionID
 		@pre : instructionID is the id of the instruction
 			   userID is the id of the user
@@ -24,12 +27,12 @@ class EvaluationManager(PortObject):
 			   userID is already in database, but empty
 		@post : the evaluation contains now the content
 		"""
-		evals=Evaluation.objects.filter(ride=Ride.objects.get(id=instructionID), user_from=UserProfile.objects.get(id=userID))
+		evals = Evaluation.objects.filter(ride = Ride.objects.get(id = rideID), user_from=UserProfile.objects.get(id=userID))
 		if len(evals)!=1:
 			raise "There isn't any valid offer for this ID"
 		if not evals[0].locked:
-			evals[0].rating=content[0]
-			evals[0].content=content[1]
+			evals[0].rating = content[0]
+			evals[0].content = content[1]
 			return 0
 		return -1
 		
@@ -39,27 +42,26 @@ class EvaluationManager(PortObject):
 			 evaluationID is the id of the evaluation
 		@post : the evaluation is now locked
 		"""
-		evals=Evaluation.objects.filter(id=evaluationID)
-		if len(evals)==0:
+		evals = Evaluation.objects.filter(id=evaluationID)
+		if len(evals) == 0:
 			raise "There isn't any valid offer for this ID"
-		evals.locked=True
+		evals.locked = True
 		
-	def buildEmptyEvaluation(self,userID, instructionID):
+	def buildEmptyEvaluation(self,userID, rideID):
 		"""Make an empty evaluation for userID and instructionID
 		@pre : userID is the id of a user
 			   instructionID is the id of an instruction
 			   DB in initialized
 		@post : the empty evaluation for userID and instructionID is now present in DB
 		"""
-		ride=Ride.objects.get(id=instructionID)
-		u_from=None
+		ride = Ride.objects.get(id = rideID)
 		if ride.offer.proposal.user.id!=userID:
-			u_from=ride.offer.proposal.user
+			u_from = ride.offer.proposal.user
 		else:
-			u_from=ride.offer.request.user
-		myeval=Evaluation(ride=ride, user_from=u_from, user_to=User.objects.get(id=userID), locked=False)
+			u_from = ride.offer.request.user
+		myeval = Evaluation(ride=ride, user_from=u_from, user_to=User.objects.get(id=userID), locked=False)
 		myeval.save()
-		delay=delayAction(86400*3, self.send_to, (self.get_port, ('closeevaluation', myeval.id)))
+		delay = delayAction(86400*3, self.send_to, (self.get_port, ('closeevaluation', myeval.id)))
 		delay.start()
 		
 	def routine(self, src, msg):
@@ -67,8 +69,7 @@ class EvaluationManager(PortObject):
 		The messages accepted are the pairs ('startevaluation', userId,instructionid),
 		('evaluate', instructionid, userId, content,callback) and ('closeevaluation', evaluationid)
 		
-		@pre : DB is initialized and is a SQL Database
-			 instructionid is an id for the instruction (int)
+		@pre :	 rideid is an id for the ride (int)
 			 userId is an id for the user involved in instruction (int)
 			 evaluationid is an if for the evaluation (int)
 			content is the content of an evaluation, composed of a pair (note, comment)
@@ -79,12 +80,12 @@ class EvaluationManager(PortObject):
 			  	- if the message received is 'closeevaluation', the timer has sent message to lock the evaluation.
 			  no evaluation is now possible
 		"""
-		if msg[0]=='startevaluation':
+		if msg[0] == 'startevaluation':
 			self.buildEmptyEvaluation(msg[1], msg[2])
-		elif msg[0]=='evaluate':
-			res=self.updateEvaluation(msg[1], msg[2], msg[3])
+		elif msg[0] == 'evaluate':
+			res = self.updateEvaluation(msg[1], msg[2], msg[3])
 			msg[4](res)
-		elif msg[0]=='closeevaluation':
+		elif msg[0] == 'closeevaluation':
 			self.lockEvaluation(msg[1])
 
 #timer description
