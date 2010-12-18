@@ -127,7 +127,7 @@ def insert_offer(offer_l, new_o):
     accept : boolean containing the response
     global_address_cache : cache address for optimisation
 """
-def responseoffer(request, offset, port_offer, accept, global_address_cache):
+def responseoffer(request, offset, port_offer, accept):
 
     try:
         offset = int(offset)
