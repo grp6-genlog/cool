@@ -24,17 +24,19 @@ class WaitCallbacksRide(WaitCallbacks):
     If he isn't connected, display the home page
 """
 def myrides(request, global_address_cache=None):
-    return redirect('/home/')
+    
     if not request.user.is_authenticated():
         return redirect('/home/')        
     
     user = UserProfile.objects.get(user=request.user)
-    info_offers = []
+    info_rides = []
     
-    for prop in user.proposal_set.all():
-        new_offers = Offer.objects.filter(proposal=prop, status='P')
-        for of in new_offers:
-            ride = Ride.objects.filter(offer=of)
+    for prop in Proposal.objects.filter(user=user, status='P', departure_time__gt=datetime.datetime.today()):
+        
+        offer_list = Offer.objects.filter(proposal=prop, status='A') # every future offer accepted by both where the user is the driver
+        for of in offer_list:
+            ride = Ride.objects.get(offer=of)
+            
             route_points = of.proposal.routepoints_set.all()
             index_pickup = 0
             index_drop = 0
@@ -59,18 +61,21 @@ def myrides(request, global_address_cache=None):
             drop_point = global_address_cache.get_address((of.drop_point_lat,of.drop_point_long))
             
             infos = {
-                'driver':True, 'status':of.driver_ok, 'other':of.request.user,
+                'driver':True, 'other':of.request.user,
                 'date_pick':date_pick, 'pick_point': pick_point,
                 'date_drop':date_drop, 'drop_point': drop_point,
-                'fee': of.total_fee, 'id':of.id, 'nb_seat': of.request.nb_requested_seats
+                'fee': of.total_fee, 'id':ride.id, 'nb_seat': of.request.nb_requested_seats
             }
 
-            insert_offer(info_offers, infos)
+            insert_ride(info_rides, infos)
 
+
+    for req in Request.objects.filter(user=user, status='P', arrival_time__gt=datetime.datetime.today()):
+        
+        offer_list = Offer.objects.filter(request=req, status='A') # every future offer accepted by both where the user is the non-driver
+        for of in offer_list:
+            ride = Ride.objects.get(offer=of)    
             
-    for req in user.request_set.all():
-        new_offers = Offer.objects.filter(request=req, status='P')
-        for of in new_offers:
             route_points = of.proposal.routepoints_set.all()
             
             index_pickup = 0
@@ -96,22 +101,22 @@ def myrides(request, global_address_cache=None):
             drop_point = global_address_cache.get_address((of.drop_point_lat,of.drop_point_long))
             
             infos = {
-                'driver':False, 'status':of.non_driver_ok, 'other':of.proposal.user,
+                'driver':False, 'other':of.proposal.user,
                 'date_pick':date_pick, 'pick_point': pick_point,
                 'date_drop':date_drop, 'drop_point': drop_point,
-                'fee': of.total_fee, 'id':of.id
+                'fee': of.total_fee, 'id':ride.id, 'nb_seat': of.request.nb_requested_seats
             }
-            
-            insert_offer(info_offers, infos)
+
+            insert_ride(info_rides, infos)
     
     
     notification = WaitCallbacksRide.get_message(user)
     WaitCallbacksRide.erase_message(user)
-    return render_to_response('myoffers.html', locals())
+    return render_to_response('myrides.html', locals())
     
     
     
-def insert_offer(offer_l, new_o):
+def insert_ride(offer_l, new_o):
     for i in xrange(len(offer_l)):
          if offer_l[i]['date_pick'] > new_o['date_pick']:
              offer_l.insert(i,new_o)
@@ -127,7 +132,7 @@ def insert_offer(offer_l, new_o):
     accept : boolean containing the response
     global_address_cache : cache address for optimisation
 """
-def responseoffer(request, offset, port_offer, accept, global_address_cache):
+def responseride(request, offset, port_offer, accept, global_address_cache):
 
     try:
         offset = int(offset)
@@ -192,17 +197,4 @@ def failurecall(user, message=None):
     if message:
         WaitCallbacksRide.update_message(user, message)
     WaitCallbacksRide.update(user, 'fail')
-        
-    
-def editrequest(request, offset):
-    try:
-        offset = int(offset)
-    except ValueError:
-        raise Http404()
-    
-    try:
-        req = Request.object.get(id=offset)
-    except:
-        error_msg = "No request found"
-        return render_to_response('error.html', locals())
-    return render_to_response('home.html', locals())
+

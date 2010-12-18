@@ -150,16 +150,19 @@ def editprofile(request, port_profile=None):
             
             if request.method == 'POST':
                 form = EditProfileForm(request.POST)
-                
+
                 if form.is_valid():
+                    
                     form.cleaned_data            
                     email_addr = form.cleaned_data['email']
                     if request.user.email != email_addr and User.objects.filter(email=email_addr):
                         form._errors["email"] = form.error_class(["This email address is already used by another user"])
+                    else:
                         
                         return toprofilerecorder(request,port_profile,'edit')
-            
+                    
             else:
+                print "date : "+str(p.date_of_birth)
                 init = {
                     'email' : request.user.email,
                     'first_name' : request.user.first_name,
@@ -176,7 +179,7 @@ def editprofile(request, port_profile=None):
                     'number_of_seats' : p.number_of_seats,
                 }
                 form = EditProfileForm(initial=init,)
-
+            
             return render_to_response('register.html', locals())
             
 def changepassword(request, port_profile=None):
@@ -264,6 +267,7 @@ def toprofilerecorder(request, port_profile, action):
     if not NumberOfSeats:
         NumberOfSeats = 0
     BirthDate = form.cleaned_data['date_of_birth']
+    
     Smoker = form.cleaned_data['smoker']
     Communities = form.cleaned_data['communities']
     MoneyPerKm = form.cleaned_data['money_per_km']
@@ -296,11 +300,12 @@ def toprofilerecorder(request, port_profile, action):
     if WaitCallbacksProfile.status(request.user) == 'success':
         WaitCallbacksProfile.free(request.user)
         if action == 'register':
-
             user = auth.authenticate(username=n_user.username, password=pwd)
             if user is not None and user.is_active:
                 auth.login(request, user)
-
+                
+        else:
+            notification = {'content':'Your profile has been updated', 'success':True}
         return render_to_response('home.html', locals())
     else:
         print WaitCallbacksProfile.status(request.user)
