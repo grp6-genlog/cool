@@ -198,7 +198,7 @@ class Tracker(PortObject):
         @pre : instruId is the id of an instruction (ride) in DB
         @post : start_ride is called.
         """
-        if msg[0]:
+        if msg[0]=='startride':
             ride = Ride.objects.get(id=msg[1])
             driver = ride.offer.proposal.user
             ndriver = ride.offer.request.user
@@ -209,6 +209,11 @@ class Tracker(PortObject):
                 self.userdict[ndriver][0].send('ndr!&&\n')
                 info[NDAWARE]=True
             lock.release()
-            
-            
+        elif msg[0]=='cancelride':
+            lock.acquire()
+            for ride in rides_list:
+                if ride[RIDEID]==msg[1]:
+                    rides_list.remove(ride)
+            lock.release()
+        
     

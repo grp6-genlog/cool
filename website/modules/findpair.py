@@ -48,7 +48,7 @@ class FindPair(PortObject):
                     ('buildoffer',requestID,proposalID) with requestID, the database ID of the matching request
         """
         infos=Proposal.objects.get(id=propID)
-        requests=Request.objects.filter(nb_requested_seats__lte=infos.number_of_seats)
+        requests=Request.objects.filter(nb_requested_seats__lte=infos.number_of_seats,status='P')
         print "len req:"+str(len(requests))
         for request in requests:
             found = False
@@ -101,7 +101,7 @@ class FindPair(PortObject):
                     ('buildoffer',requestID,proposalID) with proposalID, the database ID of the matching proposal
         """
         request=Request.objects.get(id=requestID)
-        proposals=Proposal.objects.filter(number_of_seats__gte=request.nb_requested_seats)
+        proposals=Proposal.objects.filter(number_of_seats__gte=request.nb_requested_seats,status='P')
         for infos in proposals:
             route_points = RoutePoints.objects.filter(proposal=infos).order_by('order')
             valid_pair = list()
