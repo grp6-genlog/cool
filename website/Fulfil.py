@@ -238,7 +238,6 @@ def create_proposal(user, car_id, car_desc, nb_seats, moneyperkm, dep_time, ar_t
         order += 1
     match_proposal(p.id)
 
-
 def create_users(nb_users, male_first_name_list, female_first_name_list, last_name_list, server_list, pwd_list, communities_list, car_desc_list, route_points_list):
     counter = 1
     counter2 = 0
@@ -308,7 +307,6 @@ def create_users(nb_users, male_first_name_list, female_first_name_list, last_na
             cancel_margin = datetime.datetime(2010, 12, (ar_time.day-random.randint(0,1)), (ar_time.hour - random.randint(0,ar_time.hour)),ar_time.minute,ar_time.second)
             create_request(userprofile, dep_p_lat, dep_p_long, dep_ran, ar_p_lat, ar_p_long, ar_ran, ar_time, max_del, nb_seats, cancel_margin)
 
-
         if car:
             for k in xrange(random.randint(0,2)):
                 car_id = userprofile.car_id
@@ -331,7 +329,8 @@ def create_users(nb_users, male_first_name_list, female_first_name_list, last_na
                     route_p_list.insert(0,(50.885015567679545, 5.096008367836475))
                     
                 dist = get_distance(route_p_list[0],route_p_list[-1])
-                ar_time = dep_time + datetime.timedelta(minutes=int(dist))
+                ar_time = dep_time + datetime.timedelta(minutes=dist*100.0/60.0)
+                print ar_time
                 create_proposal(userprofile, car_id, car_desc, nb_seats, moneyperkm, dep_time, ar_time, route_p_list)
 
 def main():
