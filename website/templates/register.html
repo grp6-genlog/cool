@@ -154,7 +154,13 @@ Please fill the form below
         <span style="font-style:italic; font-size:11px;">Mandatory fields are in bold</span><br/>
         <div class="submit-row">
             <label>
-            <input type="submit" value="Register" />
+            {% if action == "Register" %}
+                <input type="submit" value="Register" />
+            {% else %}
+                {% if action == "Edit" %}
+                    <input type="submit" value="Update" />
+                {% endif %}
+            {% endif %}
             </label>
         </div>
     </div>

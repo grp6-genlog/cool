@@ -30,7 +30,7 @@ class RideManager(PortObject):
               self.evaluationmanager_port = evaluationmanager_port
         """
         self.usernotifier_port = usernotifier_port
-        #self.tracker_port = tracker_port
+        self.tracker_port = tracker_port
         self.paymentmanager_port = paymentmanager_port
         self.evaluationmanager_port = evaluationmanager_port
         PortObject.__init__(self)
@@ -59,8 +59,8 @@ class RideManager(PortObject):
         ride=Ride(offer=offer, ride_started=False)
         ride.save()
 
-        self.send_to(self.usernotifier_port, ('newmsg', offer.proposal.user.id, "You've got a shared ride for proposal %d. Please visit your account for further information." % proposal.id))
-        self.send_to(self.usernotifier_port, ('newmsg', offer.request.user.id, "You've got a shared ride for request %d. Please visit your account for further information." % request.id))
+        self.send_to(self.usernotifier_port, ('newmsg', offer.proposal.user.id, "You've got a shared ride for proposal %d. Please visit your account for further information." % offer.proposal.id))
+        self.send_to(self.usernotifier_port, ('newmsg', offer.request.user.id, "You've got a shared ride for request %d. Please visit your account for further information." % offer.request.id))
 
         #compute ridetime-30 in seconds
         start = proposal.departure_time # datetime
