@@ -104,9 +104,9 @@ def myoffers(request, global_address_cache=None):
             
             insert_offer(info_offers, infos)
     
-    
-    notification = WaitCallbacksOffer.get_message(user)
-    WaitCallbacksOffer.erase_message(user)
+    if WaitCallbacksOffer.message_present(request.user):
+        notification = WaitCallbacksOffer.get_message(request.user)
+        WaitCallbacksOffer.erase_message(request.user)
     return render_to_response('myoffers.html', locals())
     
     
@@ -172,10 +172,13 @@ def responseoffer(request, offset, port_offer, accept, global_address_cache):
                 time.sleep(0.1)
                 wait_counter += 1
             
+            offer = Offer.objects.get(id=offset)
             if WaitCallbacksOffer.status(request.user) == 'success':
+                if offer.status == 'A':    
+                    WaitCallbackOffer.update_message(request.user, {'content':'The ride has been confirmed','success':True})
+
                 WaitCallbacksOffer.free(request.user)
-                
-                return redirect('/rides/')
+                return redirect('/offers/')
                 
             else:
                 print WaitCallbacksOffer.status(request.user)
@@ -192,17 +195,4 @@ def failurecall(user, message=None):
     if message:
         WaitCallbacksOffer.update_message(user, message)
     WaitCallbacksOffer.update(user, 'fail')
-        
-    
-def editrequest(request, offset):
-    try:
-        offset = int(offset)
-    except ValueError:
-        raise Http404()
-    
-    try:
-        req = Request.object.get(id=offset)
-    except:
-        error_msg = "No request found"
-        return render_to_response('error.html', locals())
-    return render_to_response('home.html', locals())
+

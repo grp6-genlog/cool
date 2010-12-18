@@ -73,6 +73,7 @@ class RideManager(PortObject):
         
         half_hour_before = (today-time_to_send).seconds + (today-time_to_send).days*86400
         until_ride = (today-start).seconds + (today-start).days*86400
+        print self.tracker_port
         if today>time_to_send:
             self.send_to(self.tracker_port,('startride', ride.id,lambda: self.close_ride(ride.id),lambda: self.cancel_ride(ride.id)))
         else:

@@ -7,6 +7,19 @@ My offers
 {% endblock %}
 
 {% block content %}
+
+    {% if notification.content %}
+        {% if notification.success %}
+            <span style="color:green;">
+        {% else %}
+            <span style="color:red;">
+        {% endif %}
+        
+        {{ notification.content }}
+        </span>
+        <br/><br/>
+    {% endif %}
+
 {% if info_offers|length == 0 %}
     You don't have any offers waiting for an approval.<br/>
 {% else %}

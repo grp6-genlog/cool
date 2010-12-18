@@ -14,7 +14,7 @@ import datetime, time, re
 
 class ProposalForm(forms.Form):
 
-    car_id = forms.CharField(max_length=50)
+    car_id = forms.CharField(max_length=50, label=u'Car plate')
     car_description = forms.CharField(max_length=500,
                             widget=forms.Textarea,
                             required=False)
