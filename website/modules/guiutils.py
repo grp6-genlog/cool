@@ -56,7 +56,7 @@ class WaitCallbacks(object):
     @classmethod
     def update_message(cls, u, msg):
         with cls._message_lock:
-            cls._message.update({u:status})
+            cls._message.update({u:msg})
     
     @classmethod
     def message_present(cls, u):

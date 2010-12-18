@@ -3,6 +3,9 @@
 
 from portobject import *
 import smtplib
+import traceback
+
+from website.profiles.models import UserProfile
 
 class UserNotifier(PortObject):
     fromaddr = 'carpooling.cool@gmail.com'
@@ -20,7 +23,7 @@ class UserNotifier(PortObject):
         self.server.starttls()  
         self.server.login('carpooling.cool','genlogiscool')  
 
-    def SendMessageToUser(self,db,userID=None,message=None):
+    def SendMessageToUser(self,userID=None,message=None):
         """
         Sends a notification to user thru a desired medium
         @pre:    dbconn is the SQL database
@@ -32,6 +35,7 @@ class UserNotifier(PortObject):
         u = UserProfile.objects.get(id=userID)
         mail = u.user.email
         tries = 50
+        print "sending email to "+mail
         while tries>0:
             try:
                 self.server.sendmail(self.fromaddr, mail, message)  
@@ -41,8 +45,9 @@ class UserNotifier(PortObject):
                 self.server.starttls()  
                 self.server.login('carpooling.cool','genlogiscool')  
             tries-=1
+            print "try n"+str(tries)
 
-    def routine(self,msg):
+    def routine(self,src,msg):
         """
         The only acceptable msg is ( newmsg ,userID,strmessage)
         @pre : dbconn is initialized
@@ -50,11 +55,13 @@ class UserNotifier(PortObject):
         strmessage is a string
         @post : the send_message_to_user is called.
         """
+
         if msg[0]=='newmsg':
             try:
                 userID=msg[1]
                 message=msg[2]
-                SendMessageToUser(db,userID,message)
+                self.SendMessageToUser(userID,message)
             except:
-                print "error newmsg"
-                
+                print traceback.print_exc()
+        else:
+            print "message unknown : "+str(msg[0])

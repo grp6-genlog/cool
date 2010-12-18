@@ -30,7 +30,7 @@ class PortObjects(object):
         self.user_notif_port = UserNotifier().get_port()
         self.payment_port = PaymentManager().get_port()
         self.evaluation_port = EvaluationManager().get_port()
-        self.tracker_port = Tracker(self.user_notif_port).get_port()
+        self.tracker_port = None#Tracker(self.user_notif_port).get_port()
         self.ride_port = RideManager(self.user_notif_port, self.tracker_port, self.payment_port, self.evaluation_port).get_port()
         self.offer_port = OfferManager(self.user_notif_port, self.ride_port).get_port()
         self.find_pair_port = FindPair(self.offer_port).get_port()

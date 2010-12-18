@@ -175,7 +175,7 @@ def responseoffer(request, offset, port_offer, accept, global_address_cache):
             offer = Offer.objects.get(id=offset)
             if WaitCallbacksOffer.status(request.user) == 'success':
                 if offer.status == 'A':    
-                    WaitCallbackOffer.update_message(request.user, {'content':'The ride has been confirmed','success':True})
+                    WaitCallbacksOffer.update_message(request.user, {'content':'The ride has been confirmed','success':True})
 
                 WaitCallbacksOffer.free(request.user)
                 return redirect('/offers/')
