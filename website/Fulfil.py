@@ -2,11 +2,124 @@
 #
 # @Author Cyrille Dejemeppe
 
+import sys
+sys.path.append("home/cycy/Git/cool/website/requests")
 import datetime, random
 from django.contrib.auth.models import User
 from profiles.models import UserProfile
 from requests.models import Request
 from proposals.models import Proposal, RoutePoints
+from utils import get_distance,get_time_at_point, total_seconds
+
+def match_proposal(propID):
+    """
+    This operation try to match the specified proposal with each request of the DB
+    
+    @pre : DB has been initialized and is the SQL database
+    offermanager_port has been initialized and is the port of the OfferManager module
+    
+    propId is the id of a proposal in the database
+    
+    @post : DB has not been modified.
+    for each request matching the specified proposal, a message is sent to OfferManager through its port:
+    ('buildoffer',requestID,proposalID) with requestID, the database ID of the matching request
+    """
+    infos=Proposal.objects.get(id=propID)
+    requests=Request.objects.filter(nb_requested_seats__lte=infos.number_of_seats)
+    print "len req:"+str(len(requests))
+    for request in requests:
+        found = False
+        for offer in Offer.objects.filter(request=request):
+            if Ride.objects.filter(offer=offer):
+                found=True
+                break
+        if not found:
+            route_points = RoutePoints.objects.filter(proposal=infos).order_by('order')
+            valid_pair = list()
+            for i in xrange(len(route_points)-2):
+                if get_distance((request.departure_point_lat,request.departure_point_long),(route_points[i].latitude,route_points[i].longitude))<request.departure_range:
+                    for j in range(i+1,len(route_points)):
+                        if get_distance((request.arrival_point_lat,request.arrival_point_long),(route_points[j].latitude,route_points[j].longitude))<request.arrival_range:
+                            valid_pair.append((i,j))
+            for (i,j) in valid_pair:
+                    #delete all not in time arrival
+                if total_seconds(abs(get_time_at_point([(r.latitude,r.longitude) for r in route_points],j,infos.departure_time,infos.arrival_time)-request.arrival_time)) < request.max_delay:
+                    build_offer(request.id, infos.id,
+                                (route_points[i].latitude, route_points[i].longitude,
+                                 get_time_at_point([(r.latitude,r.longitude) for r in route_points], 
+                                                   i, infos.departure_time,infos.arrival_time)),
+                                (route_points[j].latitude, route_points[j].longitude,
+                                 get_time_at_point([(r.latitude,r.longitude) for r in route_points],
+                                                   j,infos.departure_time,infos.arrival_time)))
+
+def build_offer(requestID,proposalID,departure,arrival):
+    """
+    Create a new offer in the database (a new entry in the offer table) for the request and the proposal.
+    @pre: requestID is the ID of a request in db
+    proposalID is the ID of a proposal in db
+    It doesn't already exist an offer in the db for this couple requestID, proposalID
+    
+    @post:    A new offer is created in the db for the couple request proposal with the following states:
+    status = pending
+    DriverOk = false
+    nonDriverOk = false
+    """
+    proposals=Proposal.objects.filter(id=proposalID)
+    
+    if len(proposals)==0:
+        raise "Try to build an offer from a proposal that doesn't exist"
+    fee=compute_fee(proposals[0], departure[3], arrival[3])
+    
+    offer=Offer()
+    offer.request=Request.objects.get(id=requestID)
+    offer.proposal=Proposal.objects.get(id=proposalID)
+    offer.status='P'
+    offer.driver_ok=False
+    offer.non_driver_ok=False
+    offer.pickup_point_lat=departure[0]
+    offer.pickup_point_long=departure[1]
+    offer.pickup_time = departure[2]
+    offer.drop_point_lat=arrival[0]
+    offer.drop_point_long=arrival[1]
+    offer.drop_time = arrival[2]
+    offer.pickup_point = RoutePoints.objects.get(id=departure[3])
+    offer.drop_point = RoutePoints.objects.get(id=arrival[3])
+    offer.total_fee=fee
+    offer.save()
+
+def match_request(requestID):
+    """
+    This operation try to match the specified proposal with each request of the DB
+    
+    @pre : DB has been initialized and is the SQL database
+    offermanager_port has been initialized and is the port of the OfferManager module
+    
+    requestId is the id of a request in the database
+    
+    @post : DB has not been modified.
+    for each proposal matching the specified request, a message is sent to OfferManager through its port:
+    ('buildoffer',requestID,proposalID) with proposalID, the database ID of the matching proposal
+    """
+    request=Request.objects.get(id=requestID)
+    proposals=Proposal.objects.filter(number_of_seats__gte=request.nb_requested_seats)
+    for infos in proposals:
+        route_points = RoutePoints.objects.filter(proposal=infos).order_by('order')
+        valid_pair = list()
+        for i in xrange(len(route_points)-2):
+            if get_distance((request.departure_point_lat,request.departure_point_long),(route_points[i].latitude,route_points[i].longitude))<request.departure_range:
+                for j in range(i+1,len(route_points)):
+                    if get_distance((request.arrival_point_lat,request.arrival_point_long),(route_points[j].latitude,route_points[j].longitude))<request.arrival_range:
+                        valid_pair.append((i,j))
+        for (i,j) in valid_pair:
+            #delete all not in time arrival
+            if total_seconds(abs(get_time_at_point([(r.latitude,r.longitude) for r in route_points],j,infos.departure_time,infos.arrival_time)-request.arrival_time)) < request.max_delay:
+                build_offer(requestID, infos.id,
+                            (route_points[i].latitude,route_points[i].longitude,
+                             get_time_at_point([(r.latitude,r.longitude) for r in route_points],
+                                               i,infos.departure_time,infos.arrival_time),route_points[i].id),
+                            (route_points[j].latitude,route_points[j].longitude,
+                             get_time_at_point([(r.latitude,r.longitude) for r in route_points],
+                                               j,infos.departure_time,infos.arrival_time),route_points[j].id))
 
 def printlist(mylist):
     tmp =''
@@ -31,15 +144,10 @@ def create_user(uname, firstname, lastname, mail, pwd):
     u = User.objects.create_user(uname, mail, pwd)
     u.first_name = firstname
     u.last_name = lastname
-    #u.is_staff = False
-    #u.is_active = True
-    #u.is_superuser = False
-    #u.date_joined = time_now
-    #u.last_login = time_now
     u.save()
     return u
 
-def create_profile(user, nb_seats, birthdate, smoke_bool, communities, moneyperkm, gender, bank_account, car_id, phone_nb, car_desc, smartphone_id):
+def create_profile(user, nb_seats, birthdate, smoke_bool, communities, moneyperkm, gender, bank_account, car_id, phone_nb, car_desc):
     p = UserProfile()
     p.user = user
     p.number_of_seats = nb_seats
@@ -53,7 +161,6 @@ def create_profile(user, nb_seats, birthdate, smoke_bool, communities, moneyperk
     p.car_id = car_id
     p.phone_number = phone_nb
     p.car_description = car_desc
-    p.smartphone_id = smartphone_id
     p.save()
     return p
 
@@ -70,7 +177,9 @@ def create_request(user, dep_p_lat, dep_p_long, dep_ran, ar_p_lat, ar_p_long, ar
     r.max_delay = max_del
     r.nb_requested_seats = nb_seats
     r.cancellation_margin = cancel_margin
+    r.status = 'P'
     r.save()
+    match_request(r.id)
 
 def create_proposal(user, car_id, car_desc, nb_seats, moneyperkm, dep_time, ar_time, route_points_list):
     p = Proposal()
@@ -81,7 +190,7 @@ def create_proposal(user, car_id, car_desc, nb_seats, moneyperkm, dep_time, ar_t
     p.money_per_km = moneyperkm
     p.departure_time = dep_time
     p.arrival_time = ar_time
-    
+    p.status = 'P'
     p.save()
     
     order = 0
@@ -93,6 +202,7 @@ def create_proposal(user, car_id, car_desc, nb_seats, moneyperkm, dep_time, ar_t
         rp.order = order
         rp.save()
         order += 1
+    match_proposal(p.id)
 
 
 def create_users(nb_users, male_first_name_list, female_first_name_list, last_name_list, server_list, pwd_list, communities_list, car_desc_list, smartphone_list, route_points_list):
@@ -249,7 +359,6 @@ def main():
                      'P Ferrari 512BB 76','S Fiat 500 R 72','S Fiat Barchetta Giovane Due 00','P Ford Focus ST 06','S Ford Focus ST170 03','S Ford Ford GT 02',
                      'S Ford Ford GT 05','S Honda Castrol MUGEN NSX (JGTC) 00','S Honda CITY Turbo II 83','S Honda CIVIC 1500 3door 25i 83',
                      'S Honda CIVIC 1500 3door CX 79']
-    smartphone_list = ['Sprint HTC EVO 4G','Apple iPhone 3GS','Nokia N8','HTC Droid Incredible','Google Nexus One','Palm Pre Plus','T-Mobile myTouch 3G Slide',
                        'RIM BlackBerry Bold 9700','T-Mobile HTC HD2','Motorola Droid']
     route_points_list = list()
     for i in xrange(6000):
