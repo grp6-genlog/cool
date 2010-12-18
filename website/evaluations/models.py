@@ -11,5 +11,5 @@ class Evaluation(models.Model):
 
     
     def __unicode__(self):
-        return u'%s -> %s' % (self.user_from.name, self.user_to.name)
+        return u'%s -> %s' % (self.user_from.user.username, self.user_to.user.username)
     

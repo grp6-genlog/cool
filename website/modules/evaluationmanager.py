@@ -7,7 +7,7 @@ from rides.models import Ride
 from offers.models import Offer
 from profiles.models import UserProfile
 from django.contrib.auth.models import User
-
+import threading
 
 class EvaluationManager(PortObject):
 	
@@ -95,7 +95,7 @@ class delayAction:
 		self.fun = fun
 		self.arg = arg
 	def start(self):
-		self.t = Timer(self.delay,self.fun,self.arg)
+		self.t = threading.Timer(self.delay,self.fun,self.arg)
 		self.t.start()
 	def cancel(self):
 		self.t.cancel()
