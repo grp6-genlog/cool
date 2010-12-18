@@ -6,13 +6,12 @@ from website.profiles.models import UserProfile
 from website.requests.models import Request
 from django.contrib.auth.models import User
 
-from portobject import PortObject
+from portobject import *anonymous_send_to
 from guiutils import WaitCallbacks
 from google_tools_json import *
 
 import datetime, time, re
 
-gui_port = PortObject()
 
 
 class RequestForm(forms.Form):
@@ -97,7 +96,7 @@ def addrequest(request, port_request=None):
             
             WaitCallbacksRequest.declare(request.user)
             
-            gui_port.send_to(port_request,('recordrequest',[UserID,departure_point,departure_range,
+            anonymous_send_to(port_request,('recordrequest',[UserID,departure_point,departure_range,
                                                             arrival_point,arrival_range,arrival_time,max_delay,
                                                             nb_requested_seats,cancellation_margin,status],
                                            successcall,

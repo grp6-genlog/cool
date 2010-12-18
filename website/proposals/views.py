@@ -5,12 +5,11 @@ from website.profiles.models import UserProfile
 from website.proposals.models import Proposal, RoutePoints
 from django.contrib.auth.models import User
 
-from portobject import PortObject
+from portobject import *
 from guiutils import WaitCallbacks
 
 import datetime, time, re
 
-gui_port = PortObject()
 
 
 class ProposalForm(forms.Form):
@@ -67,7 +66,7 @@ def addproposal(request, port_proposal=None,global_address_cache=None):
             
             WaitCallbacksProposal.declare(request.user)
             
-            gui_port.send_to(port_proposal,('recordproposal',[UserID,route_points_list,car_description,car_id,
+            anonymous_send_to(port_proposal,('recordproposal',[UserID,route_points_list,car_description,car_id,
                                                             number_of_seats,money_per_km,departure_time,arrival_time,status],
                                            successcall,
                                            failurecall,

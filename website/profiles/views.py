@@ -17,10 +17,9 @@ from django.contrib.auth.models import User
 
 import datetime, time
 
-from portobject import PortObject
+from portobject import *
 from guiutils import WaitCallbacks
 
-gui_port = PortObject()
 
 GENDER_CHOICES = (
     ('M', 'Male'),
@@ -284,7 +283,7 @@ def toprofilerecorder(request, port_profile, action):
         
     WaitCallbacksProfile.declare(request.user)
     
-    gui_port.send_to(port_profile,(msg,[n_user,NumberOfSeats,
+    anonymous_send_to(port_profile,(msg,[n_user,NumberOfSeats,
                                        BirthDate,Smoker,Communities,MoneyPerKm,
                                        Gender,BankAccountNumber,CarID,
                                        GSMNumber,CarDescription],
