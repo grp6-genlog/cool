@@ -37,7 +37,7 @@ class RideManager(PortObject):
         
     def buildinstructions(self,msg):
         """
-        The ('newacceptedride',offerID) message treatement.
+        The ('newacceptedride',) message treatement.
         @pre : DB is initialized and is the SQL database
                self.usernotifier_port is the UserNotifier module port (a Queue)
                self.tracker_port is the Tracker module port (a Queue)
@@ -56,43 +56,33 @@ class RideManager(PortObject):
                   ('startevaluation',instructionID) with instructionID the id of the request in the DB's table.
         """
         offer=Offer.objects.get(id=msg[1])
-        if offer==None:
-            raise "There doesn't exist an offer for %d" % msg[1]
-        proposal=Proposal.objects.get(id=offer.proposal.id)
-        request=Request.objects.get(id=offer.request.id)
-        if proposal==None or request==None:
-            raise "There doesn't exist a proposal or a request for the offer %d" % msg[1]
-
         ride=Ride(offer=offer, ride_started=False)
         ride.save()
 
-        self.send_to(self.usernotifier_port, ('newmsg', proposal.user.id, "You've got a shared ride for proposal %d. Please visit your account for further information." % proposal.id))
-        self.send_to(self.usernotifier_port, ('newmsg', request.user.id, "You've got a shared ride for request %d. Please visit your account for further information." % request.id))
+        self.send_to(self.usernotifier_port, ('newmsg', offer.proposal.user.id, "You've got a shared ride for proposal %d. Please visit your account for further information." % proposal.id))
+        self.send_to(self.usernotifier_port, ('newmsg', offer.request.user.id, "You've got a shared ride for request %d. Please visit your account for further information." % request.id))
 
         #compute ridetime-30 in seconds
         start = proposal.departure_time # datetime
-        today = datetime.today() # datetime
+        today = datetime.now() # datetime
         
         half_hour = timedelta(minutes=30) # delta
         time_to_send = start - half_hour # datetime
         
-        if start < today:
-            raise 'Ride time over passed'
-            
-        elif time_to_send < today:
-            raise 'less than 30min before'
-            
+        
+        half_hour_before = (today-time_to_send).seconds + (today-time_to_send).days*86400
+        until_ride = (today-start).seconds + (today-start).days*86400
+        if today>time_to_send:
+            self.send_to(self.tracker_port,('startride', ride.id,lambda: self.close_ride(ride.id),lambda: self.cancel_ride(ride.id)))
         else:
-            half_hour_before = (today-time_to_send).seconds + (today-time_to_send).days*86400
-            until_ride = (today-start).seconds + (today-start).days*86400
-            
-            
             delay1=delayAction(half_hour_before, self.send_to, (self.tracker_port, ('startride', ride.id,lambda: self.close_ride(ride.id),lambda: self.cancel_ride(ride.id))))
-            delay2=delayAction(until_ride, self.send_to, (self.evaluationmanager_port, ('startevaluation', proposal.user.id, ride.id)))
-            delay3=delayAction(until_ride, self.send_to, (self.evaluationmanager_port, ('startevaluation', request.user.id, ride.id)))
             delay1.start()
-            delay2.start()
-            delay3.start()
+
+        delay2=delayAction(until_ride, self.send_to, (self.evaluationmanager_port, ('startevaluation', proposal.user.id, ride.id)))
+        delay3=delayAction(until_ride, self.send_to, (self.evaluationmanager_port, ('startevaluation', request.user.id, ride.id)))
+        
+        delay2.start()
+        delay3.start()
 
     def close_ride(self,instructionID):
         """
@@ -110,14 +100,10 @@ class RideManager(PortObject):
                    ('payfee',instructionID)
         """
         ride=Ride.objects.get(id=instructionID)
-        if ride==None:
-            raise 'There is no instruction for %d' % instructionID
         offer=Offer.objects.get(id=ride.offer.id)
-        if offer==None:
-            raise 'There is no offer for this instruction'
         offer.status('F')
         offer.save()
-        self.send_to(self.evaluationmanager_port, ('payfee', instructionID))
+        self.send_to(self.paymentmanager_port, ('payfee', instructionID))
 
     def cancel_ride(self,instructionID):
         """
@@ -137,23 +123,16 @@ class RideManager(PortObject):
                    ('newmsg',usersID,"The ride instructionID has been cancelled.")
         """
         ride=Ride.objects.get(id=instructionID)
+        if ride.ride_started:
+            return 1
+
+        ride.offer.status('F')
+        ride.offer.save()        
+        self.send_to(self.usernotifier_port, ('newmsg', ride.offer.request.user.id, 'The ride %d has been cancelled' % instructionID))
+        self.send_to(self.usernotifier_port, ('newmsg', ride.offer.proposal.user.id, 'The ride %d has been cancelled' % instructionID))
+        self.send_to(self.tracker_port,('cancelride',ride.id))
+        return 0
         
-        if ride==None:
-            raise 'There is no instruction for %d' % instructionID
-        offer=Offer.objects.get(id=ride.offer.id)
-        if offer==None:
-            raise 'There is no offer for this instruction'
-        nondriver=Request.objects.get(id=offer.request.id)
-        driver=Proposal.objects.get(id=offer.proposal.id)
-        if nondriver==None or driver==None:
-            raise 'There is a problem with the users'
-        offer.status('F')
-        offer.save()
-
-        self.send_to(self.evaluationmanager_port, ('returnfee', instructionID))
-        self.send_to(self.usernotifier_port, ('newmsg', nondriver.user, 'The ride %d has been cancelled' % instructionID))
-        self.send_to(self.usernotifier_port, ('newmsg', driver.user, 'The ride %d has been cancelled' % instructionID))
-
     def routine(self,src,msg):
         """
         The msg treatement routine.
@@ -167,12 +146,10 @@ class RideManager(PortObject):
         for 'newacceptedride', see self.buildinstruction msg
         """
         if msg[0]=='cancelride':
-            res=self.cancel_ride(msg[1])
-            
-            if res==0:
-                successCancelRide()
+            if not self.cancel_ride(msg[1]):
+                threading.Thread(target=msg[2]).start()
             else:
-                failureCancelRide('The ride cannot be canceled')
+                threading.Thread(target=msg[3]).start()
             
         elif msg[0] == 'newacceptedride':
             res=self.buildinstructions(msg)
