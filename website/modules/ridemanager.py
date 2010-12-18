@@ -66,8 +66,8 @@ class RideManager(PortObject):
         ride=Ride(offer=offer, ride_started=False)
         ride.save()
 
-        self.send_to(self.usernotifier_port, ('newmsg', proposal.user, "You've got a shared ride for proposal %d. Please visit your account for further information." % proposal.id))
-        self.send_to(self.usernotifier_port, ('newmsg', request.user, "You've got a shared ride for request %d. Please visit your account for further information." % request.id))
+        self.send_to(self.usernotifier_port, ('newmsg', proposal.user.id, "You've got a shared ride for proposal %d. Please visit your account for further information." % proposal.id))
+        self.send_to(self.usernotifier_port, ('newmsg', request.user.id, "You've got a shared ride for request %d. Please visit your account for further information." % request.id))
 
         #compute ridetime-30 in seconds
         start = proposal.departure_time # datetime
@@ -87,9 +87,9 @@ class RideManager(PortObject):
             until_ride = (today-start).seconds + (today-start).days*86400
             
             
-            delay1=delayAction(half_hour_before, self.send_to, (self.tracker_port, ('startride', ride.id, self.close_ride, self.cancel_ride)))
-            delay2=delayAction(until_ride, self.send_to, (self.evaluationmanager_port, ('startevaluation', proposal.user, ride.id)))
-            delay3=delayAction(until_ride, self.send_to, (self.evaluationmanager_port, ('startevaluation', request.user, ride.id)))
+            delay1=delayAction(half_hour_before, self.send_to, (self.tracker_port, ('startride', ride.id,lambda: self.close_ride(ride.id),lambda: self.cancel_ride(ride.id))))
+            delay2=delayAction(until_ride, self.send_to, (self.evaluationmanager_port, ('startevaluation', proposal.user.id, ride.id)))
+            delay3=delayAction(until_ride, self.send_to, (self.evaluationmanager_port, ('startevaluation', request.user.id, ride.id)))
             delay1.start()
             delay2.start()
             delay3.start()
