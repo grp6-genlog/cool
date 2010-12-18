@@ -5,7 +5,7 @@ class Evaluation(models.Model):
     user_from = models.ForeignKey('profiles.UserProfile', related_name='user_from')
     user_to = models.ForeignKey('profiles.UserProfile', related_name='user_to')
     rating = models.IntegerField(null=True)
-    content = models.TextField(max_length=500, null=True)
+    content = models.TextField(max_length=500, null=True, blank=True)
     ride_time = models.DateTimeField(null=True)
     locked = models.BooleanField(default=True)
 

@@ -18,15 +18,31 @@ Profile
         Phone number: {{other.phone_number}}<br/>
     {% endif %}
     <br/><br/>
-    {% if evaluations %}
-        {% for eval in evaluations %}
-            From: {{ eval.user_from.user.first_name }} {{ eval.user_from.user.last_name }}<br/>
-            Date: {{ eval.ride_time }}<br/>
-            Rating: {{ eval.rating }}<br/>
-            <i>{{ eval.content }}</i>
-            <br/><br/>
-        {% endfor %}
+    <hr>
+    {% if evaluation_l|length == 0 %}
+        There are no evaluations written about this user.<br/>
     {% else %}
-            This user hasn't any evaluation yet.
+        <span style="text-weight:bold;font-size:1.1em;">Evaluations for the rides for which {{other.user.first_name}} was the driver</span>
+        <br/><br/>
+        {% for evaluation in evaluation_l %}
+            {% if evaluation.ride.offer.proposal.user == other %}
+                <b>Evaluation from:</b> {{ evaluation.user_from.user.first_name }} {{ evaluation.user_from.user.last_name }}<br/>
+                <b>Rating:</b> {% if evaluation.rating %}{{ evaluation.rating }}{% else %}<i>Not yet set</i>{% endif %}<br/>
+	            {% if evaluation.content %}<b>Comment:</b> {{ evaluation.content }}<br/>{% endif %}
+	            <b>Date of the ride:</b> {{ evaluation.ride_time }}<br/><br/>
+            {% endif %}
+        {% endfor %}
+        
+        <hr>
+        <span style="text-weight:bold;font-size:1.1em;">Evaluations for the rides for which you were a passenger</span>
+        <br/>
+        {% for evaluation in evaluation_l %}
+            {% if evaluation.ride.offer.request.user == other %}
+                <b>Evaluation from:</b> {{ evaluation.user_from.user.first_name }} {{ evaluation.user_from.user.last_name }}<br/>
+                <b>Rating:</b> {% if evaluation.rating %}{{ evaluation.rating }}{% else %}<i>Not yet set</i>{% endif %}<br/>
+	            <b>Comment:</b> {{ evaluation.content }}<br/>
+	            <b>Date of the ride:</b> {{ evaluation.ride_time }}<br/><br/>
+            {% endif %}
+        {% endfor %}
     {% endif %}
 {% endblock %}

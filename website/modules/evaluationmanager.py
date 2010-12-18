@@ -7,7 +7,7 @@ from rides.models import Ride
 from offers.models import Offer
 from profiles.models import UserProfile
 from django.contrib.auth.models import User
-import threading
+import threading, datetime
 
 class EvaluationManager(PortObject):
 	
@@ -59,7 +59,7 @@ class EvaluationManager(PortObject):
 			u_from = ride.offer.proposal.user
 		else:
 			u_from = ride.offer.request.user
-		myeval = Evaluation(ride=ride, user_from=u_from, user_to=UserProfile.objects.get(id=userID), locked=False)
+		myeval = Evaluation(ride=ride, user_from=u_from, user_to=UserProfile.objects.get(id=userID), locked=False, ride_time=datetime.datetime.today())
 		myeval.save()
 		delay = delayAction(86400*3, self.send_to, (self.get_port, ('closeevaluation', myeval.id)))
 		delay.start()

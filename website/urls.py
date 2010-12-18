@@ -89,6 +89,6 @@ urlpatterns += patterns('website.rides.views',
 )
 
 urlpatterns += patterns('website.evaluations.views',
-    (r'^evaluations/$', 'myevaluations', {'global_address_cache':global_address_cache}),
+    (r'^evaluations/$', 'myevaluations'),
     (r'^addevaluation/(?P<offset>\d+)/$', 'addevaluation', {'port_evaluation':global_ports.evaluation_port,}),
 )

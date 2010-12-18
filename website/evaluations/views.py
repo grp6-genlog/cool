@@ -3,14 +3,29 @@ from django.http import HttpResponseRedirect
 from django import forms
 
 from website.profiles.models import UserProfile
-from website.requests.models import Request
+from website.evaluations.models import Evaluation
+from website.rides.models import Ride
 from django.contrib.auth.models import User
 
 from portobject import *
 from guiutils import WaitCallbacks
-from google_tools_json import *
 
-import datetime, time, re
+import datetime, time
+
+
+RATING_CHOICES = (
+    (1, '1/5'),
+    (2, '2/5'),
+    (3, '3/5'),
+    (4, '4/5'),
+    (5, '5/5'),
+)
+
+class EvaluationForm(forms.Form):
+    rating = forms.ChoiceField(choices=RATING_CHOICES, initial=3)
+    content = forms.CharField(max_length=500,
+                            widget=forms.Textarea,
+                            required=False)
 
 
 
@@ -44,51 +59,34 @@ def addevaluation(request, offset, port_evaluation=None):
             return render_to_response('home.html', locals())
         else:
         
-            if ride.offer.status != 'A':
-                notification = {'content':'Invalid call, ride not agreed', 'success':False}
+            if ride.offer.status != 'F' and ride.offer.status != 'C':
+                notification = {'content':'Invalid call, ride not done or cancelled', 'success':False}
                 return render_to_response('home.html', locals())
             
-            if request.user != ride.offer.proposal.user.user and request.user != ride.offer.request.user.user:
-                notification = {'content':'Invalid call', 'success':False}
+            if request.user == ride.offer.proposal.user.user:
+                user_to = ride.offer.request.user
+            elif request.user == ride.offer.request.user.user:
+                user_to = ride.offer.proposal.user
+            else:
+                notification = {'content':'Invalid call, you have not participated to this ride', 'success':False}
+                return render_to_response('home.html', locals())
+            
+            evaluation = Evaluation.objects.get(ride=ride, user_to=user_to)
+            if evaluation.locked:
+                notification = {'content':'You have can not evaluate this ride anymore', 'success':False}
+                return render_to_response('home.html', locals())
                 
-    if not request.user.is_authenticated():
-        return redirect('/home/', request=request)
-
+            form = EvaluationForm()
+            return render_to_response('evaluationform.html', locals())
+                
     if request.method == 'POST':
-        form = RequestForm(request.POST)
+        form = EvaluationForm(request.POST)
         if form.is_valid():
             form.cleaned_data
             
-            departure_point = address_to_location(form.cleaned_data['departure_point'])
-            if departure_point == -1:
-                form._errors["departure_point"] = form.error_class(["No address found"])
-                return render_to_response('requestform.html', locals())
-                
-            departure_range = request.POST.get('departure_range', 0)
-
-            arrival_point = address_to_location(form.cleaned_data['arrival_point'])
-            if arrival_point == -1:
-                form._errors["arrival_point"] = form.error_class(["No address found"])
-                return render_to_response('requestform.html', locals())
+            rating = form.cleaned_data['rating']
+            content = form.cleaned_data['content']
             
-            arrival_time = form.cleaned_data['arrival_time']
-            UserID = UserProfile.objects.get(user=request.user)
-            if arrival_time < datetime.datetime.today():
-                form._errors["arrival_time"] = form.error_class(["Arrival time already passed"])
-                return render_to_response('requestform.html', locals())
-                
-            arrival_range = form.cleaned_data['arrival_range']
-                        
-            max_delay = form.cleaned_data['max_delay']
-            max_delay = int(max_delay.hour*3600 + max_delay.minute * 60)
-            nb_requested_seats = form.cleaned_data['nb_requested_seats']
-            cancellation_margin = form.cleaned_data['cancellation_margin']
-            
-            #if abs(cancellation_margin - (arrival_time - datetime.timedelta(seconds=max_delay))) < datetime.timedelta(minutes=30):
-            #    form._errors["cancellation_margin"] = form.error_class(["Specify a cancellation margin earlier"])
-            #    return render_to_response('requestform.html', locals())
-            
-            status = 'P'
             
             WaitCallbacksEval.declare(request.user)
             

@@ -27,21 +27,22 @@ My evaluations
     <br/><br/>
     {% for evaluation in evaluation_l %}
         {% if evaluation.ride.offer.proposal.user.user == request.user %}
-            <b>Evaluation from {{ evaluation.user_from.first_name }} {{ evaluation.user_from.last_name }}</b><br/>
-            <b>Rating:</b> {{ evaluation.rating }}<br/>
-	    <b>Comment:</b> {{ evaluation.content }}<br/>
-	    <b>Date of the ride:</b> {{ evaluation.ride_time }}<br/><br/><br/>
+            <b>Evaluation from:</b> {{ evaluation.user_from.user.first_name }} {{ evaluation.user_from.user.last_name }}<br/>
+            <b>Rating:</b> {% if evaluation.rating %}{{ evaluation.rating }}{% else %}<i>Not yet set</i>{% endif %}<br/>
+	        {% if evaluation.content %}<b>Comment:</b> {{ evaluation.content }}<br/>{% endif %}
+	        <b>Date of the ride:</b> {{ evaluation.ride_time }}<br/><br/><br/>
         {% endif %}
     {% endfor %}
     
     <hr>
     <span style="text-weight:bold;font-size:1.1em;">Evaluations for the rides for which you were a passenger</span>
+    <br/><br/>
     {% for evaluation in evaluation_l %}
         {% if evaluation.ride.offer.request.user.user == request.user %}
-            <b>Evaluation from {{ evaluation.user_from.first_name }} {{ evaluation.user_from.last_name }}</b><br/>
-            <b>Rating:</b> {{ evaluation.rating }}<br/>
-	    <b>Comment:</b> {{ evaluation.content }}<br/>
-	    <b>Date of the ride:</b> {{ evaluation.ride_time }}<br/><br/><br/>
+            <b>Evaluation from:</b> {{ evaluation.user_from.user.first_name }} {{ evaluation.user_from.user.last_name }}<br/>
+            <b>Rating:</b> {% if evaluation.rating %}{{ evaluation.rating }}{% else %}<i>Not yet set</i>{% endif %}<br/>
+	        <b>Comment:</b> {{ evaluation.content }}<br/>
+	        <b>Date of the ride:</b> {{ evaluation.ride_time }}<br/><br/><br/>
         {% endif %}
     {% endfor %}
 {% endif %}

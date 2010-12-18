@@ -32,9 +32,13 @@ def myrides(request, global_address_cache=None):
     user = UserProfile.objects.get(user=request.user)
     info_rides = []
     
-    for prop in Proposal.objects.filter(user=user, status='P', departure_time__gt=datetime.datetime.today()):
+    three_days_ago = datetime.datetime.today() - datetime.timedelta(days=3)
+    for prop in Proposal.objects.filter(user=user, status='P', departure_time__gt=three_days_ago):
         
-        offer_list = Offer.objects.filter(proposal=prop, status='A') # every future offer accepted by both where the user is the driver
+        ol1 = Offer.objects.filter(proposal=prop, status='A') # every future offer accepted by both where the user is the driver
+        ol2 = Offer.objects.filter(proposal=prop, status='F') # every offer finished where the user is the driver
+        ol3 = Offer.objects.filter(proposal=prop, status='C') # every offer cancelled where the user is the driver
+        offer_list = ol1 | ol2 | ol3
         for of in offer_list:
             print of.id
             ride = Ride.objects.get(offer=of)
@@ -66,15 +70,19 @@ def myrides(request, global_address_cache=None):
                 'driver':True, 'other':of.request.user,
                 'date_pick':date_pick, 'pick_point': pick_point,
                 'date_drop':date_drop, 'drop_point': drop_point,
-                'fee': of.total_fee, 'id':ride.id, 'nb_seat': of.request.nb_requested_seats
+                'fee': of.total_fee, 'id':ride.id,
+                'nb_seat': of.request.nb_requested_seats, 'status':of.status
             }
 
             insert_ride(info_rides, infos)
 
 
-    for req in Request.objects.filter(user=user, status='P', arrival_time__gt=datetime.datetime.today()):
+    for req in Request.objects.filter(user=user, status='P', arrival_time__gt=three_days_ago):
         
-        offer_list = Offer.objects.filter(request=req, status='A') # every future offer accepted by both where the user is the non-driver
+        ol1 = Offer.objects.filter(request=req, status='A') # every future offer accepted by both where the user is the passenger
+        ol2 = Offer.objects.filter(request=req, status='F') # every offer finished where the user is the passenger
+        ol3 = Offer.objects.filter(request=req, status='C') # every offer cancelled where the user is the passenger
+        offer_list = ol1 | ol2 | ol3
         for of in offer_list:
             ride = Ride.objects.get(offer=of)    
             
@@ -106,7 +114,8 @@ def myrides(request, global_address_cache=None):
                 'driver':False, 'other':of.proposal.user,
                 'date_pick':date_pick, 'pick_point': pick_point,
                 'date_drop':date_drop, 'drop_point': drop_point,
-                'fee': of.total_fee, 'id':ride.id, 'nb_seat': of.request.nb_requested_seats
+                'fee': of.total_fee, 'id':ride.id,
+                'nb_seat': of.request.nb_requested_seats, 'status':of.status
             }
 
             insert_ride(info_rides, infos)

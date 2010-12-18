@@ -326,30 +326,32 @@ def publicprofile(request, offset):
     try:
         offset = int(offset)
     except:
-        return render_to_response('error.html', locals())
+        notification = {'content':'Not an user', 'success':False}
+        return render_to_response('home.html', locals())
     
-    user = UserProfile.objects.get(user=request.user)    
+    user_p = UserProfile.objects.get(user=request.user)    
     try:
         other = UserProfile.objects.get(user=User.objects.get(id=offset))
     except:
-        return render_to_response('error.html', locals())
+        notification = {'content':'Not an user', 'success':False}
+        return render_to_response('home.html', locals())
         
     if not request.user.is_authenticated():
         current_date = datetime.datetime.now()
+        notification = {'content':'Please log in to see this page', 'success':False}
         return render_to_response('home.html', locals())
     
     
     other_requests = Request.objects.filter(user=other)
     other_proposals = Proposal.objects.filter(user=other)
-    user_requests = Request.objects.filter(user=user)
-    user_proposals = Proposal.objects.filter(user=user)
+    user_requests = Request.objects.filter(user=user_p)
+    user_proposals = Proposal.objects.filter(user=user_p)
     
     b = False
-
     for other_r in other_requests:
         other_offers = other_r.offer_set.all()
         for other_o in other_offers:
-            if ((other_o.proposal in user_proposals) and (other_o.status == 'P' or other_o.status == 'A')):
+            if ((other_o.proposal in user_proposals) and other_o.status != 'D'):
                 b = True
                 com_offer = other_o
                 break
@@ -357,19 +359,22 @@ def publicprofile(request, offset):
             break
     if not b:        
         for other_p in other_proposals:
-            other_offers = other_p.request_set.all()
+            other_offers = other_p.offer_set.all()
             for other_o in other_offers:
-                if (other_o.request in user_requests) and (other_o.status == 'P' or other_o.status == 'A'):
+                if ((other_o.request in user_requests) and other_o.status != 'D'):
                     b = True
                     com_offer = other_o
                     break
+                else:
+                    print str(other_o.request)+" not in "+str(user_requests)+" with status "+other_o.status
             if b:
                 break
     if not b:
-        return render_to_response('error.html', locals())
+        notification = {'content':'You are not allowed to see this profile', 'success':False}
+        return render_to_response('home.html', locals())
     else:
         age = int(abs(datetime.date.today() - other.date_of_birth).days/(365*0.75 + 366*0.25))
-        evaluations = other.user_to.all()
+        evaluation_l = other.user_to.all()
         return render_to_response('publicprofile.html', locals())
         
         
