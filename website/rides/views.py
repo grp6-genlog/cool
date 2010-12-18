@@ -15,16 +15,15 @@ from guiutils import WaitCallbacks
 import datetime, time, utils
 
 
-class WaitCallbacksOffer(WaitCallbacks):
+class WaitCallbacksRide(WaitCallbacks):
     pass
                       
 
 """
-    Display the list of offers of the authenticated user waiting for approval
-    of one or the two participant
+    Display the list of rides of the authenticated user
     If he isn't connected, display the home page
 """
-def myoffers(request, global_address_cache=None):
+def myrides(request, global_address_cache=None):
     if not request.user.is_authenticated():
         return redirect('/home/')
     
@@ -34,6 +33,7 @@ def myoffers(request, global_address_cache=None):
     for prop in user.proposal_set.all():
         new_offers = Offer.objects.filter(proposal=prop, status='P')
         for of in new_offers:
+            ride = Ride.objects.filter(offer=of)
             route_points = of.proposal.routepoints_set.all()
             index_pickup = 0
             index_drop = 0
