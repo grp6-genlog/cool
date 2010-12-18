@@ -51,18 +51,15 @@ class EvaluationManager(PortObject):
 			   DB in initialized
 		@post : the empty evaluation for userID and instructionID is now present in DB
 		"""
-		rides=Ride.objects.get(id=instructionID)
-		if len(rides)==0:
-			raise "The ride doesn't exist for this offer"
-		proposals=Proposal.objects.filter(id=rides[0].proposal)
-		requests=Request.objects.filter(id=rides[0].request)
-		if len(proposals)==0 or len(requests)==0:
-			raise "The requests or the proposals doesn't exist for this offer"
-		if proposals[0].user!=userID:
-			u_from=proposals[0].user
-		eval=Evaluation(ride=rides[0], user_from=u_from, user_to=userID, locked=False)
-		eval.save()
-		delay=delayAction(86400*3, self.send_to, (self.get_port, ('closeevaluation', [eval.id])))
+		ride=Ride.objects.get(id=instructionID)
+		u_from=None
+		if ride.offer.proposal.user.id!=userID:
+			u_from=ride.offer.proposal.user
+		else:
+			u_from=ride.offer.request.user
+		myeval=Evaluation(ride=ride, user_from=u_from, user_to=User.objects.get(id=userID), locked=False)
+		myeval.save()
+		delay=delayAction(86400*3, self.send_to, (self.get_port, ('closeevaluation', myeval.id)))
 		delay.start()
 		
 	def routine(self, src, msg):
