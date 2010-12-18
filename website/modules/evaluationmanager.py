@@ -24,7 +24,7 @@ class EvaluationManager(PortObject):
 			   userID is already in database, but empty
 		@post : the evaluation contains now the content
 		"""
-		evals=Evaluation.objects.filter(ride=instructionID, user_from=userID)
+		evals=Evaluation.objects.filter(ride=Ride.objects.get(id=instructionID), user_from=UserProfile.objects.get(id=userID))
 		if len(evals)!=1:
 			raise "There isn't any valid offer for this ID"
 		if not evals[0].locked:
@@ -51,7 +51,7 @@ class EvaluationManager(PortObject):
 			   DB in initialized
 		@post : the empty evaluation for userID and instructionID is now present in DB
 		"""
-		rides=Ride.objects.filter(offer=instructionID)
+		rides=Ride.objects.filter(offer=Offer.objects.get(id=instructionID))
 		if len(rides)==0:
 			raise "The ride doesn't exist for this offer"
 		proposals=Proposal.objects.filter(id=rides[0].proposal)
