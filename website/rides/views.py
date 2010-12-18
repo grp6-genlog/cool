@@ -6,174 +6,165 @@ from website.profiles.models import UserProfile
 from website.proposals.models import Proposal
 from website.requests.models import Request
 from website.offers.models import Offer
-from website.rides.models import Ride
 from django.contrib.auth.models import User
 
 
-from portobject import PortObject
+from portobject import *
 from guiutils import WaitCallbacks
-from google_tools_json import *
 
-import datetime, time
-
-gui_port = PortObject()
+import datetime, time, utils
 
 
 class WaitCallbacksRide(WaitCallbacks):
-    pass    
-
+    pass
                       
 
-def myrides(request):
+"""
+    Display the list of rides of the authenticated user
+    If he isn't connected, display the home page
+"""
+def myrides(request, global_address_cache=None):
     if not request.user.is_authenticated():
         return redirect('/home/')
     
-    user=UserProfile.objects.get(user=request.user)
-    info_rides = []
+    user = UserProfile.objects.get(user=request.user)
+    info_offers = []
     
     for prop in user.proposal_set.all():
-        new_offers = Offer.objects.filter(proposal=prop, status='A')
+        new_offers = Offer.objects.filter(proposal=prop, status='P')
         for of in new_offers:
             ride = Ride.objects.filter(offer=of)
-            if ride:
-                route_points = of.proposal.routepoints_set.all()
-                
-                date_pick = get_time(of.proposal.departure_time,
-                                     of.proposal.arrival_time,
-                                     route_points,
-                                    (of.pickup_point_lat, of.pickup_point_long))
-                
-                date_drop = get_time(of.proposal.departure_time,
-                                     of.proposal.arrival_time,
-                                     route_points,
-                                    (of.drop_point_lat, of.drop_point_long))
-                                    
-                pick_point_js = json.loads(location_to_address(str(of.pickup_point_lat)+","+str(of.pickup_point_long)).read())
-                if len(pick_point_js)==0:
-                    pick_point = "No address"
-                else:
-                    pick_point = pick_point_js['results'][0]['formatted_address']
-                drop_point_js = json.loads(location_to_address(str(of.drop_point_lat)+","+str(of.drop_point_long)).read())
-                if len(drop_point_js)==0:
-                    drop_point = "No address"
-                else:
-                    drop_point = drop_point_js['results'][0]['formatted_address']
-                
-                infos = {
-                    'driver':True, 'status':of.driver_ok, 'other':of.request.user,
-                    'date_pick':date_pick, 'pick_point': pick_point,
-                    'date_drop':date_drop, 'drop_point': drop_point,
-                    'fee': of.total_fee, 'id':ride.id, 'nb_seat': of.request.nb_requested_seats
-                }
-                
-                self.insert_ride(info_ride, infos)
+            route_points = of.proposal.routepoints_set.all()
+            index_pickup = 0
+            index_drop = 0
+            for i in xrange(len(route_points)):
+                if route_points[i].latitude == of.pickup_point_lat and route_points[i].longitude == of.pickup_point_long:
+                    index_pickup = i
+                if route_points[i].latitude == of.drop_point_lat and route_points[i].longitude == of.drop_point_long:
+                    index_drop = i
+            
+            date_pick = utils.get_time_at_point([(el.latitude,el.longitude) for el in route_points],
+                                            index_pickup,
+                                            of.proposal.departure_time,
+                                            of.proposal.arrival_time)
+            
+            date_drop = utils.get_time_at_point([(el.latitude,el.longitude) for el in route_points],
+                                            index_drop,
+                                            of.proposal.departure_time,
+                                            of.proposal.arrival_time)
+            
+            
+            pick_point = global_address_cache.get_address((of.pickup_point_lat,of.pickup_point_long))
+            drop_point = global_address_cache.get_address((of.drop_point_lat,of.drop_point_long))
+            
+            infos = {
+                'driver':True, 'status':of.driver_ok, 'other':of.request.user,
+                'date_pick':date_pick, 'pick_point': pick_point,
+                'date_drop':date_drop, 'drop_point': drop_point,
+                'fee': of.total_fee, 'id':of.id, 'nb_seat': of.request.nb_requested_seats
+            }
+
+            insert_offer(info_offers, infos)
+
             
     for req in user.request_set.all():
-        new_offers = Offer.objects.filter(request=req, status='A')
+        new_offers = Offer.objects.filter(request=req, status='P')
         for of in new_offers:
-            ride = Ride.objects.filter(request=of)
-            if ride:
-                route_points = of.proposal.routepoints_set.all()
-                
-                date_pick = get_time(of.proposal.departure_time,
-                                     of.proposal.arrival_time,
-                                     route_points,
-                                    (of.pickup_point_lat, of.pickup_point_long))
-                
-                date_drop = get_time(of.proposal.departure_time,
-                                     of.proposal.arrival_time,
-                                     route_points,
-                                    (of.drop_point_lat, of.drop_point_long))
-                
-                pick_point_js = json.loads(location_to_address(str(of.pickup_point_lat)+","+str(of.pickup_point_long)).read())
-                if len(pick_point_js)==0:
-                    pick_point = "No address"
-                else:
-                    pick_point = pick_point_js['results'][0]['formatted_address']
-                drop_point_js = json.loads(location_to_address(str(of.drop_point_lat)+","+str(of.drop_point_long)).read())
-                if len(drop_point_js)==0:
-                    drop_point = "No address"
-                else:
-                    drop_point = drop_point_js['results'][0]['formatted_address']
-                
-                infos = {
-                    'driver':False, 'status':of.non_driver_ok, 'other':of.proposal.user,
-                    'date_pick':date_pick, 'pick_point': pick_point,
-                    'date_drop':date_drop, 'drop_point': drop_point,
-                    'fee': of.total_fee, 'id':ride.id
-                }
-                
-                self.insert_ride(info_rides, infos)
+            route_points = of.proposal.routepoints_set.all()
+            
+            index_pickup = 0
+            index_drop = 0
+            for i in xrange(len(route_points)):
+                if route_points[i].latitude == of.pickup_point_lat and route_points[i].longitude == of.pickup_point_long:
+                    index_pickup = i
+                if route_points[i].latitude == of.drop_point_lat and route_points[i].longitude == of.drop_point_long:
+                    index_drop = i
+            
+            
+            date_pick = utils.get_time_at_point([(el.latitude,el.longitude) for el in route_points],
+                                            index_pickup,
+                                            of.proposal.departure_time,
+                                            of.proposal.arrival_time)
+            
+            date_drop = utils.get_time_at_point([(el.latitude,el.longitude) for el in route_points],
+                                            index_drop,
+                                            of.proposal.departure_time,
+                                            of.proposal.arrival_time)
+            
+            pick_point = global_address_cache.get_address((of.pickup_point_lat,of.pickup_point_long))
+            drop_point = global_address_cache.get_address((of.drop_point_lat,of.drop_point_long))
+            
+            infos = {
+                'driver':False, 'status':of.non_driver_ok, 'other':of.proposal.user,
+                'date_pick':date_pick, 'pick_point': pick_point,
+                'date_drop':date_drop, 'drop_point': drop_point,
+                'fee': of.total_fee, 'id':of.id
+            }
+            
+            insert_offer(info_offers, infos)
     
     
     notification = WaitCallbacksOffer.get_message(user)
     WaitCallbacksOffer.erase_message(user)
-    return render_to_response('myrides.html', locals())
+    return render_to_response('myoffers.html', locals())
     
     
     
-def insert_ride(ride_l, new_o):
-    for i in xrange(len(ride_l)):
-         if ride_l[i]['date_pick'] > new_o['date_pick']:
-             rp_list.insert(i,new_o)
-             break
+def insert_offer(offer_l, new_o):
+    for i in xrange(len(offer_l)):
+         if offer_l[i]['date_pick'] > new_o['date_pick']:
+             offer_l.insert(i,new_o)
+             return
+             
+    offer_l.append(new_o)
     
-    
-def get_time(dep_time, arr_time, checkpoints, pick_point):
-    points_str = []
-    cpt_point = 0
-    for point in checkpoints:
-        points_str.append(str(point.latitude)+","+str(point.longitude))
-        if point.latitude == pick_point[0] and point.longitude == pick_point[1]:
-            point_index = cpt_point
-        cpt_point += 1
-        
-    distance = distance_origin_dest(points_str[0], points_str[-1], points_str[1:-1])
-    total_time = (dep_time - arr_time).seconds + (dep_time - arr_time).days*60*60*24
-    
-    time_per_point = total_time / (len(checkpoints)-1)
-    
-    return datetime.timedelta(seconds=(time_per_point * point_index)) + dep_time
-    
-
-def responseoffer(request, offset, port_offer, accept):
+ 
+"""
+    Response to an offer
+    offer : the id of the offer specified in the url
+    port_offer : the port_object to the offer manager
+    accept : boolean containing the response
+    global_address_cache : cache address for optimisation
+"""
+def responseoffer(request, offset, port_offer, accept, global_address_cache):
 
     try:
         offset = int(offset)
     except:
         notification = {'content':'Invalid call', 'success':False}
-        return render_to_response('myproposals.html', locals())
+        return render_to_response('home.html', locals())
     else:
     
         try:
             offer = Offer.objects.get(id=offset)
         except:
             notification = {'content':'Invalid call', 'success':False}
-            return render_to_response('myproposals.html', locals())
+            return render_to_response('home.html', locals())
         else:
         
             if offer.status != 'P':
-                notification = {'content':'Invalid call', 'success':False}
-                return render_to_response('myproposals.html', locals())
+                notification = {'content':'Invalid call'+offer.status, 'success':False}
+                return render_to_response('home.html', locals())
             
-            if request.user != offer.proposal.user and request.user != offer.request.user:
+            if request.user != offer.proposal.user.user and request.user != offer.request.user.user:
                 notification = {'content':'Invalid call', 'success':False}
-                return render_to_response('myproposals.html', locals())
+                return render_to_response('error.html', locals())
+                
             
             if accept:
-                if request.user == offer.proposal.user:
-                    message = "driveragree"
+                if request.user == offer.proposal.user.user:
+                    message = "driver_agree"
                 else:
-                    message = "nondriveragree"
+                    message = "non_driver_agree"
             else:
                 message = "refuseoffer"
             
+            
             WaitCallbacksOffer.declare(request.user)
             
-            gui_port.send_to(port_offer,(message,offer.id,
-                                           successcall,
-                                           failurecall,
-                                           request.user))
+            anonymous_send_to(port_offer,(message,offer.id,request.user.id,
+                                           lambda:successcall(request.user),
+                                           lambda:failurecall(request.user)))
             
             wait_counter = 0
             while WaitCallbacksOffer.is_pending(request.user) and wait_counter < 10:
@@ -188,7 +179,6 @@ def responseoffer(request, offset, port_offer, accept):
             else:
                 print WaitCallbacksOffer.status(request.user)
                 WaitCallbacksOffer.free(request.user)
-                
                 
                 return redirect('/offers/')
 

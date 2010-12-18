@@ -20,3 +20,9 @@ user.is_superuser = True
 user.is_staff = True
 user.is_active = True
 user.save()
+up = UserProfile()
+up.user = user
+up.gender = 'M'
+up.bank_account_number = 'BE-123'
+up.phone_number = '012345'
+up.save()

@@ -14,7 +14,7 @@ from guiutils import WaitCallbacks
 
 import datetime, time, utils
 
-gui_port = PortObject()
+
 
 
 class WaitCallbacksOffer(WaitCallbacks):

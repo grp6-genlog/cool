@@ -2,14 +2,31 @@
 #
 # @Author Cyrille Dejemeppe
 
-import sys
-sys.path.append("home/cycy/Git/cool/website/requests")
+from django.conf import settings
+import os, sys
+sys.path.insert(0, os.path.join(settings.PROJECT_PATH,'modules'))
+
 import datetime, random
 from django.contrib.auth.models import User
 from profiles.models import UserProfile
 from requests.models import Request
+from offers.models import Offer
+from rides.models import Ride
 from proposals.models import Proposal, RoutePoints
 from utils import get_distance,get_time_at_point, total_seconds
+
+
+def compute_fee(proposal, departure, arrival):
+    dep = RoutePoints.objects.get(id=departure)
+    arr = RoutePoints.objects.get(id=arrival)
+    total=0.
+    last = dep
+    for index in range(dep.order+1, arr.order+1):
+        tmp = RoutePoints.objects.get(order=index,proposal=proposal)
+        total+=get_distance((last.latitude,last.longitude),(tmp.latitude,tmp.longitude))
+        last= tmp
+    return total*proposal.money_per_km
+    
 
 def match_proposal(propID):
     """
@@ -26,7 +43,7 @@ def match_proposal(propID):
     """
     infos=Proposal.objects.get(id=propID)
     requests=Request.objects.filter(nb_requested_seats__lte=infos.number_of_seats)
-    print "len req:"+str(len(requests))
+
     for request in requests:
         found = False
         for offer in Offer.objects.filter(request=request):
@@ -113,13 +130,20 @@ def match_request(requestID):
         for (i,j) in valid_pair:
             #delete all not in time arrival
             if total_seconds(abs(get_time_at_point([(r.latitude,r.longitude) for r in route_points],j,infos.departure_time,infos.arrival_time)-request.arrival_time)) < request.max_delay:
-                build_offer(requestID, infos.id,
-                            (route_points[i].latitude,route_points[i].longitude,
-                             get_time_at_point([(r.latitude,r.longitude) for r in route_points],
-                                               i,infos.departure_time,infos.arrival_time),route_points[i].id),
-                            (route_points[j].latitude,route_points[j].longitude,
-                             get_time_at_point([(r.latitude,r.longitude) for r in route_points],
-                                               j,infos.departure_time,infos.arrival_time),route_points[j].id))
+                build_offer(requestID,
+                            infos.id,
+                            (
+                                route_points[i].latitude,
+                                route_points[i].longitude,
+                                get_time_at_point([(r.latitude,r.longitude) for r in route_points],
+                                               i,infos.departure_time,infos.arrival_time),route_points[i].id
+                            ),
+                            (
+                                route_points[j].latitude,
+                                route_points[j].longitude,
+                                get_time_at_point([(r.latitude,r.longitude) for r in route_points],
+                                               j,infos.departure_time,infos.arrival_time),route_points[j].id
+                             ))
 
 def printlist(mylist):
     tmp =''
@@ -205,7 +229,7 @@ def create_proposal(user, car_id, car_desc, nb_seats, moneyperkm, dep_time, ar_t
     match_proposal(p.id)
 
 
-def create_users(nb_users, male_first_name_list, female_first_name_list, last_name_list, server_list, pwd_list, communities_list, car_desc_list, smartphone_list, route_points_list):
+def create_users(nb_users, male_first_name_list, female_first_name_list, last_name_list, server_list, pwd_list, communities_list, car_desc_list, route_points_list):
     counter = 1
     counter2 = 0
     advancement_list = ['[',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',']']
@@ -220,9 +244,11 @@ def create_users(nb_users, male_first_name_list, female_first_name_list, last_na
         if gender:
             f_name_ind = random.randint(0, len(male_first_name_list) - 1)
             first_name = male_first_name_list[f_name_ind]
+            gender = 'M'
         else:
             f_name_ind = random.randint(0, len(female_first_name_list) - 1)
             first_name = female_first_name_list[f_name_ind]
+            gender = 'F'
         l_name_ind = random.randint(0, len(last_name_list) - 1)
         last_name = last_name_list[l_name_ind]
         uname = first_name + '_' + last_name + str(random.randint(0,999))
@@ -242,8 +268,7 @@ def create_users(nb_users, male_first_name_list, female_first_name_list, last_na
             car_description = car_desc_list[car_desc_ind]
         else:
             car_description = None
-        smartphone_ind = random.randint(0, len(smartphone_list) - 1)
-        smartphone = smartphone_list[smartphone_ind]
+
         birthdate = datetime.date(random.randint(1950,1990), random.randint(1,12), random.randint(1,28))
         bank_account = str(random.randint(0,9)) + str(random.randint(0,9)) + str(random.randint(0,9)) + '-' + str(random.randint(0,9)) + str(random.randint(0,9)) + str(random.randint(0,9)) + str(random.randint(0,9)) + str(random.randint(0,9)) + str(random.randint(0,9)) + str(random.randint(0,9)) + '-' + str(random.randint(0,9)) + str(random.randint(0,9)) + str(random.randint(0,9))
         car_id = chr(random.randint(65,90)) + chr(random.randint(65,90)) + chr(random.randint(65,90)) + '-' + str(random.randint(0,9)) + str(random.randint(0,9)) + str(random.randint(0,9))
@@ -255,34 +280,34 @@ def create_users(nb_users, male_first_name_list, female_first_name_list, last_na
 
         # Creating a new user and his/her profile:
         user = create_user(uname, first_name, last_name, email, password)
-        userprofile = create_profile(user, nb_seats, birthdate, random.randint(0,1) == 1, communities, random.uniform(0.01, 0.25), gender, bank_account, car_id, phone_nb, car_description, smartphone)
+        userprofile = create_profile(user, nb_seats, birthdate, random.randint(0,1) == 1, communities, random.uniform(0.01, 0.25), gender, bank_account, car_id, phone_nb, car_description)
 
         # Chosing all the random fields for request and proposal tables
-        for j in xrange(random.randint(0,4)):
+        for j in xrange(random.randint(0,2)):
             dep_p_ind = random.randint(0, len(route_points_list) - 1)
             ar_p_ind = random.randint(0, len(route_points_list) - 1)
             dep_p_lat = route_points_list[dep_p_ind][0]
             dep_p_long = route_points_list[dep_p_ind][1]
-            dep_ran = random.uniform(2.5, 25.0)
+            dep_ran = random.uniform(0.5, 25.0)
             ar_p_lat = route_points_list[ar_p_ind][0]
             ar_p_long = route_points_list[ar_p_ind][1]
-            ar_ran = random.uniform(2.5, 25.0)
+            ar_ran = random.uniform(0.5, 25.0)
             ar_time = datetime.datetime(2010, 12, random.randint(20,31), random.randint(7,22), random.randint(0,59), 0)
-            max_del = datetime.time(random.randint(0,1),random.randint(0,45),0)
+            max_del = random.randint(300,3600)
             nb_seats= random.randint(1,4)
             cancel_margin = datetime.datetime(2010, 12, (ar_time.day-random.randint(0,1)), (ar_time.hour - random.randint(0,ar_time.hour)),ar_time.minute,ar_time.second)
             create_request(userprofile, dep_p_lat, dep_p_long, dep_ran, ar_p_lat, ar_p_long, ar_ran, ar_time, max_del, nb_seats, cancel_margin)
 
 
         if car:
-            for k in xrange(random.randint(0,7)):
+            for k in xrange(random.randint(0,2)):
                 car_id = userprofile.car_id
                 car_desc = userprofile.car_description
                 nb_seats = userprofile.number_of_seats
                 moneyperkm = userprofile.money_per_km
                 dep_time = datetime.datetime(2010, 12, random.randint(20,31), random.randint(7,22), random.randint(0,59), 0)
                 rp_list = list()
-                for rp in xrange(random.randint(2, 25)):
+                for rp in xrange(random.randint(2, 10)):
                     rp_list.append(route_points_list[random.randint(0, len(route_points_list) - 1)])
                 
                 route_p_list = [(-8000.0,-8000.0)]
@@ -292,9 +317,11 @@ def create_users(nb_users, male_first_name_list, female_first_name_list, last_na
                 
                 route_p_list.remove((-8000.0,-8000.0))
                 
-                ar_time = dep_time + datetime.timedelta(minutes=len(route_p_list)*random.randint(3,12))
                 if len(route_p_list) < 2:
-                    route_p_list.insert(0,(0.0,0.0))
+                    route_p_list.insert(0,(50.885015567679545, 5.096008367836475))
+                    
+                dist = get_distance(route_p_list[0],route_p_list[-1])
+                ar_time = dep_time + datetime.timedelta(minutes=int(dist))
                 create_proposal(userprofile, car_id, car_desc, nb_seats, moneyperkm, dep_time, ar_time, route_p_list)
 
 def main():
@@ -359,11 +386,9 @@ def main():
                      'P Ferrari 512BB 76','S Fiat 500 R 72','S Fiat Barchetta Giovane Due 00','P Ford Focus ST 06','S Ford Focus ST170 03','S Ford Ford GT 02',
                      'S Ford Ford GT 05','S Honda Castrol MUGEN NSX (JGTC) 00','S Honda CITY Turbo II 83','S Honda CIVIC 1500 3door 25i 83',
                      'S Honda CIVIC 1500 3door CX 79']
-                       'RIM BlackBerry Bold 9700','T-Mobile HTC HD2','Motorola Droid']
-    route_points_list = list()
-    for i in xrange(6000):
-        route_points_list.append((random.uniform(0.01,250.0),random.uniform(0.01,250.0)))
 
-    create_users(5000, male_name_list, female_name_list, last_name_list, server_list, pwd_list, communities_list, car_desc_list, smartphone_list, route_points_list)
+    route_points_list = [(51.104901597287146, 3.4269104339182377),(51.111799359288014, 5.239654574543238),(50.51133060530523, 5.267120394855738),(49.968182569011724, 5.458557195961475),(50.09380282770382, 3.5038147307932377),(50.86629801972728, 4.800201449543238),(50.85589612171209, 3.2236633636057377),(50.158601346149815, 4.513732977211475),(51.15316431532614, 5.898834262043238),(51.50463952950513, 4.502746649086475),(50.78093392042112, 2.5032349303364754),(50.732283037120425, 3.9204712584614754),(50.572073903534324, 6.095764227211475),(50.65572944615896, 4.623596258461475),(51.14765110760071, 4.294006414711475),(51.374523601460275, 4.843322820961475),(50.32722825732965, 5.216857977211475),(50.42531856595681, 4.074279852211475),(49.69890426086907, 5.568420477211475),(50.41131808144422, 5.810119695961475)]
+        
+    create_users(2000, male_name_list, female_name_list, last_name_list, server_list, pwd_list, communities_list, car_desc_list, route_points_list)
 
 main()

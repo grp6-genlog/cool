@@ -6,7 +6,7 @@ from website.profiles.models import UserProfile
 from website.requests.models import Request
 from django.contrib.auth.models import User
 
-from portobject import *anonymous_send_to
+from portobject import *
 from guiutils import WaitCallbacks
 from google_tools_json import *
 
