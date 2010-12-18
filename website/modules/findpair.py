@@ -48,7 +48,7 @@ class FindPair(PortObject):
                     ('buildoffer',requestID,proposalID) with requestID, the database ID of the matching request
         """
         infos=Proposal.objects.get(id=propID)
-        requests=Request.objects.filter(nb_requested_seats__lte=infos.number_of_seats,status='P')
+        requests=Request.objects.filter(nb_requested_seats__lte=infos.number_of_seats, status='P')
         print "len req:"+str(len(requests))
         for request in requests:
             found = False
@@ -75,14 +75,16 @@ class FindPair(PortObject):
                                         route_points[i].longitude,
                                         get_time_at_point([(r.latitude,r.longitude) for r in route_points], 
                                                             i,
-                                                            infos.departure_time,infos.arrival_time)
+                                                            infos.departure_time,infos.arrival_time),
+                                        route_points[i].id
                                      ),
                                      (
                                         route_points[j].latitude,
                                         route_points[j].longitude,
                                         get_time_at_point([(r.latitude,r.longitude) for r in route_points],
                                                             j,
-                                                            infos.departure_time,infos.arrival_time)
+                                                            infos.departure_time,infos.arrival_time),
+                                        route_points[j].id
                                       )
                                 ))
 

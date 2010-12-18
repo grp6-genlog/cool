@@ -18,7 +18,7 @@ from django.contrib.auth.models import User
 import datetime, time
 
 from portobject import *
-from guiutils import WaitCallbacks, check_IBAN
+from guiutils import *
 
 
 GENDER_CHOICES = (

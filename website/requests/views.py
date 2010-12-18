@@ -63,34 +63,34 @@ def addrequest(request, port_request=None):
         if form.is_valid():
             form.cleaned_data
             
-            departure_point = address_to_location(request.POST.get('departure_point', 0))
+            departure_point = address_to_location(form.cleaned_data['departure_point'])
             if departure_point == -1:
                 form._errors["departure_point"] = form.error_class(["No address found"])
                 return render_to_response('requestform.html', locals())
                 
             departure_range = request.POST.get('departure_range', 0)
 
-            arrival_point = address_to_location(request.POST.get('arrival_point', 0))
+            arrival_point = address_to_location(form.cleaned_data['arrival_point'])
             if arrival_point == -1:
                 form._errors["arrival_point"] = form.error_class(["No address found"])
                 return render_to_response('requestform.html', locals())
             
-            arrival_time = request.POST.get('arrival_time', datetime.datetime.today())
+            arrival_time = form.cleaned_data['arrival_time']
             UserID = UserProfile.objects.get(user=request.user)
-            arrival_range = request.POST.get('arrival_range', 0)
             if arrival_time < datetime.datetime.today():
                 form._errors["arrival_time"] = form.error_class(["Arrival time already passed"])
                 return render_to_response('requestform.html', locals())
                 
-            
+            arrival_range = form.cleaned_data['arrival_range']
+                        
             max_delay = form.cleaned_data['max_delay']
             max_delay = int(max_delay.hour*3600 + max_delay.minute * 60)
-            nb_requested_seats = request.POST.get('nb_requested_seats', 1)
-            cancellation_margin = request.POST.get('cancellation_margin', None)
+            nb_requested_seats = form.cleaned_data['nb_requested_seats']
+            cancellation_margin = form.cleaned_data['cancellation_margin']
             
-            if abs(cancellaton_margin - (arrival_time - datetime.timedelta(second=max_delay))) < datetime.timedelta(minute=30):
-                form._errors["cancellation_margin"] = form.error_class(["Specify a cancellation margin earlier"])
-                return render_to_response('requestform.html', locals())
+            #if abs(cancellation_margin - (arrival_time - datetime.timedelta(seconds=max_delay))) < datetime.timedelta(minutes=30):
+            #    form._errors["cancellation_margin"] = form.error_class(["Specify a cancellation margin earlier"])
+            #    return render_to_response('requestform.html', locals())
             
             status = 'P'
             
@@ -110,11 +110,13 @@ def addrequest(request, port_request=None):
             
             if WaitCallbacksRequest.status(request.user) == 'success':
                 WaitCallbacksRequest.free(request.user)
+                notification = {'content':'Request successfully registered', 'success':True}
                 return render_to_response('home.html', locals())
             else:
                 print WaitCallbacksRequest.status(request.user)
                 WaitCallbacksRequest.free(request.user)
-                return render_to_response('error.html', locals())
+                notification = {'content':'An error occured', 'success':False}
+                return render_to_response('requestform.html', locals())
         else:
             return render_to_response('requestform.html', locals())
     else:

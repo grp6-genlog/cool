@@ -10,12 +10,21 @@ My requests
 <b>{{ notification }}</b>
 <form action="/addrequest/" method="post">
     <div class="aligned">
+    {% if notification.content %}
         <div class="text-center">
-        {{ notif }}
+        {% if notification.success %}
+            <span style="color:green;">
+        {% else %}
+            <span style="color:red;">
+        {% endif %}
+        
+        {{ notification.content }}
+        </span>
         </div>
-        {% for error in form.password.errors %}
-            <span style="color: red;">{{ error }}</span><br/>
-        {% endfor %}
+        <br/><br/>
+    {% endif %}
+        
+        
         <div class="form-row">
             {{ form.arrival_time.errors }}
             <span class="required">

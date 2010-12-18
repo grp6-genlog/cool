@@ -32,7 +32,7 @@ def myproposals(request):
         return redirect('/home/')
     
     user=UserProfile.objects.get(user=request.user)
-    proposals = Proposal.objects.filter(user=user, status='P', departure_time__lt=datetime.datetime.today())
+    proposals = Proposal.objects.filter(user=user, status='P', departure_time__gt=datetime.datetime.today())
     return render_to_response('myproposals.html', locals())
     
     
@@ -79,11 +79,13 @@ def addproposal(request, port_proposal=None,global_address_cache=None):
             
             if WaitCallbacksProposal.status(request.user) == 'success':
                 WaitCallbacksProposal.free(request.user)
+                notification = {'content':'Proposal successfully registered', 'success':True}
                 return render_to_response('home.html', locals())
             else:
                 print WaitCallbacksProposal.status(request.user)
                 WaitCallbacksProposal.free(request.user)
-                return render_to_response('error.html', locals())
+                notification = {'content':'An error occured', 'success':False}
+                return render_to_response('proposalform.html', locals())
         else:
             return render_to_response('proposalform.html', locals())
     else:

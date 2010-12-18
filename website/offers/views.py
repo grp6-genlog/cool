@@ -16,9 +16,9 @@ import datetime, time, utils
 
 
 
-
 class WaitCallbacksOffer(WaitCallbacks):
     pass
+
                       
 
 """
@@ -34,7 +34,7 @@ def myoffers(request, global_address_cache=None):
     info_offers = []
     
     for prop in user.proposal_set.all():
-        new_offers = Offer.objects.filter(proposal=prop, status='P')
+        new_offers = Offer.objects.filter(proposal=prop, status='P', pickup_time__gt=datetime.datetime.today())
         for of in new_offers:
             route_points = of.proposal.routepoints_set.all()
             index_pickup = 0
@@ -58,12 +58,11 @@ def myoffers(request, global_address_cache=None):
             
             pick_point = global_address_cache.get_address((of.pickup_point_lat,of.pickup_point_long))
             drop_point = global_address_cache.get_address((of.drop_point_lat,of.drop_point_long))
-            
             infos = {
                 'driver':True, 'status':of.driver_ok, 'other':of.request.user,
                 'date_pick':date_pick, 'pick_point': pick_point,
                 'date_drop':date_drop, 'drop_point': drop_point,
-                'fee': of.total_fee, 'id':of.id, 'nb_seat': of.request.nb_requested_seats
+                'fee': of.total_fee, 'id':of.id, 'nb_seat': of.request.nb_requested_seats,
             }
 
             insert_offer(info_offers, infos)
@@ -95,12 +94,12 @@ def myoffers(request, global_address_cache=None):
             
             pick_point = global_address_cache.get_address((of.pickup_point_lat,of.pickup_point_long))
             drop_point = global_address_cache.get_address((of.drop_point_lat,of.drop_point_long))
-            
+
             infos = {
                 'driver':False, 'status':of.non_driver_ok, 'other':of.proposal.user,
                 'date_pick':date_pick, 'pick_point': pick_point,
                 'date_drop':date_drop, 'drop_point': drop_point,
-                'fee': of.total_fee, 'id':of.id
+                'fee': of.total_fee, 'id':of.id, 'nb_seat': of.request.nb_requested_seats,
             }
             
             insert_offer(info_offers, infos)

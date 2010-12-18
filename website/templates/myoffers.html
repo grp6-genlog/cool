@@ -18,7 +18,7 @@ My offers
     
             <b>Proposition of ride with <a href="/profile/{{ offer.other.user.id }}/">{{ offer.other.user.first_name }} {{ offer.other.user.last_name }}</a></b><br/>
             Pickup request on {{ offer.date_pick }} at {{ offer.pick_point }} (<a href="http://maps.google.com/maps?f=q&source=s_q&hl=en&geocode=&q={{ offer.pick_point }}">See on Google Maps</a>)<br/>
-            And to drop at {{ offer.drop_point }} (<a href="http://maps.google.com/maps?f=q&source=s_q&hl=en&geocode=&q={{ offer.drop_point }}">See on Google Maps</a>)<br/>
+            And to drop at {{ offer.drop_point }} at {{ offer.date_drop.hour }}:{{ offer.date_drop.minute }} (<a href="http://maps.google.com/maps?f=q&source=s_q&hl=en&geocode=&q={{ offer.drop_point }}">See on Google Maps</a>)<br/>
             {% if not offer.status %}
                 {{ nb_seat }} seat{% if nb_seat > 1 %}s{% endif %} requested.<br/>
                 Money earned : {{ offer.fee }}€<br/>
