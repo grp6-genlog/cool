@@ -134,7 +134,7 @@ def insert_ride(offer_l, new_o):
     accept : boolean containing the response
     global_address_cache : cache address for optimisation
 """
-def responseride(request, offset, port_offer, accept, global_address_cache):
+def cancelride(request, offset, port_offer, global_address_cache):
 
     try:
         offset = int(offset)
@@ -150,7 +150,7 @@ def responseride(request, offset, port_offer, accept, global_address_cache):
             return render_to_response('home.html', locals())
         else:
         
-            if offer.status != 'P':
+            if offer.status != 'A':
                 notification = {'content':'Invalid call'+offer.status, 'success':False}
                 return render_to_response('home.html', locals())
             
@@ -158,19 +158,12 @@ def responseride(request, offset, port_offer, accept, global_address_cache):
                 notification = {'content':'Invalid call', 'success':False}
                 return render_to_response('error.html', locals())
                 
-            
-            if accept:
-                if request.user == offer.proposal.user.user:
-                    message = "driver_agree"
-                else:
-                    message = "non_driver_agree"
-            else:
-                message = "refuseoffer"
-            
+            message = "cancelride"            
             
             WaitCallbacksRide.declare(request.user)
             
-            anonymous_send_to(port_offer,(message,offer.id,request.user.id,
+            up = UserProfile.objects.get(user=request.user)
+            anonymous_send_to(port_offer,(message,offer.id,up.id,
                                            lambda:successcall(request.user),
                                            lambda:failurecall(request.user)))
             

@@ -132,7 +132,7 @@ class RideManager(PortObject):
         if ride.ride_started:
             return 1
 
-        ride.offer.status('F')
+        ride.offer.status('C')
         ride.offer.save()        
         self.send_to(self.usernotifier_port, ('newmsg', ride.offer.request.user.id, 'The ride %d has been cancelled' % instructionID))
         self.send_to(self.usernotifier_port, ('newmsg', ride.offer.proposal.user.id, 'The ride %d has been cancelled' % instructionID))
