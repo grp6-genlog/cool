@@ -33,8 +33,7 @@ class UserNotifier(PortObject):
         @post:    The message has been sent to user using his desired device
         """
         u = UserProfile.objects.get(id=userID)
-        #mail = u.user.email
-        mail = "notexist@email.com"
+        mail = u.user.email
         tries = 50
         print "sending email to "+mail
         while tries>0:
