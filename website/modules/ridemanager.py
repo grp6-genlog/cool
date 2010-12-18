@@ -55,6 +55,7 @@ class RideManager(PortObject):
                 a thread is run to send the following differed message to RideManager at rideTime:
                   ('startevaluation',instructionID) with instructionID the id of the request in the DB's table.
         """
+
         offer=Offer.objects.get(id=msg[1])
         ride=Ride(offer=offer, ride_started=False)
         ride.save()
@@ -62,8 +63,8 @@ class RideManager(PortObject):
         self.send_to(self.usernotifier_port, ('newmsg', offer.proposal.user.id, "You've got a shared ride for proposal %d. Please visit your account for further information." % offer.proposal.id))
         self.send_to(self.usernotifier_port, ('newmsg', offer.request.user.id, "You've got a shared ride for request %d. Please visit your account for further information." % offer.request.id))
 
-        #compute ridetime-30 in seconds
-        start = proposal.departure_time # datetime
+        # compute ridetime-30 in seconds
+        start = offer.proposal.departure_time # datetime
         today = datetime.now() # datetime
         
         half_hour = timedelta(minutes=30) # delta
@@ -77,7 +78,11 @@ class RideManager(PortObject):
         else:
             delay1=delayAction(half_hour_before, self.send_to, (self.tracker_port, ('startride', ride.id,lambda: self.close_ride(ride.id),lambda: self.cancel_ride(ride.id))))
             delay1.start()
-
+        
+        print until_ride
+        print self.evaluationmanager_port
+        print offer.proposal.user.id
+        print offer.ride.id
         delay2=delayAction(until_ride, self.send_to, (self.evaluationmanager_port, ('startevaluation', proposal.user.id, ride.id)))
         delay3=delayAction(until_ride, self.send_to, (self.evaluationmanager_port, ('startevaluation', request.user.id, ride.id)))
         
