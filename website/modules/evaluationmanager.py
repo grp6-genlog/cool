@@ -15,7 +15,7 @@ class EvaluationManager(PortObject):
 		"""
 		PortObject.__init__(self)
 		
-	def updateEvaluation(instructionID, userID, content):
+	def updateEvaluation(self,instructionID, userID, content):
 		"""Make an evaluation for a user with id userID and related with the instructionID
 		@pre : instructionID is the id of the instruction
 			   userID is the id of the user
@@ -33,7 +33,7 @@ class EvaluationManager(PortObject):
 			return 0
 		return -1
 		
-	def lockEvaluation(evaluationID):
+	def lockEvaluation(self,evaluationID):
 		"""Lock the evaluation and evaluate is not more possible for this evaluation
 		@pre : DB is initialized and evaluationID is in database
 			 evaluationID is the id of the evaluation
@@ -44,7 +44,7 @@ class EvaluationManager(PortObject):
 			raise "There isn't any valid offer for this ID"
 		evals.locked=True
 		
-	def buildEmptyEvaluation(userID, instructionID):
+	def buildEmptyEvaluation(self,userID, instructionID):
 		"""Make an empty evaluation for userID and instructionID
 		@pre : userID is the id of a user
 			   instructionID is the id of an instruction
@@ -62,7 +62,7 @@ class EvaluationManager(PortObject):
 			u_from=proposals[0].user
 		eval=Evaluation(ride=rides[0], user_from=u_from, user_to=userID, locked=False)
 		eval.save()
-		delay=delayAction(86400, self.send_to, (self.get_port, ('closeevaluation', [eval.id])))
+		delay=delayAction(86400*3, self.send_to, (self.get_port, ('closeevaluation', [eval.id])))
 		delay.start()
 		
 	def routine(self, src, msg):
