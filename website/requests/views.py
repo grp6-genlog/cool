@@ -130,9 +130,11 @@ def addrequest(request, port_request=None):
             return render_to_response('requestform.html', locals())
     else:
         init = {
-            'arrival_time' : datetime.datetime.today()
+            'arrival_time' : datetime.datetime.today(),
+            'cancellation_margin' : datetime.datetime.today(),
+            'max_delay' : '00:30'
         }
-        form = RequestForm()
+        form = RequestForm(initial = init)
         
         return render_to_response('requestform.html', locals())
 

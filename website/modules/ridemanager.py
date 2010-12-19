@@ -65,21 +65,21 @@ class RideManager(PortObject):
         pickup_point = self.global_address_cache.get_address((ride.offer.pickup_point.latitude,ride.offer.pickup_point.longitude))
         drop_point = self.global_address_cache.get_address((ride.offer.drop_point.latitude,ride.offer.drop_point.longitude))
              
-        message_for_proposal="<html>You have ride with "+offer.request.user.user.first_name +" "+offer.request.user.user.last_name+"<br/>"
-        message_for_proposal+="The phone number of non-driver is: "+offer.request.user.phone_number +"<br/>"
-        message_for_proposal+="The pick up point is at "+pickup_point+"<br/>"
-        message_for_proposal+="The ride start at: "+str(ride.offer.pickup_time)+"<br/>"
-        message_for_proposal+="The drop point is at "+drop_point+"<br/>"
-        message_for_proposal+="The drop time is: "+str(offer.drop_time)+"<br/>"
-        message_for_proposal+="Please visit your account for further information</html>"
+        message_for_proposal="You have ride with "+offer.request.user.user.first_name +" "+offer.request.user.user.last_name+"\n"
+        message_for_proposal+="The phone number of non-driver is: "+offer.request.user.phone_number +"\n"
+        message_for_proposal+="The pick up point is at "+pickup_point+"\n"
+        message_for_proposal+="The ride start at: "+str(ride.offer.pickup_time)+"\n"
+        message_for_proposal+="The drop point is at "+drop_point+"\n"
+        message_for_proposal+="The drop time is: "+str(offer.drop_time)+"\n"
+        message_for_proposal+="Please visit your account for further information"
 
-        message_for_request="<html>You have ride with "+offer.proposal.user.user.first_name +" "+offer.proposal.user.user.last_name+"<br/>"
-        message_for_request+="The phone number of driver is: "+offer.proposal.user.phone_number +"<br/>" 
-        message_for_request+="The pick up point is at "+pickup_point+"<br/>"
-        message_for_request+="The ride start at: "+str(ride.offer.pickup_time)+"<br/>"
-        message_for_request+="The drop point is at "+drop_point+"<br/>"
-        message_for_request+="The drop time is"+str(offer.drop_time)+"<br/>"
-        message_for_request+="Please visit your account for further information</html>"
+        message_for_request="You have ride with "+offer.proposal.user.user.first_name +" "+offer.proposal.user.user.last_name+"\n"
+        message_for_request+="The phone number of driver is: "+offer.proposal.user.phone_number +"\n" 
+        message_for_request+="The pick up point is at "+pickup_point+"\n"
+        message_for_request+="The ride start at: "+str(ride.offer.pickup_time)+"\n"
+        message_for_request+="The drop point is at "+drop_point+"\n"
+        message_for_request+="The drop time is"+str(offer.drop_time)+"\n"
+        message_for_request+="Please visit your account for further information"
                             
                        
         self.send_to(self.usernotifier_port, ('newmsg', offer.proposal.user.id, message_for_proposal))
@@ -159,21 +159,21 @@ class RideManager(PortObject):
         drop_point = self.global_address_cache.get_address((ride.offer.drop_point.latitude,ride.offer.drop_point.longitude))
         
         
-        message_for_proposal="<html>Your ride with "+ride.offer.request.user.user.first_name +" "+ride.offer.request.user.user.last_name+" "+"is cancelled"+"<br/>"
-        message_for_proposal+="Information of ride: "+"<br/>"
-        message_for_proposal+="The pick up point was at "+pickup_point+"<br/>"
-        message_for_proposal+="The ride started at: "+str(ride.offer.pickup_time)+"<br/>"
-        message_for_proposal+="The drop point was at "+drop_point+"<br/>"
-        message_for_proposal+="The drop time was at "+str(ride.offer.drop_time)+"<br/>"
-        message_for_proposal+="Please visit your account for further information</html>"
+        message_for_proposal="Your ride with "+ride.offer.request.user.user.first_name +" "+ride.offer.request.user.user.last_name+" "+"is cancelled"+"\n"
+        message_for_proposal+="Information of ride: "+"\n"
+        message_for_proposal+="The pick up point was at "+pickup_point+"\n"
+        message_for_proposal+="The ride started at: "+str(ride.offer.pickup_time)+"\n"
+        message_for_proposal+="The drop point was at "+drop_point+"\n"
+        message_for_proposal+="The drop time was at "+str(ride.offer.drop_time)+"\n"
+        message_for_proposal+="Please visit your account for further information"
 
-        message_for_request="<html>You have ride with "+ride.offer.proposal.user.user.first_name +" "+ride.offer.proposal.user.user.last_name+" "+"is cancelled"+"<br/>"
-        message_for_request+="Information of ride: "+"<br/>"
-        message_for_request+="The pick up point was at "+pickup_point+"<br/>"
-        message_for_request+="The ride started at: "+str(ride.offer.pickup_time)+"<br/>"
-        message_for_request+="The drop point was at "+drop_point+"<br/>"
-        message_for_request+="The drop time was"+str(ride.offer.drop_time)+"<br/>"
-        message_for_request+="Please visit your account for further information</html>"  
+        message_for_request="You have ride with "+ride.offer.proposal.user.user.first_name +" "+ride.offer.proposal.user.user.last_name+" "+"is cancelled"+"\n"
+        message_for_request+="Information of ride: "+"\n"
+        message_for_request+="The pick up point was at "+pickup_point+"\n"
+        message_for_request+="The ride started at: "+str(ride.offer.pickup_time)+"\n"
+        message_for_request+="The drop point was at "+drop_point+"\n"
+        message_for_request+="The drop time was"+str(ride.offer.drop_time)+"\n"
+        message_for_request+="Please visit your account for further information"  
                                   
         self.send_to(self.usernotifier_port, ('newmsg', ride.offer.request.user.id, message_for_request))
         self.send_to(self.usernotifier_port, ('newmsg', ride.offer.proposal.user.id, message_for_proposal))

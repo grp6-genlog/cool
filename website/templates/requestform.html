@@ -30,15 +30,16 @@ My requests
             <span class="required">
                 {{ form.departure_point.label_tag }}
             </span>
-            {{ form.departure_point }}<br/>
-	    Adress from which you wish to be picked up.
+            {{ form.departure_point }}<br/><br/>
+	    Adress from which you wish to be picked up.<br/>
+	    <i>EG: Grand Place, Bruxelles</i>
         </div>
 	<div class="form-row">
             {{ form.departure_range.errors }}
             <span class="required">
                 {{ form.departure_range.label_tag }}
             </span>
-            {{ form.departure_range }}<br/>
+            {{ form.departure_range }}<br/><br/>
 	    Number of kilometers you are able to be picked up around the departure point.
         </div>
 	<div class="form-row">
@@ -46,8 +47,9 @@ My requests
             <span class="required">
                 {{ form.arrival_point.label_tag }}
             </span>
-            {{ form.arrival_point }}<br/>
-	    Adress to which you wish to be dropped.
+            {{ form.arrival_point }}<br/><br/>
+	    Adress to which you wish to be dropped.<br/>
+	    <i>EG: Grand Place, Bruxelles</i>
         </div>
 	<div class="form-row">
             {{ form.arrival_range.errors }}

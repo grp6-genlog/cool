@@ -38,6 +38,7 @@ def myoffers(request, global_address_cache=None):
             for other_of in associated_offers:
                 if other_of.status == 'A':
                     display = False
+                    break
             
             if display:
                 route_points = of.proposal.routepoints_set.all()
@@ -75,38 +76,46 @@ def myoffers(request, global_address_cache=None):
     for req in user.request_set.all():
         new_offers = Offer.objects.filter(request=req, status='P')
         for of in new_offers:
-            route_points = of.proposal.routepoints_set.all()
+            associated_offers = Offer.objects.filter(request = req)
+            display = True
+            for other_of in associated_offers:
+                if other_of.status == 'A':
+                    display = False
+                    break
             
-            index_pickup = 0
-            index_drop = 0
-            for i in xrange(len(route_points)):
-                if route_points[i].latitude == of.pickup_point_lat and route_points[i].longitude == of.pickup_point_long:
-                    index_pickup = i
-                if route_points[i].latitude == of.drop_point_lat and route_points[i].longitude == of.drop_point_long:
-                    index_drop = i
-            
-            
-            date_pick = utils.get_time_at_point([(el.latitude,el.longitude) for el in route_points],
-                                            index_pickup,
-                                            of.proposal.departure_time,
-                                            of.proposal.arrival_time)
-            
-            date_drop = utils.get_time_at_point([(el.latitude,el.longitude) for el in route_points],
-                                            index_drop,
-                                            of.proposal.departure_time,
-                                            of.proposal.arrival_time)
-            
-            pick_point = global_address_cache.get_address((of.pickup_point_lat,of.pickup_point_long))
-            drop_point = global_address_cache.get_address((of.drop_point_lat,of.drop_point_long))
+            if display:
+                route_points = of.proposal.routepoints_set.all()
+                
+                index_pickup = 0
+                index_drop = 0
+                for i in xrange(len(route_points)):
+                    if route_points[i].latitude == of.pickup_point_lat and route_points[i].longitude == of.pickup_point_long:
+                        index_pickup = i
+                    if route_points[i].latitude == of.drop_point_lat and route_points[i].longitude == of.drop_point_long:
+                        index_drop = i
+                
+                
+                date_pick = utils.get_time_at_point([(el.latitude,el.longitude) for el in route_points],
+                                                index_pickup,
+                                                of.proposal.departure_time,
+                                                of.proposal.arrival_time)
+                
+                date_drop = utils.get_time_at_point([(el.latitude,el.longitude) for el in route_points],
+                                                index_drop,
+                                                of.proposal.departure_time,
+                                                of.proposal.arrival_time)
+                
+                pick_point = global_address_cache.get_address((of.pickup_point_lat,of.pickup_point_long))
+                drop_point = global_address_cache.get_address((of.drop_point_lat,of.drop_point_long))
 
-            infos = {
-                'driver':False, 'status':of.non_driver_ok, 'other':of.proposal.user,
-                'date_pick':date_pick, 'pick_point': pick_point,
-                'date_drop':date_drop, 'drop_point': drop_point,
-                'fee': of.total_fee, 'id':of.id, 'nb_seat': of.request.nb_requested_seats,
-            }
-            
-            insert_offer(info_offers, infos)
+                infos = {
+                    'driver':False, 'status':of.non_driver_ok, 'other':of.proposal.user,
+                    'date_pick':date_pick, 'pick_point': pick_point,
+                    'date_drop':date_drop, 'drop_point': drop_point,
+                    'fee': of.total_fee, 'id':of.id, 'nb_seat': of.request.nb_requested_seats,
+                }
+                
+                insert_offer(info_offers, infos)
 
     acc_bal = user.account_balance
     if WaitCallbacksOffer.message_present(request.user):
