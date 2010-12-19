@@ -21,20 +21,21 @@
  
 		function initialize() {
 			if (GBrowserIsCompatible()) {      
-                var options = {
-                    suppressZoomToBounds : false
-                    //resultList : G_GOOGLEBAR_RESULT_LIST_SUPPRESS
+                var options =
+		{
+                   suppressZoomToBounds : false
+                   //resultList : G_GOOGLEBAR_RESULT_LIST_SUPPRESS
                 };
-				map = new GMap2(document.getElementById("map_canvas"),{googleBarOptions: options});
-	//			gdir = new GDirections(map, document.getElementById("directions1"));
-				gdir = new GDirections(map);
-				map.setCenter(new GLatLng(50.6686131506577, 4.5867919921875), currZoom);    
- 
-				map.addControl(new GLargeMapControl());
-				map.addControl(new GScaleControl());
-				map.disableDoubleClickZoom();
-				map.enableScrollWheelZoom();
-                map.enableGoogleBar();
+		map = new GMap2(document.getElementById("map_canvas"),{googleBarOptions: options});
+		//gdir = new GDirections(map, document.getElementById("directions1"));
+		gdir = new GDirections(map);
+		map.setCenter(new GLatLng(50.6686131506577, 4.5867919921875), currZoom);    
+		
+		map.addControl(new GLargeMapControl());
+		map.addControl(new GScaleControl());
+		map.disableDoubleClickZoom();
+		map.enableScrollWheelZoom();
+		map.enableGoogleBar();
 				GEvent.addListener(gdir, "error", handleErrors);
 				GEvent.addListener(map, "click", function(overlay, latlng) {    
 					if (latlng) {  
