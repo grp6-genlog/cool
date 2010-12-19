@@ -113,8 +113,12 @@ def addevaluation(request, offset, port_evaluation=None):
                 if evaluation.locked:
                     notification = {'content':'You can not evaluate this ride anymore', 'success':False}
                     return render_to_response('home.html', locals())
-                    
-                form = EvaluationForm()
+                
+                init = {
+                    'rating' : evaluation.rating,
+                    'content' : evaluation.content,
+                }
+                form = EvaluationForm(initial = init)
                 return render_to_response('evaluationform.html', locals())
                     
                     

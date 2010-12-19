@@ -74,7 +74,7 @@ def myoffers(request, global_address_cache=None):
 
             
     for req in user.request_set.all():
-        new_offers = Offer.objects.filter(request=req, status='P')
+        new_offers = Offer.objects.filter(request=req, status='P', pickup_time__gt=datetime.datetime.today())
         for of in new_offers:
             associated_offers = Offer.objects.filter(request = req)
             display = True
