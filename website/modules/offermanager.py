@@ -98,6 +98,8 @@ class OfferManager(PortObject):
                             count+=offer2.request.nb_requested_seats
                         if count>offer.proposal.number_of_seats:
                             print "count>offer"
+                            offer.status='D'
+                            offer.save()
                             threading.Thread(target=callb_ko).start()
                             return None
                 account = offer.request.user.account_balance-offer.total_fee
@@ -148,6 +150,8 @@ class OfferManager(PortObject):
                             count+=offer2.request.nb_requested_seats
                         if count>offer.proposal.number_of_seats:
                             print "count>offer"
+                            offer.status='D'
+                            offer.save()
                             threading.Thread(target=callb_ko).start()
                         return None
 
