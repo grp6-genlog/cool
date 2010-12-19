@@ -300,9 +300,8 @@ def toprofilerecorder(request, port_profile, action):
                                        BirthDate,Smoker,Communities,MoneyPerKm,
                                        Gender,BankAccountNumber,CarID,
                                        GSMNumber,CarDescription],
-                                   successcall,
-                                   failurecall,
-                                   request.user))
+                                   lambda:successcall(request.user),
+                                   lambda:failurecall(request.user)))
     wait_counter = 0
     while WaitCallbacksProfile.is_pending(request.user) and wait_counter < 10:
         time.sleep(0.1)
@@ -321,37 +320,8 @@ def toprofilerecorder(request, port_profile, action):
     else:
         print WaitCallbacksProfile.status(request.user)
         WaitCallbacksProfile.free(request.user)
-        return render_to_response('error.html', locals())
-    WaitCallbacksProfile.declare(request.user)
-    
-    anonymous_send_to(port_profile,(msg,[n_user,NumberOfSeats,
-                                       BirthDate,Smoker,Communities,MoneyPerKm,
-                                       Gender,BankAccountNumber,CarID,
-                                       GSMNumber,CarDescription],
-                                   successcall,
-                                   failurecall,
-                                   request.user))
-    wait_counter = 0
-    while WaitCallbacksProfile.is_pending(request.user) and wait_counter < 10:
-        time.sleep(0.1)
-        wait_counter += 1
-            
-    if WaitCallbacksProfile.status(request.user) == 'success':
-        WaitCallbacksProfile.free(request.user)
-        if action == 'register':
-            user = auth.authenticate(username=n_user.username, password=pwd)
-            if user is not None and user.is_active:
-                auth.login(request, user)
-                
-        else:
-            notification = {'content':'Your profile has been updated', 'success':True}
+        notification = {'content':'Unexpected error, try again later', 'success':True}
         return render_to_response('home.html', locals())
-    else:
-        print WaitCallbacksProfile.status(request.user)
-        WaitCallbacksProfile.free(request.user)
-        notification = {'content':'Unexpected error, try again later', 'success':False}
-        return render_to_response('home.html', locals())
-            
     
     
 def publicprofile(request, offset):

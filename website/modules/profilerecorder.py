@@ -85,9 +85,9 @@ class ProfileRecorder(PortObject):
                 pro.save()
             except:
                 traceback.print_exc()
-                threading.Thread(target = msg[3], args = (msg[4],)).start()
+                threading.Thread(target = msg[3],).start()
             else:
-                threading.Thread(target = msg[2], args = (msg[4],)).start()
+                threading.Thread(target = msg[2],).start()
                 
         elif msg[0] == 'updateprofile':
             try:
@@ -120,8 +120,8 @@ class ProfileRecorder(PortObject):
                 pro.save()
             except:
                 traceback.print_exc()
-                threading.Thread(target = msg[3], args = (msg[4],)).start()
+                threading.Thread(target = msg[3],).start()
             else:
-                threading.Thread(target = msg[2], args = (msg[4],)).start()
+                threading.Thread(target = msg[2],).start()
         else:
             print 'ProfileRecorder received an unexpected message'
