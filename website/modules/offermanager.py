@@ -100,11 +100,11 @@ class OfferManager(PortObject):
                             print "count>offer"
                             threading.Thread(target=callb_ko).start()
                             return None
-                account = offer.request.user.account_balance
+                account = offer.request.user.account_balance-offer.total_fee
                 
-                for offer2 in Offer.objects.filter(status='A'):
-                    if offer2.request.user.id == userID:
-                        account-=offer2.total_fee
+                for ride2 in Ride.objects.filter(ride_started=False):
+                    if ride2.offer.request.user.id == userID:
+                        account-=ride2.offer.total_fee
                 if account < 0:
                     offer.non_driver_ok = False
                     offer.save()
@@ -150,17 +150,17 @@ class OfferManager(PortObject):
                             print "count>offer"
                             threading.Thread(target=callb_ko).start()
                         return None
-                account = offer.request.user.account_balance
-                for offer2 in Offer.objects.filter(status='A'):
-                    if offer2.request.user.user == userID:
-                        account-=offer2.total_fee
+
+                account = offer.request.user.account_balance-offer.total_fee
+                for ride2 in Ride.objects.filter(status='A'):
+                    if ride2.offer.request.user.id == userID:
+                        account-=ride2.offer.total_fee
                 if account<0:
                     offer.non_driver_ok = False
                     offer.save()
                     print "not enough money"
                     self.send_to(self.userNotifier, ('newmsg', userID, "You don't have enough money to accept the ride. Please add money on your account."))
                     threading.Thread(target=callb_ko).start()
-                
                 
                 elif offer.proposal.departure_time < datetime.datetime.today():
                     offer.status='D'
