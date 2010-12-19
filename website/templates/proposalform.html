@@ -117,7 +117,7 @@ My proposals
       {{ notif }}
     </div>
     <span style="font-style:italic;">Click on the map at each place you are going
-      to pass starting from your departure point and finishing with your arrival point.</span>
+      to pass starting from your departure point and finishing with your arrival point. You can search your location using the field on the map.</span>
     <br/>
     <div id="map_canvas" style="margin: 1em 1em; width:600px; height:400px; "></div> 
     <div id="doSomething" style="margin: 1em 1em;" > 
@@ -125,10 +125,8 @@ My proposals
     <input type='hidden' id='status' name='status' value=''> 
     <div id="directions1" width=200></div>
     <div id="directions" width=200></div>
-    <div class="submit-row">
-      <label>
-        <input name="submit" type="submit" value="Refresh Map" on click="return refreshMap();"/>
-      </label>
+    <div style="margin-top:15px; margin-bottom:15px; ">
+        <a href="" style="margin-left:200px; font-size:1.1em;" on click="return refreshMap();"><img src="/img_f/refresh.gif" /> Refresh map</a>
     </div>
     <div class="form-row">
       {{ form.departure_time.errors }}
