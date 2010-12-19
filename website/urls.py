@@ -24,24 +24,23 @@ import guiutils
 
 class PortObjects(object):
 
-    def __init__(self):
-        print "starting objects"
+    def __init__(self, global_address_cache):
+        print "starting objects..."
         self.profile_rec_port = ProfileRecorder().get_port()
         self.user_notif_port = UserNotifier().get_port()
         self.payment_port = PaymentManager().get_port()
         self.evaluation_port = EvaluationManager().get_port()
         self.tracker_port = Tracker(self.user_notif_port).get_port()
-        self.ride_port = RideManager(self.user_notif_port, self.tracker_port, self.payment_port, self.evaluation_port).get_port()
+        self.ride_port = RideManager(self.user_notif_port, self.tracker_port, self.payment_port, self.evaluation_port, global_address_cache).get_port()
         self.offer_port = OfferManager(self.user_notif_port, self.ride_port).get_port()
         self.find_pair_port = FindPair(self.offer_port).get_port()
         self.proposal_rec_port = ProposalRecorder(self.find_pair_port).get_port()
         self.request_rec_port = RequestRecorder(self.find_pair_port).get_port()
         
 
-global_ports = PortObjects()
 global_address_cache = guiutils.AddressCache()
 global_address_cache.load('addresses.cache')
-
+global_ports = PortObjects(global_address_cache)
 
 urlpatterns = patterns('',
     (r'^media_f/(.*)$', 'django.views.static.serve', { 'document_root': settings.MEDIA_ROOT }),
