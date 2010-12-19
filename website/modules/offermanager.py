@@ -108,10 +108,11 @@ class OfferManager(PortObject):
                 for ride2 in Ride.objects.filter(ride_started=False):
                     if ride2.offer.request.user.id == userID:
                         account-=ride2.offer.total_fee
+                print account
                 if account < 0:
                     offer.non_driver_ok = False
                     offer.save()
-                    self.send_to(self.userNotifier,('newmsg',ride2.offer.request.user.id,'You need to add at least '+str(abs(account))+' money to accept this ride.'))
+                    self.send_to(self.userNotifier,('newmsg',offer.request.user.id,'You need to add at least '+str(abs(account))+' money to accept this ride.'))
                     threading.Thread(target=lambda:callb_ko('The passenger doesn\'t get enough money on his cool account to afford this ride.')).start()
                     return None
                 
@@ -179,8 +180,33 @@ class OfferManager(PortObject):
                     offer.save()
                     print "accepted"
                     self.send_to(self.rideManager, ('newacceptedride', offer.id))
-                    threading.Thread(target=lambda:callb_ko('The ride start time has passed.')).start()
+                    threading.Thread(target=lambda:callb_ok('The ride has been confirmed.')).start()
+                    
             else:
+                account = offer.request.user.account_balance-offer.total_fee
+                print account
+                for ride2 in Ride.objects.filter(ride_started=False):
+                    if ride2.offer.request.user.id == userID:
+                        account-=ride2.offer.total_fee
+                if account<0:
+                    offer.non_driver_ok = False
+                    offer.save()
+                    print "not enough money"
+                    self.send_to(self.userNotifier, ('newmsg', userID, "You don't have enough money to accept the ride. Please add money on your account."))
+                    threading.Thread(target=lambda:callb_ko('The passenger doesn\'t get enough money on his cool account to afford this ride.')).start()
+                
+                elif offer.proposal.departure_time < datetime.datetime.today():
+                    offer.status='D'
+                    offer.save()
+                    print "too late"
+                    threading.Thread(target=lambda:callb_ko('The ride start time has passed.')).start()
+
+                else:
+                    offer.non_driver_ok = True
+                    offer.save()
+                    print "accepted"
+                    self.send_to(self.rideManager, ('newacceptedride', offer.id))
+                    threading.Thread(target=lambda:callb_ok('The ride has been confirmed.')).start()
                 threading.Thread(target=callb_ok).start()
 
     def cancel_proposal(self,proposalID):
