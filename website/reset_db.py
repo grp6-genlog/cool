@@ -29,5 +29,5 @@ up.bank_account_number = 'BE-123'
 up.phone_number = '012345'
 up.save()
 
-print "filling the tables..."
-import Fulfil
+#print "filling the tables..."
+#import Fulfil

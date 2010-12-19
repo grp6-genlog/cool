@@ -174,7 +174,6 @@ def editprofile(request, port_profile=None):
                         return toprofilerecorder(request,port_profile,'edit')
                     
             else:
-                print "date : "+str(p.date_of_birth)
                 init = {
                     'email' : request.user.email,
                     'first_name' : request.user.first_name,
@@ -239,7 +238,7 @@ def changepassword(request, port_profile=None):
         
 def toprofilerecorder(request, port_profile, action):
     if action != 'register' and action != 'edit':
-        return render_to_response('404.html', locals())
+        return render_to_response('home.html', locals())
 
     if action == 'register':
         if request.user.is_authenticated():
@@ -271,7 +270,6 @@ def toprofilerecorder(request, port_profile, action):
     n_user.first_name = form.cleaned_data['first_name']
     n_user.last_name = form.cleaned_data['last_name']
     n_user.save()
-        
     
     
     UserID = n_user.id
@@ -294,7 +292,8 @@ def toprofilerecorder(request, port_profile, action):
         msg = 'recordprofile'
     elif action == 'edit':
         msg = 'updateprofile'
-        WaitCallbacksProfile.declare(request.user)
+    
+    WaitCallbacksProfile.declare(request.user)
     
     anonymous_send_to(port_profile,(msg,[n_user,NumberOfSeats,
                                        BirthDate,Smoker,Communities,MoneyPerKm,
@@ -313,7 +312,8 @@ def toprofilerecorder(request, port_profile, action):
             user = auth.authenticate(username=n_user.username, password=pwd)
             if user is not None and user.is_active:
                 auth.login(request, user)
-                
+
+            notification = {'content':"Account registered successfully", 'success':True}
         else:
             notification = {'content':'Your profile has been updated', 'success':True}
         return render_to_response('home.html', locals())

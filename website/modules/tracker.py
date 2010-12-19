@@ -244,6 +244,7 @@ class Tracker(PortObject):
         @pre : instruId is the id of an instruction (ride) in DB
         @post : start_ride is called.
         """
+        print msg
         if msg[0]=='startride':
             ride,driver,ndriver=None,None,None
             if not DEBUG:

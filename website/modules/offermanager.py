@@ -175,7 +175,7 @@ class OfferManager(PortObject):
         proposal.status = 'C'
         proposal.save()
         for offer in related_offers:
-            self.discarded(offer)
+            self.discarded(offer.id)
 
     def cancel_request(self,requestID):
         request = Request.objects.get(id=requestID)
@@ -183,7 +183,7 @@ class OfferManager(PortObject):
         request.status = 'C'
         request.save()
         for offer in related_offers:
-            self.discarded(offer)
+            self.discarded(offer.id)
 
     def discarded(self,offerID):
         """

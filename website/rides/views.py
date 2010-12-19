@@ -40,41 +40,46 @@ def myrides(request, global_address_cache=None):
         ol3 = Offer.objects.filter(proposal=prop, status='C') # every offer cancelled where the user is the driver
         offer_list = ol1 | ol2 | ol3
         for of in offer_list:
-            print of.id
-            ride = Ride.objects.get(offer=of)
             
-            route_points = of.proposal.routepoints_set.all()
-            index_pickup = 0
-            index_drop = 0
-            for i in xrange(len(route_points)):
-                if route_points[i].latitude == of.pickup_point_lat and route_points[i].longitude == of.pickup_point_long:
-                    index_pickup = i
-                if route_points[i].latitude == of.drop_point_lat and route_points[i].longitude == of.drop_point_long:
-                    index_drop = i
+            ride = Ride.objects.filter(offer=of)
             
-            date_pick = utils.get_time_at_point([(el.latitude,el.longitude) for el in route_points],
-                                            index_pickup,
-                                            of.proposal.departure_time,
-                                            of.proposal.arrival_time)
-            
-            date_drop = utils.get_time_at_point([(el.latitude,el.longitude) for el in route_points],
-                                            index_drop,
-                                            of.proposal.departure_time,
-                                            of.proposal.arrival_time)
-            
-            
-            pick_point = global_address_cache.get_address((of.pickup_point_lat, of.pickup_point_long))
-            drop_point = global_address_cache.get_address((of.drop_point_lat, of.drop_point_long))
-            
-            infos = {
-                'driver':True, 'other':of.request.user,
-                'date_pick':date_pick, 'pick_point': pick_point,
-                'date_drop':date_drop, 'drop_point': drop_point,
-                'fee': of.total_fee, 'id':ride.id,
-                'nb_seat': of.request.nb_requested_seats, 'status':of.status
-            }
+            if len(ride) == 1:
+                ride = ride[0]
+                route_points = of.proposal.routepoints_set.all()
+                index_pickup = 0
+                index_drop = 0
+                for i in xrange(len(route_points)):
+                    if route_points[i].latitude == of.pickup_point_lat and route_points[i].longitude == of.pickup_point_long:
+                        index_pickup = i
+                    if route_points[i].latitude == of.drop_point_lat and route_points[i].longitude == of.drop_point_long:
+                        index_drop = i
+                
+                date_pick = utils.get_time_at_point([(el.latitude,el.longitude) for el in route_points],
+                                                index_pickup,
+                                                of.proposal.departure_time,
+                                                of.proposal.arrival_time)
+                
+                date_drop = utils.get_time_at_point([(el.latitude,el.longitude) for el in route_points],
+                                                index_drop,
+                                                of.proposal.departure_time,
+                                                of.proposal.arrival_time)
+                
+                
+                pick_point = global_address_cache.get_address((of.pickup_point_lat, of.pickup_point_long))
+                drop_point = global_address_cache.get_address((of.drop_point_lat, of.drop_point_long))
+                
+                infos = {
+                    'driver':True, 'other':of.request.user,
+                    'date_pick':date_pick, 'pick_point': pick_point,
+                    'date_drop':date_drop, 'drop_point': drop_point,
+                    'fee': of.total_fee, 'id':ride.id,
+                    'nb_seat': of.request.nb_requested_seats, 'status':of.status
+                }
 
-            insert_ride(info_rides, infos)
+                insert_ride(info_rides, infos)
+                
+            else:
+                print "offer "+str(of.id)+" with status "+of.status+"without ride"
 
 
     for req in Request.objects.filter(user=user, status='P', arrival_time__gt=three_days_ago):
@@ -84,41 +89,45 @@ def myrides(request, global_address_cache=None):
         ol3 = Offer.objects.filter(request=req, status='C') # every offer cancelled where the user is the passenger
         offer_list = ol1 | ol2 | ol3
         for of in offer_list:
-            ride = Ride.objects.get(offer=of)    
-            
-            route_points = of.proposal.routepoints_set.all()
-            
-            index_pickup = 0
-            index_drop = 0
-            for i in xrange(len(route_points)):
-                if route_points[i].latitude == of.pickup_point_lat and route_points[i].longitude == of.pickup_point_long:
-                    index_pickup = i
-                if route_points[i].latitude == of.drop_point_lat and route_points[i].longitude == of.drop_point_long:
-                    index_drop = i
-            
-            
-            date_pick = utils.get_time_at_point([(el.latitude,el.longitude) for el in route_points],
-                                            index_pickup,
-                                            of.proposal.departure_time,
-                                            of.proposal.arrival_time)
-            
-            date_drop = utils.get_time_at_point([(el.latitude,el.longitude) for el in route_points],
-                                            index_drop,
-                                            of.proposal.departure_time,
-                                            of.proposal.arrival_time)
-            
-            pick_point = global_address_cache.get_address((of.pickup_point_lat,of.pickup_point_long))
-            drop_point = global_address_cache.get_address((of.drop_point_lat,of.drop_point_long))
-            
-            infos = {
-                'driver':False, 'other':of.proposal.user,
-                'date_pick':date_pick, 'pick_point': pick_point,
-                'date_drop':date_drop, 'drop_point': drop_point,
-                'fee': of.total_fee, 'id':ride.id,
-                'nb_seat': of.request.nb_requested_seats, 'status':of.status
-            }
+            ride = Ride.objects.filter(offer=of)    
+    
+            if len(ride) == 1:
+                ride = ride[0]
+                route_points = of.proposal.routepoints_set.all()
+                
+                index_pickup = 0
+                index_drop = 0
+                for i in xrange(len(route_points)):
+                    if route_points[i].latitude == of.pickup_point_lat and route_points[i].longitude == of.pickup_point_long:
+                        index_pickup = i
+                    if route_points[i].latitude == of.drop_point_lat and route_points[i].longitude == of.drop_point_long:
+                        index_drop = i
+                
+                
+                date_pick = utils.get_time_at_point([(el.latitude,el.longitude) for el in route_points],
+                                                index_pickup,
+                                                of.proposal.departure_time,
+                                                of.proposal.arrival_time)
+                
+                date_drop = utils.get_time_at_point([(el.latitude,el.longitude) for el in route_points],
+                                                index_drop,
+                                                of.proposal.departure_time,
+                                                of.proposal.arrival_time)
+                
+                pick_point = global_address_cache.get_address((of.pickup_point_lat,of.pickup_point_long))
+                drop_point = global_address_cache.get_address((of.drop_point_lat,of.drop_point_long))
+                
+                infos = {
+                    'driver':False, 'other':of.proposal.user,
+                    'date_pick':date_pick, 'pick_point': pick_point,
+                    'date_drop':date_drop, 'drop_point': drop_point,
+                    'fee': of.total_fee, 'id':ride.id,
+                    'nb_seat': of.request.nb_requested_seats, 'status':of.status
+                }
 
-            insert_ride(info_rides, infos)
+                insert_ride(info_rides, infos)
+            else:
+                print "offer "+str(of.id)+" with status "+of.status+"without ride"
     
     if WaitCallbacksRide.message_present(request.user):
         notification = WaitCallbacksRide.get_message(user)

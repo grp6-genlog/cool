@@ -96,12 +96,11 @@ class RideManager(PortObject):
         until_ride = (today-start).seconds + (today-start).days*86400
         
         if today>time_to_send:
-            #self.send_to(self.tracker_port,('startride', ride.id,lambda: self.close_ride(ride.id),lambda: self.cancel_ride(ride.id)))
-            pass
+            self.send_to(self.tracker_port,('startride', ride.id,lambda: self.close_ride(ride.id),lambda: self.cancel_ride(ride.id)))
+            
         else:
-            #delay1=delayAction(half_hour_before, self.send_to, (self.tracker_port, ('startride', ride.id,lambda: self.close_ride(ride.id),lambda: self.cancel_ride(ride.id))))
-            #delay1.start()
-            pass
+            delay1=delayAction(half_hour_before, self.send_to, (self.tracker_port, ('startride', ride.id,lambda: self.close_ride(ride.id),lambda: self.cancel_ride(ride.id))))
+            delay1.start()
         
         delay2=delayAction(until_ride, self.send_to, (self.evaluationmanager_port, ('startevaluation', offer.proposal.user.id, ride.id)))
         delay3=delayAction(until_ride, self.send_to, (self.evaluationmanager_port, ('startevaluation', offer.request.user.id, ride.id)))

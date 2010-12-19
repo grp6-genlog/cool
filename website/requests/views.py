@@ -77,6 +77,7 @@ def addrequest(request, port_request=None):
             
             arrival_time = form.cleaned_data['arrival_time']
             UserID = UserProfile.objects.get(user=request.user)
+            
             if arrival_time < datetime.datetime.today():
                 form._errors["arrival_time"] = form.error_class(["Arrival time already passed"])
                 return render_to_response('requestform.html', locals())
@@ -123,6 +124,7 @@ def addrequest(request, port_request=None):
         form = RequestForm()
         
         return render_to_response('requestform.html', locals())
+
 
 def cancelrequest(request, offset, port_offer=None):
     try:

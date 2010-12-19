@@ -104,7 +104,12 @@ def addevaluation(request, offset, port_evaluation=None):
                     notification = {'content':'Invalid call, you have not participated to this ride', 'success':False}
                     return render_to_response('home.html', locals())
                 
-                evaluation = Evaluation.objects.get(ride=ride, user_to=user_to)
+                evaluation = Evaluation.objects.filter(ride=ride, user_to=user_to)
+                if len(evaluation) != 1:
+                    notification = {'content':'You have can not evaluate this ride', 'success':False}
+                    return render_to_response('home.html', locals())
+                evaluation = evaluation[0]
+                
                 if evaluation.locked:
                     notification = {'content':'You have can not evaluate this ride anymore', 'success':False}
                     return render_to_response('home.html', locals())
