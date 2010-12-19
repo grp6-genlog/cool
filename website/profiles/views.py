@@ -442,15 +442,11 @@ def fillaccount(request, port_payement):
                 
             if WaitCallbacksProfile.status(request.user) == 'success':
                 WaitCallbacksProfile.free(request.user)
-                if action == 'register':
-                    user = auth.authenticate(username=n_user.username, password=pwd)
-                    if user is not None and user.is_active:
-                        auth.login(request, user)
-                        
+
+                notification = {'content':'Your account has been filled with'+str(amount), 'success':True}
+                return render_to_response('home.html', locals())
             else:
-                notification = {'content':'Your profile has been updated', 'success':True}
-            return render_to_response('home.html', locals())
-        else:
-            print WaitCallbacksProfile.status(request.user)
-            WaitCallbacksProfile.free(request.user)
-            return render_to_response('error.html', locals())
+                print WaitCallbacksProfile.status(request.user)
+                WaitCallbacksProfile.free(request.user)
+                notification = {'content':'Unexpected error, try again later', 'success':False}
+                return render_to_response('home.html', locals())
