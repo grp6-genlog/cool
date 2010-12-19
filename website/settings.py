@@ -39,11 +39,11 @@ DATABASES = {
 AUTH_PROFILE_MODULE = 'profiles.User'
 
 EMAIL_USE_TLS = True
-EMAIL_HOST = "smtp.sgsi.ucl.ac.be"
-EMAIL_HOST_USER = "mtrigaux"
-EMAIL_HOST_PASSWORD = ""
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_HOST_USER = "carpooling.cool@gmail.com"
+EMAIL_HOST_PASSWORD = "genlogiscool"
 EMAIL_PORT = 587
-DEFAULT_FROM_EMAIL = "notexists@email.com"
+DEFAULT_FROM_EMAIL = "carpooling.cool@gmail.com"
 
 
 # Local time zone for this installation. Choices can be found here:

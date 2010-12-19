@@ -7,6 +7,9 @@ import traceback
 
 from website.profiles.models import UserProfile
 
+from django.core.mail import send_mail
+
+
 class UserNotifier(PortObject):
     fromaddr = 'carpooling.cool@gmail.com'
     server = None
@@ -34,18 +37,8 @@ class UserNotifier(PortObject):
         """
         u = UserProfile.objects.get(id=userID)
         mail = u.user.email
-        tries = 50
-        while tries>0:
-            try:
-                self.server.sendmail(self.fromaddr, mail, message)  
-                break
-            except:
-                self.server = smtplib.SMTP('smtp.gmail.com:587')  
-                self.server.starttls()  
-                self.server.login('carpooling.cool','genlogiscool')  
-            tries-=1
- 
-        print "mail sent to "+mail+" with "+str(tries)
+        send_mail('Car pooling notification', message, 'carpooling.cool@gmail.com',[mail], fail_silently=False)
+        
 
     def routine(self,src,msg):
         """
