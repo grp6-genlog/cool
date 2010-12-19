@@ -5,6 +5,7 @@ from website.offers.models import Offer
 from website.rides.models import Ride
 from website.proposals.models import Proposal
 from website.requests.models import Request
+from website.profiles.models import UserProfile
 
 class PaymentManager(PortObject):
     def __init__(self):
@@ -22,6 +23,7 @@ class PaymentManager(PortObject):
                 money more
         """
         ride = Ride.objects.get(id=instructionID)
+        fee=ride.offer.total_fee
         driver=ride.offer.proposal.user
         ndriver=ride.offer.request.user        
         ndriver.account_balance=ndriver.account_balance-fee
@@ -40,6 +42,7 @@ class PaymentManager(PortObject):
         Trust me :)
         """
         print 'Transfer sent to bank:',bankAccount,communication,amount
+        return True
 
     def add_money(self,userID, bankAccount, communication, amount):
         """Add money from bank account to car pooling system account
@@ -72,7 +75,8 @@ class PaymentManager(PortObject):
             return False
         else:
             user.account_balance-=amount
-            self.transfer_money(bankAccount,str(userId),amount)
+            if not self.transfer_money(bankAccount,str(userId),amount):
+                return False
             user.save()
             return True
         

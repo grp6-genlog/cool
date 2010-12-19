@@ -90,7 +90,8 @@ class PasswordForm(forms.Form):
                        widget=forms.PasswordInput(render_value=False),
                        label=u'Confirm password')
 
-
+class FillAccountForm(forms.Form):
+    amount = forms.FloatField()
 
 class WaitCallbacksProfile(WaitCallbacks):
     pass
@@ -282,8 +283,7 @@ def toprofilerecorder(request, port_profile, action):
         msg = 'recordprofile'
     elif action == 'edit':
         msg = 'updateprofile'
-        
-    WaitCallbacksProfile.declare(request.user)
+        WaitCallbacksProfile.declare(request.user)
     
     anonymous_send_to(port_profile,(msg,[n_user,NumberOfSeats,
                                        BirthDate,Smoker,Communities,MoneyPerKm,
@@ -311,6 +311,35 @@ def toprofilerecorder(request, port_profile, action):
         print WaitCallbacksProfile.status(request.user)
         WaitCallbacksProfile.free(request.user)
         return render_to_response('error.html', locals())
+    WaitCallbacksProfile.declare(request.user)
+    
+    anonymous_send_to(port_profile,(msg,[n_user,NumberOfSeats,
+                                       BirthDate,Smoker,Communities,MoneyPerKm,
+                                       Gender,BankAccountNumber,CarID,
+                                       GSMNumber,CarDescription],
+                                   successcall,
+                                   failurecall,
+                                   request.user))
+    wait_counter = 0
+    while WaitCallbacksProfile.is_pending(request.user) and wait_counter < 10:
+        time.sleep(0.1)
+        wait_counter += 1
+            
+    if WaitCallbacksProfile.status(request.user) == 'success':
+        WaitCallbacksProfile.free(request.user)
+        if action == 'register':
+            user = auth.authenticate(username=n_user.username, password=pwd)
+            if user is not None and user.is_active:
+                auth.login(request, user)
+                
+        else:
+            notification = {'content':'Your profile has been updated', 'success':True}
+        return render_to_response('home.html', locals())
+    else:
+        print WaitCallbacksProfile.status(request.user)
+        WaitCallbacksProfile.free(request.user)
+        notification = {'content':'Unexpected error, try again later', 'success':False}
+        return render_to_response('home.html', locals())
             
     
 
@@ -329,16 +358,16 @@ def publicprofile(request, offset):
         notification = {'content':'Not an user', 'success':False}
         return render_to_response('home.html', locals())
     
+    if not request.user.is_authenticated():
+        current_date = datetime.datetime.now()
+        notification = {'content':'Please log in to see this page', 'success':False}
+        return render_to_response('home.html', locals())
+    
     user_p = UserProfile.objects.get(user=request.user)    
     try:
         other = UserProfile.objects.get(user=User.objects.get(id=offset))
     except:
         notification = {'content':'Not an user', 'success':False}
-        return render_to_response('home.html', locals())
-        
-    if not request.user.is_authenticated():
-        current_date = datetime.datetime.now()
-        notification = {'content':'Please log in to see this page', 'success':False}
         return render_to_response('home.html', locals())
     
     
@@ -378,8 +407,50 @@ def publicprofile(request, offset):
         return render_to_response('publicprofile.html', locals())
         
         
+def fillaccount(request, port_payement):
+    if not request.user.is_authenticated():
+        current_date = datetime.datetime.now()
+        notification = {'content':'Please log in to see this page', 'success':False}
+        return render_to_response('home.html', locals())
+    
+    user_p = UserProfile.objects.get(user=request.user)    
+    
+    if request.method == 'POST':
+        form = FillAccountForm(request.POST)
         
-        
-        
-        
-        
+        if form.is_valid():
+            amount = form.cleaned_data['amount']
+            
+            if amount <= 0:                
+                form._errors["amount"] = form.error_class(["Insert a positive amount"])
+                return render_to_response('fillaccount.html', locals())
+
+                    
+            WaitCallbacksProfile.declare(request.user)
+    
+            anonymous_send_to(port_profile,(msg,[n_user,NumberOfSeats,
+                                           BirthDate,Smoker,Communities,MoneyPerKm,
+                                           Gender,BankAccountNumber,CarID,
+                                           GSMNumber,CarDescription],
+                                           successcall,
+                                           failurecall,
+                                       request.user))
+            wait_counter = 0
+            while WaitCallbacksProfile.is_pending(request.user) and wait_counter < 10:
+                time.sleep(0.1)
+                wait_counter += 1
+                
+            if WaitCallbacksProfile.status(request.user) == 'success':
+                WaitCallbacksProfile.free(request.user)
+                if action == 'register':
+                    user = auth.authenticate(username=n_user.username, password=pwd)
+                    if user is not None and user.is_active:
+                        auth.login(request, user)
+                        
+            else:
+                notification = {'content':'Your profile has been updated', 'success':True}
+            return render_to_response('home.html', locals())
+        else:
+            print WaitCallbacksProfile.status(request.user)
+            WaitCallbacksProfile.free(request.user)
+            return render_to_response('error.html', locals())
