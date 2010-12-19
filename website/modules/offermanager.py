@@ -103,9 +103,15 @@ class OfferManager(PortObject):
                 account = offer.request.user.account_balance
                 
                 for offer2 in Offer.objects.filter(status='A'):
-                    if offer2.request.user.user == userID:
+                    if offer2.request.user.id == userID:
                         account-=offer2.total_fee
-                        
+                if account < 0:
+                    offer.non_driver_ok = False
+                    offer.save()
+                    self.send_to(self.userNotifier,('newmsg',offer2.request.user.id,'You need to add at least '+str(abs(account))+' money to accept this ride.'))
+                    threading.Thread(target=callb_ko).start()
+                    return None
+                
                 if offer.proposal.departure_time < datetime.datetime.today():
                     offer.status='D'
                     offer.save()
