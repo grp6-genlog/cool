@@ -1,0 +1,102 @@
+{% extends "message.html" %}
+
+{% block title %}My account{% endblock %}
+
+{% block message %}
+My account
+{% endblock %}
+
+{% block content %}
+Current amount on the account : {{ current_amount }}€
+<br/><br/>
+<span style="font-size:11px;">Transfer from your bank account ({{ user_p.bank_account_number }}) to your car pooling account.</span><br/><br/>
+<form action="/account/" method="post">
+    <div class="aligned">
+    {% if notification1.content %}
+        <div class="text-center">
+        {% if notification1.success %}
+            <span style="color:green;">
+        {% else %}
+            <span style="color:red;">
+        {% endif %}
+        
+        {{ notification1.content }}
+        </span>
+        </div>
+        <br/><br/>
+    {% endif %}
+        
+        <div class="form-row">
+            {{ form1.amount.errors }}
+            <span class="required">
+                {{ form1.amount.label_tag }}
+            </span>
+            {{ form1.amount }}<br/>
+	        Amount you want to add to your account
+        </div>
+        <div class="form-row">
+            {{ form1.password.errors }}
+            <span class="required">
+                {{ form1.password.label_tag }}
+            </span>
+            {{ form1.password }}
+        </div>
+        <span style="font-style:italic; font-size:11px;">Mandatory fields are in bold</span><br/>
+        <div class="submit-row">
+            <label>
+            <input type="submit" value="Transfer" />
+            </label>
+        </div>
+    </div>
+</form>
+<br/>
+<hr/>
+<br/>
+<span style="font-size:11px;">Transfer from your car pooling account to the bank account number specified bellow.</span><br/><br/>
+<form action="/emptyaccount/" method="post">
+    <div class="aligned">
+    {% if notification2.content %}
+        <div class="text-center">
+        {% if notification2.success %}
+            <span style="color:green;">
+        {% else %}
+            <span style="color:red;">
+        {% endif %}
+        
+        {{ notification2.content }}
+        </span>
+        </div>
+        <br/><br/>
+    {% endif %}
+        
+        <div class="form-row">
+            {{ form2.amount.errors }}
+            <span class="required">
+                {{ form2.amount.label_tag }}
+            </span>
+            {{ form2.amount }}<br/>
+	        Amount you want to add to your account
+        </div>
+        <div class="form-row">
+            {{ form2.account_number.errors }}
+            <span class="required">
+                {{ form2.account_number.label_tag }}
+            </span>
+            {{ form2.account_number }}<br/>
+        </div>
+        <div class="form-row">
+            {{ form2.password.errors }}
+            <span class="required">
+                {{ form2.password.label_tag }}
+            </span>
+            {{ form2.password }}
+        </div>
+        <span style="font-style:italic; font-size:11px;">Mandatory fields are in bold</span><br/>
+        <div class="submit-row">
+            <label>
+            <input type="submit" value="Transfer" />
+            </label>
+        </div>
+    </div>
+</form>
+{% endblock %}
