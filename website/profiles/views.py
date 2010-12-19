@@ -92,6 +92,17 @@ class PasswordForm(forms.Form):
 
 class FillAccountForm(forms.Form):
     amount = forms.FloatField()
+    password = forms.CharField(max_length=50,
+                       min_length=3,
+                       widget=forms.PasswordInput(render_value=False),)
+
+class TransferAccountForm(forms.Form):
+    amount = forms.FloatField()
+    account_number = forms.CharField(max_length=50,)
+    password = forms.CharField(max_length=50,
+                       min_length=3,
+                       widget=forms.PasswordInput(render_value=False),)
+
 
 class WaitCallbacksProfile(WaitCallbacks):
     pass
@@ -407,7 +418,7 @@ def publicprofile(request, offset):
         return render_to_response('publicprofile.html', locals())
         
         
-def fillaccount(request, port_payement):
+def myaccount(request, port_payment):
     if not request.user.is_authenticated():
         current_date = datetime.datetime.now()
         notification = {'content':'Please log in to see this page', 'success':False}
@@ -423,8 +434,12 @@ def fillaccount(request, port_payement):
             
             if amount <= 0:                
                 form._errors["amount"] = form.error_class(["Insert a positive amount"])
-                return render_to_response('fillaccount.html', locals())
-
+                return render_to_response('accountform.html', locals())
+            
+            pwd = form.cleaned_data['password']
+            if not auth.models.check_password(pwd, request.user.password):
+                form._errors["password"] = form.error_class(["Invalid password"])
+                return render_to_response('accountform.html', locals())
                     
             WaitCallbacksProfile.declare(request.user)
     
@@ -448,4 +463,9 @@ def fillaccount(request, port_payement):
                 print WaitCallbacksProfile.status(request.user)
                 WaitCallbacksProfile.free(request.user)
                 notification = {'content':'Unexpected error, try again later', 'success':False}
-                return render_to_response('home.html', locals())
+                return render_to_response('accountform.html', locals())
+    else:
+        form1 = FillAccountForm()
+        form2 = TransferAccountForm()
+        
+        return render_to_response('accountform.html', locals())

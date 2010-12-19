@@ -63,7 +63,8 @@ urlpatterns += patterns('website.profiles.views',
     (r'^profile/$', 'editprofile', {'port_profile':global_ports.profile_rec_port}),
     (r'^profile/(?P<offset>\d+)/$', 'publicprofile'),
     (r'^password/$', 'changepassword', {'port_profile':global_ports.profile_rec_port}),
-    (r'^fillaccount/$', 'fillaccount', {'port_payment':global_ports.payment_port,}),
+    (r'^account/$', 'myaccount', {'port_payment':global_ports.payment_port,}),
+    (r'^emptyaccount/$', 'emptyaccount', {'port_payment':global_ports.payment_port,}),
 )
 
 urlpatterns += patterns('website.requests.views',
