@@ -353,14 +353,6 @@ def toprofilerecorder(request, port_profile, action):
         return render_to_response('home.html', locals())
             
     
-
-def successcall(user):
-    WaitCallbacksProfile.update(user, 'success')
-    
-def failurecall(user):
-    WaitCallbacksProfile.update(user, 'fail')
-    
-    
     
 def publicprofile(request, offset):
     try:
@@ -421,51 +413,131 @@ def publicprofile(request, offset):
 def myaccount(request, port_payment):
     if not request.user.is_authenticated():
         current_date = datetime.datetime.now()
-        notification = {'content':'Please log in to see this page', 'success':False}
+        notification1 = {'content':'Please log in to see this page', 'success':False}
         return render_to_response('home.html', locals())
     
-    user_p = UserProfile.objects.get(user=request.user)    
+    user_p = UserProfile.objects.get(user=request.user)
+    
+    current_amount = user_p.account_balance
+    form1 = FillAccountForm()
+    init = { 'account_number' : user_p.bank_account_number }
+    form2 = TransferAccountForm(initial = init)
     
     if request.method == 'POST':
-        form = FillAccountForm(request.POST)
+        form1 = FillAccountForm(request.POST)
         
-        if form.is_valid():
-            amount = form.cleaned_data['amount']
+        if form1.is_valid():
+            amount = form1.cleaned_data['amount']
             
             if amount <= 0:                
-                form._errors["amount"] = form.error_class(["Insert a positive amount"])
+                form1._errors["amount"] = form1.error_class(["Insert a positive amount"])
                 return render_to_response('accountform.html', locals())
             
-            pwd = form.cleaned_data['password']
+            pwd = form1.cleaned_data['password']
             if not auth.models.check_password(pwd, request.user.password):
-                form._errors["password"] = form.error_class(["Invalid password"])
+                form1._errors["password"] = form1.error_class(["Invalid password"])
                 return render_to_response('accountform.html', locals())
-                    
+            
+            communication = "Carpooling transfer from "+request.user.first_name+" "+request.user.last_name
             WaitCallbacksProfile.declare(request.user)
     
-            anonymous_send_to(port_payement,(msg,[n_user,NumberOfSeats,
-                                           BirthDate,Smoker,Communities,MoneyPerKm,
-                                           Gender,BankAccountNumber,CarID,
-                                           GSMNumber,CarDescription],
+            anonymous_send_to(port_payment,('addmoney',(user_p.id,
+                                                user_p.bank_account_number,
+                                                communication,
+                                                amount),
                                            lambda:successcall(request.user),
                                            lambda:failurecall(request.user)))
             wait_counter = 0
             while WaitCallbacksProfile.is_pending(request.user) and wait_counter < 10:
                 time.sleep(0.1)
                 wait_counter += 1
-                
+            
+            user_p = UserProfile.objects.get(user=request.user)
             if WaitCallbacksProfile.status(request.user) == 'success':
                 WaitCallbacksProfile.free(request.user)
 
-                notification = {'content':'Your account has been filled with'+str(amount), 'success':True}
-                return render_to_response('home.html', locals())
+                notification1 = {'content':'Your account has been filled with '+str(amount)+' euro', 'success':True}
+                current_amount = user_p.account_balance
+                return render_to_response('accountform.html', locals())
+                
             else:
                 print WaitCallbacksProfile.status(request.user)
                 WaitCallbacksProfile.free(request.user)
-                notification = {'content':'Unexpected error, try again later', 'success':False}
+                notification1 = {'content':'Unexpected error, try again later', 'success':False}
+                
+                current_amount = user_p.account_balance
                 return render_to_response('accountform.html', locals())
     else:
-        form1 = FillAccountForm()
-        form2 = TransferAccountForm()
-        
+        current_amount = user_p.account_balance
         return render_to_response('accountform.html', locals())
+        
+        
+def emptyaccount(request, port_payment):
+    if not request.user.is_authenticated():
+        current_date = datetime.datetime.now()
+        notification2 = {'content':'Please log in to see this page', 'success':False}
+        return render_to_response('home.html', locals())
+    
+    user_p = UserProfile.objects.get(user=request.user)    
+    
+    current_amount = user_p.account_balance
+    form1 = FillAccountForm()
+    init = { 'account_number' : user_p.bank_account_number }
+    form2 = TransferAccountForm(initial = init)    
+    
+    if request.method == 'POST':
+        form2 = TransferAccountForm(request.POST)
+        
+        if form2.is_valid():
+            amount = form2.cleaned_data['amount']
+            
+            if amount <= 0:                
+                form2._errors["amount"] = form2.error_class(["Insert a positive amount"])
+                return render_to_response('accountform.html', locals())
+            
+            account_number = form2.cleaned_data['account_number']
+            pwd = form2.cleaned_data['password']
+            if not auth.models.check_password(pwd, request.user.password):
+                form2._errors["password"] = form2.error_class(["Invalid password"])
+                return render_to_response('accountform.html', locals())
+                    
+            WaitCallbacksProfile.declare(request.user)
+    
+            anonymous_send_to(port_payment,('getmoney',(user_p.id,
+                                                    account_number,
+                                                    amount),
+                                           lambda:successcall(request.user),
+                                           lambda:failurecall(request.user)))
+            wait_counter = 0
+            while WaitCallbacksProfile.is_pending(request.user) and wait_counter < 10:
+                time.sleep(0.1)
+                wait_counter += 1
+            
+            user_p = UserProfile.objects.get(user=request.user) 
+            if WaitCallbacksProfile.status(request.user) == 'success':
+                WaitCallbacksProfile.free(request.user)
+                
+                msg = str(amount)+' euro have been transfered to your account'
+                notification2 = {'content': msg, 'success':True}
+                current_amount = user_p.account_balance
+                
+                return render_to_response('accountform.html', locals())
+                
+            else:
+                print WaitCallbacksProfile.status(request.user)
+                WaitCallbacksProfile.free(request.user)
+                notification2 = {'content':'Unexpected error, try again later', 'success':False}
+                
+                current_amount = user_p.account_balance
+                return render_to_response('accountform.html', locals())
+    else:
+        return render_to_response('accountform.html', locals())
+
+        
+        
+def successcall(user):
+    WaitCallbacksProfile.update(user, 'success')
+    
+def failurecall(user):
+    WaitCallbacksProfile.update(user, 'fail')
+

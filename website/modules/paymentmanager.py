@@ -6,6 +6,7 @@ from website.rides.models import Ride
 from website.proposals.models import Proposal
 from website.requests.models import Request
 from website.profiles.models import UserProfile
+import threading
 
 class PaymentManager(PortObject):
     def __init__(self):
@@ -75,7 +76,7 @@ class PaymentManager(PortObject):
             return False
         else:
             user.account_balance-=amount
-            if not self.transfer_money(bankAccount,str(userId),amount):
+            if not self.transfer_money(bankAccount,str(userID),amount):
                 return False
             user.save()
             return True
@@ -97,15 +98,19 @@ class PaymentManager(PortObject):
               - if the message received is 'getmoney' the amount of money of the userID's account is 
             removed and sent to the dstBankAccount. The call back function is called.
         """
+        print msg
         if len(msg)==2:
             (name,instructionID)=msg
             self.fee_transfer(instructionID)
-        if len(msg)==3:
-            (name,tab,functionOk,functionKo)=msg
+            
+        if len(msg)==4:
+            (name,tab,functionOk,functionKo) = msg
             if name=='addmoney':
                 if(self.add_money(tab[0],tab[1],tab[2],tab[3])):
+                    print 'ok add money'
                     threading.Thread(target=functionOk).start()
                 else:
+                    print 'ko add money'
                     threading.Thread(target=functionKo).start()
             elif name=='getmoney':
                 if self.get_money(tab[0],tab[1],tab[2]):
