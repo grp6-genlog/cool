@@ -38,7 +38,7 @@ class UserNotifier(PortObject):
         u = UserProfile.objects.get(id=userID)
         mail = u.user.email
         send_mail('Car pooling notification', message, 'carpooling.cool@gmail.com',[mail], fail_silently=False)
-        
+        print "mail sent to "+mail
 
     def routine(self,src,msg):
         """
