@@ -28,7 +28,7 @@ class PaymentManager(PortObject):
         driver=ride.offer.proposal.user
         ndriver=ride.offer.request.user        
         ndriver.account_balance=ndriver.account_balance-fee
-        driver.account_balance=driver.acount_balance+fee
+        driver.account_balance=driver.account_balance+fee
         driver.save()
         ndriver.save()
 
