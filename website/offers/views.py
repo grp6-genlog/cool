@@ -99,7 +99,7 @@ def myoffers(request, global_address_cache=None):
             
             insert_offer(info_offers, infos)
 
-    acc_bal = UserProfile.objects.get(user=request.user).account_balance
+    acc_bal = user.account_balance
     if WaitCallbacksOffer.message_present(request.user):
         notification = WaitCallbacksOffer.get_message(request.user)
         WaitCallbacksOffer.erase_message(request.user)
