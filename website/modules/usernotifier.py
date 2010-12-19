@@ -44,7 +44,8 @@ class UserNotifier(PortObject):
                 self.server.starttls()  
                 self.server.login('carpooling.cool','genlogiscool')  
             tries-=1
-        print "mail sent to "+mail
+ 
+        print "mail sent to "+mail+" with "+str(tries)
 
     def routine(self,src,msg):
         """

@@ -8,8 +8,8 @@ from proposals.models import *
 from rides.models import *
 
 print "emptying tables..."
-User.objects.all().delete()
-UserProfile.objects.all().delete()
+#User.objects.all().delete()
+#UserProfile.objects.all().delete()
 Evaluation.objects.all().delete()
 Request.objects.all().delete()
 Offer.objects.all().delete()

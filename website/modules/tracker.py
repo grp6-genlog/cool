@@ -11,7 +11,8 @@ if not DEBUG:
     from offers.models import Offer
     from rides.models import Ride
     from proposals.models import Proposal
-    from requests.models import Request 
+    from requests.models import Request
+    from profiles.models import UserProfile
 import socket,threading,datetime
 from utils import get_distance
 

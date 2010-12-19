@@ -33,7 +33,7 @@ def myoffers(request, global_address_cache=None):
         for of in new_offers:
             
             associated_req = of.request
-            associated_offers = Offer.requests.filter(request = associated_req)
+            associated_offers = Offer.objects.filter(request = associated_req)
             display = True
             for other_of in associated_offers:
                 if other_of.status == 'A':
