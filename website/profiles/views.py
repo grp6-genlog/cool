@@ -378,7 +378,25 @@ def publicprofile(request, offset):
         return render_to_response('publicprofile.html', locals())
         
         
+def fillaccoun(request, port_payement):
+    try:
+        offset = int(offset)
+    except:
+        notification = {'content':'Not an user', 'success':False}
+        return render_to_response('home.html', locals())
+    
+    user_p = UserProfile.objects.get(user=request.user)    
+    try:
+        other = UserProfile.objects.get(user=User.objects.get(id=offset))
+    except:
+        notification = {'content':'Not an user', 'success':False}
+        return render_to_response('home.html', locals())
         
+    if not request.user.is_authenticated():
+        current_date = datetime.datetime.now()
+        notification = {'content':'Please log in to see this page', 'success':False}
+        return render_to_response('home.html', locals())
+    
         
         
         
