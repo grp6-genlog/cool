@@ -42,6 +42,7 @@ class PaymentManager(PortObject):
         Trust me :)
         """
         print 'Transfer sent to bank:',bankAccount,communication,amount
+        return True
 
     def add_money(self,userID, bankAccount, communication, amount):
         """Add money from bank account to car pooling system account
@@ -74,7 +75,8 @@ class PaymentManager(PortObject):
             return False
         else:
             user.account_balance-=amount
-            self.transfer_money(bankAccount,str(userId),amount)
+            if not self.transfer_money(bankAccount,str(userId),amount):
+                return False
             user.save()
             return True
         
