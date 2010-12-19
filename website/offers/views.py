@@ -8,18 +8,13 @@ from website.requests.models import Request
 from website.offers.models import Offer
 from django.contrib.auth.models import User
 
-
 from portobject import *
 from guiutils import WaitCallbacks
 
 import datetime, time, utils
 
-
-
 class WaitCallbacksOffer(WaitCallbacks):
-    pass
-
-                      
+    pass    
 
 """
     Display the list of offers of the authenticated user waiting for approval
@@ -103,7 +98,8 @@ def myoffers(request, global_address_cache=None):
             }
             
             insert_offer(info_offers, infos)
-    
+
+    acc_bal = UserProfile.objects.get(user=request.user).account_balance
     if WaitCallbacksOffer.message_present(request.user):
         notification = WaitCallbacksOffer.get_message(request.user)
         WaitCallbacksOffer.erase_message(request.user)
