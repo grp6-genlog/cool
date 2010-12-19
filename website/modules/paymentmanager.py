@@ -107,10 +107,8 @@ class PaymentManager(PortObject):
             (name,tab,functionOk,functionKo) = msg
             if name=='addmoney':
                 if(self.add_money(tab[0],tab[1],tab[2],tab[3])):
-                    print 'ok add money'
                     threading.Thread(target=functionOk).start()
                 else:
-                    print 'ko add money'
                     threading.Thread(target=functionKo).start()
             elif name=='getmoney':
                 if self.get_money(tab[0],tab[1],tab[2]):
