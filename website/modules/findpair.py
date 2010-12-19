@@ -59,7 +59,7 @@ class FindPair(PortObject):
             if not found:
                 route_points = RoutePoints.objects.filter(proposal=infos).order_by('order')
                 valid_pair = list()
-                for i in xrange(len(route_points)-2):
+                for i in xrange(len(route_points)-1):
                     if get_distance((request.departure_point_lat,request.departure_point_long),(route_points[i].latitude,route_points[i].longitude))<request.departure_range:
                         for j in range(i+1,len(route_points)):
                             if get_distance((request.arrival_point_lat,request.arrival_point_long),(route_points[j].latitude,route_points[j].longitude))<request.arrival_range:
@@ -88,7 +88,6 @@ class FindPair(PortObject):
                                       )
                                 ))
 
-
     def match_request(self,requestID):
         """
         This operation try to match the specified proposal with each request of the DB
@@ -107,7 +106,7 @@ class FindPair(PortObject):
         for infos in proposals:
             route_points = RoutePoints.objects.filter(proposal=infos).order_by('order')
             valid_pair = list()
-            for i in xrange(len(route_points)-2):
+            for i in xrange(len(route_points)-1):
                 if get_distance((request.departure_point_lat,request.departure_point_long),(route_points[i].latitude,route_points[i].longitude))<request.departure_range:
                     for j in range(i+1,len(route_points)):
                         if get_distance((request.arrival_point_lat,request.arrival_point_long),(route_points[j].latitude,route_points[j].longitude))<request.arrival_range:

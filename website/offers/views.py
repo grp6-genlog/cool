@@ -177,7 +177,7 @@ def responseoffer(request, offset, port_offer, accept):
             
             WaitCallbacksOffer.declare(request.user)
             
-            anonymous_send_to(port_offer,(message,offer.id,request.user.id,
+            anonymous_send_to(port_offer,(message,offer.id,offer.request.user.id,
                                            lambda:successcall(request.user),
                                            lambda:failurecall(request.user)))
             

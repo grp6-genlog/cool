@@ -6,6 +6,7 @@ from website.offers.models import Offer
 from website.requests.models import Request
 from website.proposals.models import Proposal, RoutePoints
 from google_tools_json import *
+from website.rides.models import Ride
 from utils import get_distance
 import threading, traceback, datetime
 
@@ -110,7 +111,7 @@ class OfferManager(PortObject):
                 if account < 0:
                     offer.non_driver_ok = False
                     offer.save()
-                    self.send_to(self.userNotifier,('newmsg',offer2.request.user.id,'You need to add at least '+str(abs(account))+' money to accept this ride.'))
+                    self.send_to(self.userNotifier,('newmsg',ride2.offer.request.user.id,'You need to add at least '+str(abs(account))+' money to accept this ride.'))
                     threading.Thread(target=callb_ko).start()
                     return None
                 
@@ -156,7 +157,7 @@ class OfferManager(PortObject):
                         return None
 
                 account = offer.request.user.account_balance-offer.total_fee
-                for ride2 in Ride.objects.filter(status='A'):
+                for ride2 in Ride.objects.filter(ride_started=False):
                     if ride2.offer.request.user.id == userID:
                         account-=ride2.offer.total_fee
                 if account<0:
