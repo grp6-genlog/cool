@@ -4,7 +4,9 @@
 
 
 {% block head %}
-    <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAhOS2B6-EQD5T3SnECoQ9PxRsKpCEGTM6La2gZHhYvr-1cMUY4hTZuWrG30_Zvj6WGIj-hLMe-xR4xA" type="text/javascript"></script>
+
+    <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;sensor=false&amp;key=ABQIAAAAg7Yj7wUMy6BH_1nz01bPpBQG2tVlXskPHidVACaw9bLZ-bSKnxQIqT5O1ORZYLEngWNSYgk7R_nYgQ" type="text/javascript"></script>
+
 	<script type="text/javascript"> 
 		window.onload=initialize;
 		window.onunload=GUnload;
@@ -21,7 +23,7 @@
 			if (GBrowserIsCompatible()) {      
                 var options = {
                     suppressZoomToBounds : false
-                    resultList : G_GOOGLEBAR_RESULT_LIST_SUPPRESS
+                    //resultList : G_GOOGLEBAR_RESULT_LIST_SUPPRESS
                 };
 				map = new GMap2(document.getElementById("map_canvas"),{googleBarOptions: options});
 	//			gdir = new GDirections(map, document.getElementById("directions1"));
