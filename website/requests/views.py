@@ -4,6 +4,7 @@ from django import forms
 
 from website.profiles.models import UserProfile
 from website.requests.models import Request
+from website.offers.models import Offer
 from django.contrib.auth.models import User
 
 from portobject import *
@@ -37,19 +38,26 @@ def myrequests(request):
     requests = Request.objects.filter(user=user, status='P', arrival_time__gt=datetime.datetime.today())
     request_list = []
     for req in requests:
-        
-        d = {
-            'departure_point': json.loads(location_to_address(str(req.departure_point_lat)+","+str(req.departure_point_long)).read())['results'][0]['formatted_address'],
-            'departure_range' : req.departure_range,
-            'arrival_point' : json.loads(location_to_address(str(req.arrival_point_lat)+","+str(req.arrival_point_long)).read())['results'][0]['formatted_address'],
-            'arrival_range' : req.arrival_range,
-            'arrival_time': req.arrival_time,
-            'max_delay': str(req.max_delay/3600)+":"+str((req.max_delay % 3660) / 60),
-            'nb_requested_seats': req.nb_requested_seats,
-            'cancellation_margin' : req.cancellation_margin,
-            'id' : req.id,
-        }
-        request_list.append(d)
+        offer_l = Offer.objects.filter(request = req)
+        display = True
+        if len(offer_l) > 0:
+            for of in offer_l:
+                if of.status != 'P' and of.status != 'D':
+                    display = False
+    
+        if display:
+            d = {
+                'departure_point': json.loads(location_to_address(str(req.departure_point_lat)+","+str(req.departure_point_long)).read())['results'][0]['formatted_address'],
+                'departure_range' : req.departure_range,
+                'arrival_point' : json.loads(location_to_address(str(req.arrival_point_lat)+","+str(req.arrival_point_long)).read())['results'][0]['formatted_address'],
+                'arrival_range' : req.arrival_range,
+                'arrival_time': req.arrival_time,
+                'max_delay': str(req.max_delay/3600)+":"+str((req.max_delay % 3660) / 60),
+                'nb_requested_seats': req.nb_requested_seats,
+                'cancellation_margin' : req.cancellation_margin,
+                'id' : req.id,
+            }
+            request_list.append(d)
     return render_to_response('myrequests.html', locals())
     
     

@@ -131,6 +131,8 @@ class FindPair(PortObject):
             Post : match_request (if 'newrequest') 
                    or match_proposal (if 'newproposal') is executed
         """
+        print "find pair msg :"
+        print msg
         (st,ide)=msg
         if(st=='newproposal'):
             self.match_proposal(ide)

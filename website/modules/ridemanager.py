@@ -73,7 +73,7 @@ class RideManager(PortObject):
         message_for_proposal+="The drop time is: "+str(offer.drop_time)+"<br/>"
         message_for_proposal+="Please visit your account for further information"
 
-        message_for_request="You have ride with "+offer.proposal.user.user.first_name +" "+offer.proposal.user.last_name+"<br/>"
+        message_for_request="You have ride with "+offer.proposal.user.user.first_name +" "+offer.proposal.user.user.last_name+"<br/>"
         message_for_request+="The phone number of driver is: "+offer.proposal.user.phone_number +"<br/>" 
         message_for_request+="The pick up point is at "+pickup_point+"<br/>"
         message_for_request+="The ride start at: "+str(ride.offer.pickup_time)+"<br/>"
@@ -167,7 +167,7 @@ class RideManager(PortObject):
         message_for_proposal+="The drop time was at "+str(ride.offer.drop_time)+"<br/>"
         message_for_proposal+="Please visit your account for further information"
 
-        message_for_request="You have ride with "+ride.offer.proposal.user.user.first_name +" "+ride.offer.proposal.user.last_name+" "+"is cancelled"+"<br/>"
+        message_for_request="You have ride with "+ride.offer.proposal.user.user.first_name +" "+ride.offer.proposal.user.user.last_name+" "+"is cancelled"+"<br/>"
         message_for_request+="Information of ride: "+"<br/>"
         message_for_request+="The pick up point was at "+pickup_point+"<br/>"
         message_for_request+="The ride started at: "+str(ride.offer.pickup_time)+"<br/>"
