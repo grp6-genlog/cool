@@ -22,9 +22,7 @@ class UserNotifier(PortObject):
           initialize the port object
         """
         PortObject.__init__(self)
-        self.server = smtplib.SMTP('smtp.gmail.com:587')  
-        self.server.starttls()  
-        self.server.login('carpooling.cool','genlogiscool')  
+        
 
     def SendMessageToUser(self,userID=None,message=None):
         """

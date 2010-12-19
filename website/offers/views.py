@@ -127,7 +127,14 @@ def myoffers(request, global_address_cache=None):
     
 def insert_offer(offer_l, new_o):
     for i in xrange(len(offer_l)):
-         if offer_l[i]['date_pick'] > new_o['date_pick']:
+         if (not new_o['status'] and offer_l[i]['status']):
+            offer_l.insert(i,new_o)
+            return
+          
+         elif (new_o['status'] and offer_l[i]['status']) and offer_l[i]['date_pick'] > new_o['date_pick']:
+             offer_l.insert(i,new_o)
+             return
+         elif (not new_o['status']and not offer_l[i]['status']) and offer_l[i]['date_pick'] > new_o['date_pick']:
              offer_l.insert(i,new_o)
              return
              
@@ -179,7 +186,7 @@ def responseoffer(request, offset, port_offer, accept):
             
             anonymous_send_to(port_offer,(message,offer.id,offer.request.user.id,
                                            lambda:successcall(request.user),
-                                           lambda:failurecall(request.user)))
+                                           lambda(message):failurecall(request.user,message)))
             
             wait_counter = 0
             while WaitCallbacksOffer.is_pending(request.user) and wait_counter < 10:
@@ -195,6 +202,8 @@ def responseoffer(request, offset, port_offer, accept):
                 return redirect('/offers/')
                 
             else:
+                WaitCallbacksOffer.update_message(request.user , {'content':WaitCallbacksOffer.get_message(request.user),'success':False})
+                    
                 print WaitCallbacksOffer.status(request.user)
                 WaitCallbacksOffer.free(request.user)
                 
@@ -209,4 +218,5 @@ def failurecall(user, message=None):
     if message:
         WaitCallbacksOffer.update_message(user, message)
     WaitCallbacksOffer.update(user, 'fail')
+ 
 
