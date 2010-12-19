@@ -99,7 +99,8 @@ class OfferManager(PortObject):
                         if count>offer.proposal.number_of_seats:
                             print "count>offer"
                             threading.Thread(target=callb_ko).start()
-                    account = offer.request.user.account_balance
+                            return None
+                account = offer.request.user.account_balance
                 
                 for offer2 in Offer.objects.filter(status='A'):
                     if offer2.request.user.user == userID:
@@ -142,7 +143,8 @@ class OfferManager(PortObject):
                         if count>offer.proposal.number_of_seats:
                             print "count>offer"
                             threading.Thread(target=callb_ko).start()
-                    account = offer.request.user.account_balance
+                        return None
+                account = offer.request.user.account_balance
                 for offer2 in Offer.objects.filter(status='A'):
                     if offer2.request.user.user == userID:
                         account-=offer2.total_fee
