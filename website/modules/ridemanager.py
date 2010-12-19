@@ -7,7 +7,7 @@ from website.rides.models import Ride
 from website.proposals.models import Proposal
 from website.requests.models import Request
 from datetime import *
-import threading
+import threading, json
 
 class RideManager(PortObject):
 
