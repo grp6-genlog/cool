@@ -92,3 +92,7 @@ urlpatterns += patterns('website.evaluations.views',
     (r'^evaluations/$', 'myevaluations'),
     (r'^addevaluation/(?P<offset>\d+)/$', 'addevaluation', {'port_evaluation':global_ports.evaluation_port,}),
 )
+
+urlpatterns += patterns('website.account.views',
+    (r'^fillaccount/(?P<offset>\d+)/$', 'fillaccount', {'port_payment':global_ports.payment_port,}),
+)
