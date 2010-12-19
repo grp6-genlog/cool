@@ -19,6 +19,7 @@ My offers
         </span>
         <br/><br/>
     {% endif %}
+    You still have {{request.user.account_balance}}€ on your car pool account.
 
 {% if info_offers|length == 0 %}
     You don't have any offers waiting for an approval.<br/>
