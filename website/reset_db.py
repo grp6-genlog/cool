@@ -29,6 +29,7 @@ up.user = user
 up.gender = 'M'
 up.bank_account_number = 'BE-123'
 up.phone_number = '012345'
+up.account_balance = 10000
 up.save()
 
 #print "filling the tables..."
