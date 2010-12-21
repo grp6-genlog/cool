@@ -69,7 +69,7 @@ class WaitCallbacks(object):
             if u in cls._message:
                 return cls._message.get(u)
             else:
-                return None
+                return 'ERROR'
 
 class AddressCache():
     dico = None
