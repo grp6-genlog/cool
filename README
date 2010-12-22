@@ -73,9 +73,9 @@ To fit the database configuration with the one installed on your computer, modif
 The software can be run in the developpement mode easily by executing the manage.py file with the following syntax :
     $ python manage.py runserver
 The full application can be run that way and is accessible on http://127.0.0.1:8000/
+
     
 To run the application with Apache, you need to first add the site in the apache configuration file (/etc/apache2/sites-available/default on ubuntu)
-
 
 <VirtualHost *:80>
     
@@ -83,7 +83,7 @@ To run the application with Apache, you need to first add the site in the apache
 	DocumentRoot /PATHTOTHEAPP      # replace by the path of the application
 	LogLevel error
     
-    WSGIDaemonProcess site-1 user=mart group=mart threads=25    # replace by your user and group
+    WSGIDaemonProcess site-1 user=user group=users threads=25    # replace by your user and group
     WSGIProcessGroup site-1
     
 	WSGIScriptAlias / "/PATHTOTHEAPP/apache/django.wsgi"
@@ -103,4 +103,4 @@ To run the application with Apache, you need to first add the site in the apache
 
 </VirtualHost>
 
-The django.wsgi file replace the two addition in the sys.path with the folder containing the django application and its root.
+To send the emails with apache, you will need to have a mail server running such as sendmail or postfix.
