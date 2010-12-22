@@ -58,6 +58,8 @@ The apache folder contains a file for the execution of the django project by the
 Every module in the model which needs to be present in the database is created in a subfolder (evaluations, offers, profiles, proposals, requests and rides). The admin.py file contains informations to allow us to modify this part of the database in the admin pannel, models.py the structure of the database and views.py the functions called by the URLConf related to this module.
 In the modules subfolder, every manager present in the logical architecture is implemented as well as some utilities functions.
 
+database_graph.png is a graph representing the structure of the database
+
 
 INSTALLATION PROCEDURE
 ----------------------
