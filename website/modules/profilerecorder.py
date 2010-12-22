@@ -87,7 +87,7 @@ class ProfileRecorder(PortObject):
                 usr.save()
                 
                 pro = UserProfile()
-                pro.user = usr.id
+                pro.user = usr
                 pro.number_of_seats = lfields[NBSEATS]
                 pro.date_of_birth = lfields[BIRTHDATE]
                 pro.smoker = lfields[SMOKER]
