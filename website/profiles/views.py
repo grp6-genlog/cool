@@ -246,13 +246,17 @@ def toprofilerecorder(request, port_profile, action):
     form.is_valid()
     form.cleaned_data
     
+    
+        
+    if action == 'register':
+        username = form.cleaned_data['username']
+        pwd = form.cleaned_data['password']
+    else:
+        username = request.user.username
+        
     if action == 'password':
         pwd = form.cleaned_data['new_password']
     else:
-        if action == 'register':
-            username = form.cleaned_data['username']
-            pwd = form.cleaned_data['password']
-        
         email = form.cleaned_data['email']
         first_name = form.cleaned_data['first_name']
         last_name = form.cleaned_data['last_name']
@@ -303,7 +307,7 @@ def toprofilerecorder(request, port_profile, action):
     if WaitCallbacksProfile.status(request.user) == 'success':
         WaitCallbacksProfile.free(request.user)
         if action == 'register':
-            user = auth.authenticate(username=n_user.username, password=pwd)
+            user = auth.authenticate(username=username.username, password=pwd)
             if user is not None and user.is_active:
                 auth.login(request, user)
 
