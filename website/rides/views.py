@@ -49,9 +49,9 @@ def myrides(request, global_address_cache=None):
                 index_pickup = 0
                 index_drop = 0
                 for i in xrange(len(route_points)):
-                    if route_points[i].latitude == of.pickup_point_lat and route_points[i].longitude == of.pickup_point_long:
+                    if route_points[i].latitude == of.pickup_point.latitude and route_points[i].longitude == of.pickup_point.longitude:
                         index_pickup = i
-                    if route_points[i].latitude == of.drop_point_lat and route_points[i].longitude == of.drop_point_long:
+                    if route_points[i].latitude == of.drop_point.latitude and route_points[i].longitude == of.drop_point.longitude:
                         index_drop = i
                 
                 date_pick = utils.get_time_at_point([(el.latitude,el.longitude) for el in route_points],
@@ -65,8 +65,8 @@ def myrides(request, global_address_cache=None):
                                                 of.proposal.arrival_time)
                 
                 
-                pick_point = global_address_cache.get_address((of.pickup_point_lat, of.pickup_point_long))
-                drop_point = global_address_cache.get_address((of.drop_point_lat, of.drop_point_long))
+                pick_point = global_address_cache.get_address((of.pickup_point.latitude, of.pickup_point.longitude))
+                drop_point = global_address_cache.get_address((of.drop_point.latitude, of.drop_point.longitude))
                 
                 infos = {
                     'driver':True, 'other':of.request.user,
@@ -98,9 +98,9 @@ def myrides(request, global_address_cache=None):
                 index_pickup = 0
                 index_drop = 0
                 for i in xrange(len(route_points)):
-                    if route_points[i].latitude == of.pickup_point_lat and route_points[i].longitude == of.pickup_point_long:
+                    if route_points[i].latitude == of.pickup_point.latitude and route_points[i].longitude == of.pickup_point.longitude:
                         index_pickup = i
-                    if route_points[i].latitude == of.drop_point_lat and route_points[i].longitude == of.drop_point_long:
+                    if route_points[i].latitude == of.drop_point.latitude and route_points[i].longitude == of.drop_point.longitude:
                         index_drop = i
                 
                 
@@ -114,8 +114,8 @@ def myrides(request, global_address_cache=None):
                                                 of.proposal.departure_time,
                                                 of.proposal.arrival_time)
                 
-                pick_point = global_address_cache.get_address((of.pickup_point_lat,of.pickup_point_long))
-                drop_point = global_address_cache.get_address((of.drop_point_lat,of.drop_point_long))
+                pick_point = global_address_cache.get_address((of.pickup_point.latitude,of.pickup_point.longitude))
+                drop_point = global_address_cache.get_address((of.drop_point.latitude,of.drop_point.longitude))
                 
                 infos = {
                     'driver':False, 'other':of.proposal.user,

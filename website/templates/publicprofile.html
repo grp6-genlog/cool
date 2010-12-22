@@ -34,7 +34,7 @@ Profile
         {% endfor %}
         
         <hr>
-        <span style="text-weight:bold;font-size:1.1em;">Evaluations for the rides for which you were a passenger</span>
+        <span style="text-weight:bold;font-size:1.1em;">Evaluations for the rides for which {{other.user.first_name}} was a passenger</span>
         <br/>
         {% for evaluation in evaluation_l %}
             {% if evaluation.ride.offer.request.user == other %}

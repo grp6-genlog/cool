@@ -75,7 +75,8 @@ class FindPair(PortObject):
                                         route_points[i].longitude,
                                         get_time_at_point([(r.latitude,r.longitude) for r in route_points], 
                                                             i,
-                                                            infos.departure_time,infos.arrival_time),
+                                                            infos.departure_time,
+                                                            infos.arrival_time),
                                         route_points[i].id
                                      ),
                                      (
@@ -108,13 +109,33 @@ class FindPair(PortObject):
             valid_pair = list()
             for i in xrange(len(route_points)-1):
                 if get_distance((request.departure_point_lat,request.departure_point_long),(route_points[i].latitude,route_points[i].longitude))<request.departure_range:
+                
                     for j in range(i+1,len(route_points)):
                         if get_distance((request.arrival_point_lat,request.arrival_point_long),(route_points[j].latitude,route_points[j].longitude))<request.arrival_range:
                             valid_pair.append((i,j))
+                            
             for (i,j) in valid_pair:
                 #delete all not in time arrival
                 if total_seconds(abs(get_time_at_point([(r.latitude,r.longitude) for r in route_points],j,infos.departure_time,infos.arrival_time)-request.arrival_time)) < request.max_delay:
-                    self.send_to(self.offermanager_port,('buildoffer',requestID,infos.id,(route_points[i].latitude,route_points[i].longitude,get_time_at_point([(r.latitude,r.longitude) for r in route_points],i,infos.departure_time,infos.arrival_time),route_points[i].id),(route_points[j].latitude,route_points[j].longitude,get_time_at_point([(r.latitude,r.longitude) for r in route_points],j,infos.departure_time,infos.arrival_time),route_points[j].id)))
+                    self.send_to(self.offermanager_port,('buildoffer',
+                                                          requestID,
+                                                          infos.id,
+                                                          ( route_points[i].latitude,
+                                                            route_points[i].longitude,
+                                                            get_time_at_point([(r.latitude,r.longitude) for r in route_points],
+                                                                              i,
+                                                                              infos.departure_time,infos.arrival_time),
+                                                            route_points[i].id
+                                                          ),
+                                                          ( route_points[j].latitude,
+                                                            route_points[j].longitude,
+                                                            get_time_at_point([(r.latitude,r.longitude) for r in route_points],
+                                                                              j,
+                                                                              infos.departure_time,
+                                                                              infos.arrival_time),
+                                                            route_points[j].id
+                                                          )
+                                                      ))
 
 
               

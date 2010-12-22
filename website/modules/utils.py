@@ -44,6 +44,7 @@ def get_time_at_point(points,arrindex,deptime,arrtime):
         if index<=arrindex:
             ride_dist+=dist
     return deptime + (arrtime-deptime) * int(ride_dist/total_dist)
-    
+
+
 def total_seconds(td):
     return (td.microseconds + (td.seconds + td.days * 24 * 3600) * 10**6) / 10**6

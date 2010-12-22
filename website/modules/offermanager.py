@@ -67,11 +67,7 @@ class OfferManager(PortObject):
         offer.status='P'
         offer.driver_ok=False
         offer.non_driver_ok=False
-        offer.pickup_point_lat=departure[0]
-        offer.pickup_point_long=departure[1]
         offer.pickup_time = departure[2]
-        offer.drop_point_lat=arrival[0]
-        offer.drop_point_long=arrival[1]
         offer.drop_time = arrival[2]
         offer.pickup_point = RoutePoints.objects.get(id=departure[3])
         offer.drop_point = RoutePoints.objects.get(id=arrival[3])
@@ -180,7 +176,7 @@ class OfferManager(PortObject):
                     offer.save()
                     print "accepted"
                     self.send_to(self.rideManager, ('newacceptedride', offer.id))
-                    threading.Thread(target=lambda:callb_ok('The ride has been confirmed.')).start()
+                    threading.Thread(target=lambda:callb_ok).start()
                     
             else:
                 account = offer.request.user.account_balance-offer.total_fee
@@ -206,7 +202,7 @@ class OfferManager(PortObject):
                     offer.save()
                     print "accepted"
                     self.send_to(self.rideManager, ('newacceptedride', offer.id))
-                    threading.Thread(target=lambda:callb_ok('The ride has been confirmed.')).start()
+                    threading.Thread(target=lambda:callb_ok).start()
                 threading.Thread(target=callb_ok).start()
 
     def cancel_proposal(self,proposalID):

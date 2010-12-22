@@ -45,7 +45,7 @@ def home(request):
 def logout(request):
     auth.logout(request)
     current_date = datetime.datetime.now()
-    form = LoginForm(initial={'login': 'login'})
+    form = LoginForm()
     notifications = [{'error':False, 'msg':'You are now disconnected'}]
     return render_to_response('home.html', locals())
 

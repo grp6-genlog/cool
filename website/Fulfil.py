@@ -54,9 +54,9 @@ def match_proposal(propID):
             route_points = RoutePoints.objects.filter(proposal=infos).order_by('order')
             valid_pair = list()
             for i in xrange(len(route_points)-2):
-                if get_distance((request.departure_point_lat,request.departure_point_long),(route_points[i].latitude,route_points[i].longitude))<request.departure_range:
+                if get_distance((request.departure_point.latitude,request.departure_point.longitude),(route_points[i].latitude,route_points[i].longitude))<request.departure_range:
                     for j in range(i+1,len(route_points)):
-                        if get_distance((request.arrival_point_lat,request.arrival_point_long),(route_points[j].latitude,route_points[j].longitude))<request.arrival_range:
+                        if get_distance((request.arrival_point.latitude,request.arrival_point.longitude),(route_points[j].latitude,route_points[j].longitude))<request.arrival_range:
                             valid_pair.append((i,j))
             for (i,j) in valid_pair:
                     #delete all not in time arrival
@@ -101,11 +101,7 @@ def build_offer(requestID,proposalID,departure,arrival):
     offer.status='P'
     offer.driver_ok=False
     offer.non_driver_ok=False
-    offer.pickup_point_lat=departure[0]
-    offer.pickup_point_long=departure[1]
     offer.pickup_time = departure[2]
-    offer.drop_point_lat=arrival[0]
-    offer.drop_point_long=arrival[1]
     offer.drop_time = arrival[2]
     offer.pickup_point = RoutePoints.objects.get(id=departure[3])
     offer.drop_point = RoutePoints.objects.get(id=arrival[3])
@@ -131,9 +127,9 @@ def match_request(requestID):
         route_points = RoutePoints.objects.filter(proposal=infos).order_by('order')
         valid_pair = list()
         for i in xrange(len(route_points)-2):
-            if get_distance((request.departure_point_lat,request.departure_point_long),(route_points[i].latitude,route_points[i].longitude))<request.departure_range:
+            if get_distance((request.departure_point.latitude,request.departure_point.longitude),(route_points[i].latitude,route_points[i].longitude))<request.departure_range:
                 for j in range(i+1,len(route_points)):
-                    if get_distance((request.arrival_point_lat,request.arrival_point_long),(route_points[j].latitude,route_points[j].longitude))<request.arrival_range:
+                    if get_distance((request.arrival_point.latitude,request.arrival_point.longitude),(route_points[j].latitude,route_points[j].longitude))<request.arrival_range:
                         valid_pair.append((i,j))
         for (i,j) in valid_pair:
             #delete all not in time arrival

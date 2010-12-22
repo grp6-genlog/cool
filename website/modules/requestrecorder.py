@@ -88,3 +88,4 @@ class RequestRecorder(PortObject):
                 threading.Thread(target = msg[2], args = (msg[4],)).start()
         else:
             print 'RequestRecorder received an unexpected message'
+
