@@ -6,16 +6,22 @@ from profiles.models import *
 import threading, traceback
 
 USERID = 0
-NBSEATS = 1
-BIRTHDATE = 2
-SMOKER = 3
-COMMUNITIES = 4
-MONEYPERKM = 5
-GENDER = 6
-BANKACCOUNT = 7
-CARID = 8
-GSMNUMBER = 9
-CARDESCRIPTION = 10
+USERNAME = 0
+PASSWORD = 1
+EMAIL = 2
+FIRST = 3
+LAST = 4
+
+NBSEATS = 5
+BIRTHDATE = 6
+SMOKER = 7
+COMMUNITIES = 8
+MONEYPERKM = 9
+GENDER = 10
+BANKACCOUNT = 11
+CARID = 12
+GSMNUMBER = 13
+CARDESCRIPTION = 14
 
 class ProfileRecorder(PortObject):
     
@@ -30,16 +36,21 @@ class ProfileRecorder(PortObject):
     def routine(self,src,msg):
         """
         The msg treatement routine.
-        The only acceptable messages are the pairs ('recordprofile',[UserID,NumberOfSeats,
-                                                                    BirthDate,Smoker,Communities,MoneyPerKm,
-                                                                    Gender,BankAccountNumber,CarID,
-                                                                    GSMNumber,CarDescription],
-                                                                    SuccessCallBack,FailureCallBack,request)
-                                                   ('updateprofile',[UserID,UserPassword,NumberOfSeats,
-                                                                    BirthDate,Smoker,Communities,MoneyPerKm,
-                                                                    Gender,BankAccountNumber,CarID,
-                                                                    GSMNumber,CarDescription],
-                                                                    SuccessCallBack,FailureCallBack,request)
+        The only acceptable messages are the pairs ('recordprofile',[username, pwd, email,
+                                                                    first_name, last_name, NumberOfSeats,
+                                                                    BirthDate, Smoker, Communities,
+                                                                    MoneyPerKm, Gender, BankAccountNumber,
+                                                                    CarID, GSMNumber, CarDescription],
+                                                    callback_ok, callback_ok)
+                                                   ('updateprofile',[userid, None, email,
+                                                                    first_name, last_name, NumberOfSeats,
+                                                                    BirthDate, Smoker, Communities,
+                                                                    MoneyPerKm, Gender, BankAccountNumber,
+                                                                    CarID, GSMNumber, CarDescription],
+                                                    callback_ok, callback_ok)
+                                                   ('changepass',[userid, newpass],
+                                                    callback_ok, callback_ok)
+                                                    
         @pre : DB is initialized and is the SQL database
                
                UserID is an integer
@@ -68,9 +79,15 @@ class ProfileRecorder(PortObject):
         if msg[0] == 'recordprofile':
             try:
                 lfields = msg[1]
-                pro = UserProfile()
                 
-                pro.user = lfields[USERID]
+                
+                usr = User.objects.create_user(lfields[USERNAME], lfields[EMAIL], lfields[PASSWORD])
+                usr.first_name = lfields[FIRST]
+                usr.last_name = lfields[LAST]
+                usr.save()
+                
+                pro = UserProfile()
+                pro.user = usr.id
                 pro.number_of_seats = lfields[NBSEATS]
                 pro.date_of_birth = lfields[BIRTHDATE]
                 pro.smoker = lfields[SMOKER]
@@ -92,7 +109,17 @@ class ProfileRecorder(PortObject):
         elif msg[0] == 'updateprofile':
             try:
                 lfields = msg[1]
-                pro = UserProfile.objects.get(user=lfields[USERID])
+                
+                usr = User.objects.get(id=lfields[USERID])
+                if lfields[EMAIL] != None:
+                    usr.email = lfields[EMAIL]
+                if lfields[FIRST] != None:
+                    usr.first_name = lfields[FIRST]
+                if lfields[LAST] != None:
+                    usr.last_name = lfields[LAST]
+                
+                usr.save()
+                pro = UserProfile.objects.get(user=usr)
 
                 if lfields[NBSEATS] != None:
                     pro.number_of_seats = lfields[NBSEATS]
@@ -118,6 +145,19 @@ class ProfileRecorder(PortObject):
                     pro.car_description = lfields[CARDESCRIPTION]
                 
                 pro.save()
+            except:
+                traceback.print_exc()
+                threading.Thread(target = msg[3],).start()
+            else:
+                threading.Thread(target = msg[2],).start()
+        elif msg[0] == 'changepass':
+            try:
+                lfields = msg[1]
+                
+                usr = User.objects.get(id=lfields[USERID])
+                usr.set_password(lfields[PASSWORD])
+                usr.save()
+                
             except:
                 traceback.print_exc()
                 threading.Thread(target = msg[3],).start()

@@ -223,12 +223,8 @@ def changepassword(request, port_profile=None):
                     valid = False
                     
                 if valid:
-
-                    request.user.set_password(new_p1)
-                    request.user.save()
-
-                    notification = {'content':"Password changed successfully", 'success':True}
-                    return render_to_response('home.html', locals())
+                    
+                    return toprofilerecorder(request,port_profile,'password')
             
             else:
                 form = PasswordForm()
@@ -237,70 +233,68 @@ def changepassword(request, port_profile=None):
     
         
 def toprofilerecorder(request, port_profile, action):
-    if action != 'register' and action != 'edit':
+    if action != 'register' and action != 'edit' and action != 'password':
         return render_to_response('home.html', locals())
 
     if action == 'register':
-        if request.user.is_authenticated():
-            current_date = datetime.datetime.now() 
-            return render_to_response('home.html', locals())        
-
         form = RegisterForm(request.POST)
     elif action == 'edit':
-        if not request.user.is_authenticated():
-            current_date = datetime.datetime.now() 
-            return render_to_response('home.html', locals())        
-            
         form = EditProfileForm(request.POST)
+    elif action == 'password':
+        form = PasswordForm(request.POST)
     
     form.is_valid()
     form.cleaned_data
     
-    if action == 'register':
-        username = form.cleaned_data['username']
-        pwd = form.cleaned_data['password']
-        email = form.cleaned_data['email']
-        n_user = User.objects.create_user(username, email, pwd)
+    if action == 'password':
+        pwd = form.cleaned_data['new_password']
+    else:
+        if action == 'register':
+            username = form.cleaned_data['username']
+            pwd = form.cleaned_data['password']
         
-    elif action == 'edit':
         email = form.cleaned_data['email']
-        n_user = request.user
-        n_user.email = email
-    
-    n_user.first_name = form.cleaned_data['first_name']
-    n_user.last_name = form.cleaned_data['last_name']
-    n_user.save()
-    
-    
-    UserID = n_user.id
-    NumberOfSeats = form.cleaned_data['number_of_seats']
-    if not NumberOfSeats:
-        NumberOfSeats = 0
-    BirthDate = form.cleaned_data['date_of_birth']
-    
-    Smoker = form.cleaned_data['smoker']
-    Communities = form.cleaned_data['communities']
-    MoneyPerKm = form.cleaned_data['money_per_km']
-    Gender = form.cleaned_data['gender']
-    BankAccountNumber = form.cleaned_data['bank_account_number']
-    CarID = form.cleaned_data['car_id']
-
-    GSMNumber = form.cleaned_data['phone_number']
-    CarDescription = form.cleaned_data['car_description']
+        first_name = form.cleaned_data['first_name']
+        last_name = form.cleaned_data['last_name']
         
-    if action == 'register':
-        msg = 'recordprofile'
-    elif action == 'edit':
-        msg = 'updateprofile'
+        BirthDate = form.cleaned_data['date_of_birth']
+        Smoker = form.cleaned_data['smoker']
+        Communities = form.cleaned_data['communities']
+        MoneyPerKm = form.cleaned_data['money_per_km']
+        Gender = form.cleaned_data['gender']
+        BankAccountNumber = form.cleaned_data['bank_account_number']
+        GSMNumber = form.cleaned_data['phone_number']
+        
+        CarID = form.cleaned_data['car_id']
+        CarDescription = form.cleaned_data['car_description']
+        NumberOfSeats = form.cleaned_data['number_of_seats']
+        if not NumberOfSeats:
+            NumberOfSeats = 0
     
     WaitCallbacksProfile.declare(request.user)
     
-    anonymous_send_to(port_profile,(msg,[n_user,NumberOfSeats,
-                                       BirthDate,Smoker,Communities,MoneyPerKm,
-                                       Gender,BankAccountNumber,CarID,
-                                       GSMNumber,CarDescription],
+    if action == 'register':
+        anonymous_send_to(port_profile,('recordprofile',[username, pwd, email,
+                                                        first_name, last_name, NumberOfSeats,
+                                                        BirthDate, Smoker, Communities,
+                                                        MoneyPerKm, Gender, BankAccountNumber,
+                                                        CarID, GSMNumber, CarDescription],
                                    lambda:successcall(request.user),
                                    lambda:failurecall(request.user)))
+        
+    elif action == 'edit':
+        anonymous_send_to(port_profile,('updateprofile',[request.user.id, None, email,
+                                                        first_name, last_name, NumberOfSeats,
+                                                        BirthDate, Smoker, Communities,
+                                                        MoneyPerKm, Gender, BankAccountNumber,
+                                                        CarID, GSMNumber, CarDescription],
+                                   lambda:successcall(request.user),
+                                   lambda:failurecall(request.user)))
+    elif action == 'password':
+        anonymous_send_to(port_profile,('changepass',[request.user.id, pwd],
+                                   lambda:successcall(request.user),
+                                   lambda:failurecall(request.user)))
+    
     wait_counter = 0
     while WaitCallbacksProfile.is_pending(request.user) and wait_counter < 10:
         time.sleep(0.1)
@@ -314,8 +308,10 @@ def toprofilerecorder(request, port_profile, action):
                 auth.login(request, user)
 
             notification = {'content':"Account registered successfully", 'success':True}
-        else:
+        elif action == 'updateprofile':
             notification = {'content':'Your profile has been updated', 'success':True}
+        elif action == 'password':
+            notification = {'content':"Password changed successfully", 'success':True}
         return render_to_response('home.html', locals())
     else:
         print WaitCallbacksProfile.status(request.user)
