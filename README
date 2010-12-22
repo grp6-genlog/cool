@@ -1,1 +1,106 @@
-thank you to read me :-)
+Carpooling system application
+INGI2255-SINF2255
+
+  group 6 2010-2011
+
+    Cyrille Dejemeppe
+    Jorick Flabat
+    Benjamin Hesmans
+    Francois-Xavier Mouthuy
+    Jawira Portugal
+    Fiacre Setondji Kinmagbahohoue
+    Martin Trigaux
+    Remy Vandaele
+
+
+
+
+HOW DOES THE APP WORKS
+----------------------
+The Django project has the following structure :
+
+    apache/
+    \--django.wsgi
+    
+    evaluations/
+    \--admin.py
+    \--__init__.py
+    \--models.py
+    \--views.py
+    
+    media/
+    modules/
+    \--evaluationmanager.py
+    \--findpair.py
+    \--...
+    
+    offers/
+    profiles
+    proposals/
+    requests/
+    rides/
+    templates/
+    __init__.py
+    manage.py
+    reset_db.py
+    settings.py
+    urls.py
+    views.py
+
+
+__init__.py : as for each python application, started at the server launch
+manage.py : file used to run the server in developpement area, run a django shell, manage the apps and database tables,... It is used only for the developpement and tests.
+reset_db.py : empty every table and create a new super user which can access the admin pannel
+settings.py : configuaration of the project. Indicates which apps to load, how to access the database, enable the debug mode,...
+urls.pu : every regex to match an url with the function defined in a a views.py file, starting of 
+views.py : contains every functions to execute when called by the urlconf. Should return a HTML page.
+The apache folder contains a file for the execution of the django project by the apache server
+Every module in the model which needs to be present in the database is created in a subfolder (evaluations, offers, profiles, proposals, requests and rides). The admin.py file contains informations to allow us to modify this part of the database in the admin pannel, models.py the structure of the database and views.py the functions called by the URLConf related to this module.
+In the modules subfolder, every manager present in the logical architecture is implemented as well as some utilities functions.
+
+
+INSTALLATION PROCEDURE
+----------------------
+REQUIEREMENT :
+    Python 2.6 or above
+    Django 1.2
+    MySQL 5
+    Apache (optional)
+    SMTP server (optional)
+    
+To fit the database configuration with the one installed on your computer, modify the settings.py file at the root of the django project by setting the engine, name, user, password and host of the database into the DATABASE dictionnary.
+
+The software can be run in the developpement mode easily by executing the manage.py file with the following syntax :
+    $ python manage.py runserver
+The full application can be run that way and is accessible on http://127.0.0.1:8000/
+    
+To run the application with Apache, you need to first add the site in the apache configuration file (/etc/apache2/sites-available/default on ubuntu)
+
+
+<VirtualHost *:80>
+    
+	ServerAdmin admin@admin.net
+	DocumentRoot /PATHTOTHEAPP      # replace by the path of the application
+	LogLevel error
+    
+    WSGIDaemonProcess site-1 user=mart group=mart threads=25    # replace by your user and group
+    WSGIProcessGroup site-1
+    
+	WSGIScriptAlias / "/PATHTOTHEAPP/apache/django.wsgi"
+
+	<Directory "/PATHTOTHEAPP/apache">
+		Order deny,allow
+		Allow from all
+	</Directory>
+
+    Alias /media/ "/usr/share/pyshared/django/contrib/admin/media/"     # replace by the path of your django software if different
+    <Directory "/usr/share/pyshared/django/contrib/admin/media/">
+    Order allow,deny
+    Options Indexes
+    Allow from all
+    IndexOptions FancyIndexing
+    </Directory>
+
+</VirtualHost>
+
+The django.wsgi file replace the two addition in the sys.path with the folder containing the django application and its root.

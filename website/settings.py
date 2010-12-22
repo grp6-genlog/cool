@@ -1,19 +1,6 @@
 # Django settings for website project.
 import os, sys
-"""
-print "__name__ =", __name__
-print "__file__ =", __file__
-print "os.getpid() =", os.getpid()
-print "os.getcwd() =", os.getcwd()
-print "os.curdir =", os.curdir
-print "sys.path =", repr(sys.path)
-print "sys.modules.keys() =", repr(sys.modules.keys())
-print "sys.modules.has_key('website') =", sys.modules.has_key('website')
-if sys.modules.has_key('website'):
-  print "sys.modules['website'].__name__ =", sys.modules['website'].__name__
-  print "sys.modules['website'].__file__ =", sys.modules['website'].__file__
-  print "os.environ['DJANGO_SETTINGS_MODULE'] =", os.environ.get('DJANGO_SETTINGS_MODULE', None)
-"""
+
 PROJECT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__)))
 
 DEBUG = True
