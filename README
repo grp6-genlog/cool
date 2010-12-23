@@ -52,7 +52,7 @@ __init__.py : as for each python application, started at the server launch
 manage.py : file used to run the server in developpement area, run a django shell, manage the apps and database tables,... It is used only for the developpement and tests.
 reset_db.py : empty every table and create a new super user which can access the admin pannel
 settings.py : configuaration of the project. Indicates which apps to load, how to access the database, enable the debug mode,...
-urls.pu : every regex to match an url with the function defined in a a views.py file, starting of 
+urls.py : every regex to match an url with the function defined in a a views.py file. At the server start, every module is launched.
 views.py : contains every functions to execute when called by the urlconf. Should return a HTML page.
 The apache folder contains a file for the execution of the django project by the apache server
 Every module in the model which needs to be present in the database is created in a subfolder (evaluations, offers, profiles, proposals, requests and rides). The admin.py file contains informations to allow us to modify this part of the database in the admin pannel, models.py the structure of the database and views.py the functions called by the URLConf related to this module.
