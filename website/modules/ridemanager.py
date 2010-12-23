@@ -19,7 +19,7 @@ class RideManager(PortObject):
     
     def __init__(self,usernotifier_port,tracker_port,paymentmanager_port,evaluationmanager_port, global_address_cache):
         """
-        Initialize the DB and all known modules ports of the RequestRecorder.
+        Initialize all known modules ports of the RequestRecorder.
         @pre usernotifier_port is the UserNotifier module port (a Queue)
              tracker_port is the Tracker module port (a Queue)
              paymentmanager_port is the PaymentManager module port (a Queue)
@@ -40,8 +40,7 @@ class RideManager(PortObject):
     def buildinstructions(self,msg):
         """
         The ('newacceptedride',) message treatement.
-        @pre : DB is initialized and is the SQL database
-               self.usernotifier_port is the UserNotifier module port (a Queue)
+        @pre : self.usernotifier_port is the UserNotifier module port (a Queue)
                self.tracker_port is the Tracker module port (a Queue)
                self.paymentmanager_port is the PaymentManager module port (a Queue)
                self.evaluationmanager_port is the evaluationmanager module port (a Queue)
@@ -50,8 +49,9 @@ class RideManager(PortObject):
       
         @post : the instruction is built from the specified offer and is added to the DB (in the instruction table).
                 two messages are sent to UserNotifier through its port (usernotifier_port):
-                  ('newmsg',nondriverID,'You've got a ride for request requestID. Please visit your account for further information.')
-                  ('newmsg',driverID,'You've got a shared ride for proposalID. Please visit your account for further information.')
+                  ('newmsg', nondriverID, msg1)
+                  ('newmsg',driverID,msg2)
+                msg1 and msg2 are text message containing the ride information
                 a thread is run to send the following differed message to Tracker at rideTime - 30min:
                   ('startride',instructionID,closeRide(),cancelRide()) with instructionID the id of the request in the DB's table. and closeRide,cancelRide callback functions = lambda close_ride(self,instructionID).
                 a thread is run to send the following differed message to RideManager at rideTime:
@@ -110,45 +110,44 @@ class RideManager(PortObject):
         delay2.start()
         delay3.start()
 
-    def close_ride(self,instructionID):
+    def close_ride(self,rideID):
         """
         The ride is done, send payment and modify db.
-        @pre : DB is initialized and is the SQL database
-               self.usernotifier_port is the UserNotifier module port (a Queue)
+        @pre : self.usernotifier_port is the UserNotifier module port (a Queue)
                self.tracker_port is the Tracker module port (a Queue)
                self.paymentmanager_port is the PaymentManager module port (a Queue)
                self.evaluationmanager_port is the evaluationmanager module port (a Queue)
                
-               instructionID is the id of an instruction in the database.
+               rideID is the id of a ride in the database.
 
-        @post : DB's instruction status is modified at 'done'
+        @post : DB's offer status is modified at 'F'
                 a message is sent to the PaymentManager to pay the fee:
-                   ('payfee',instructionID)
+                   ('payfee',rideID)
         """
-        ride=Ride.objects.get(id=instructionID)
+        ride=Ride.objects.get(id=rideID)
         offer=Offer.objects.get(id=ride.offer.id)
         offer.status = 'F'
         offer.save()
-        self.send_to(self.paymentmanager_port, ('payfee', instructionID))
+        self.send_to(self.paymentmanager_port, ('payfee', rideID))
 
-    def cancel_ride(self,instructionID):
+    def cancel_ride(self, rideID):
         """
         The ride is cancelled, returns payment and modify db.
-        @pre : DB is initialized and is the SQL database
-               self.usernotifier_port is the UserNotifier module port (a Queue)
+        @pre : self.usernotifier_port is the UserNotifier module port (a Queue)
                self.tracker_port is the Tracker module port (a Queue)
                self.paymentmanager_port is the PaymentManager module port (a Queue)
                self.evaluationmanager_port is the evaluationmanager module port (a Queue)
                
-               instructionID is the id of an instruction in the database.
+               rideID is the id of a ride in the database.
 
-        @post : DB's instruction status is modified at 'done'
+        @post : DB's offer status is modified at 'F'
                 a message is sent to the PaymentManager to pay the fee:
-                   ('returnfee',instructionID)
+                   ('returnfee',rideID)
                 a message is sent for both user saying that the ride has been cancelled to UserNotifier:
-                   ('newmsg',usersID,"The ride instructionID has been cancelled.")
+                   ('newmsg',usersID, msg)
+                msg contains the information about the ride
         """
-        ride=Ride.objects.get(id=instructionID)
+        ride=Ride.objects.get(id=rideID)
         if ride.ride_started:
             return 0
 
@@ -177,16 +176,15 @@ class RideManager(PortObject):
                                   
         self.send_to(self.usernotifier_port, ('newmsg', ride.offer.request.user.id, message_for_request))
         self.send_to(self.usernotifier_port, ('newmsg', ride.offer.proposal.user.id, message_for_proposal))
-        #self.send_to(self.tracker_port,('cancelride',ride.id))
         return 1
         
     def routine(self,src,msg):
         """
         The msg treatement routine.
-        The only acceptable messages are ('cancelride',instructionID,successCancelRide,failureCancelRide)
+        The only acceptable messages are ('cancelride',rideID,successCancelRide,failureCancelRide)
                                          ('newacceptedride',offerID)
         
-        for 'cancelride', see self.cancel_ride(instructionID) if the request is valid 
+        for 'cancelride', see self.cancel_ride(rideID) if the request is valid 
                 (ride existing, pending,...) in which case successCancelRide is called
                 otherwise failureCancelRide is called with an optional explanation message
         )

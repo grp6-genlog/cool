@@ -33,7 +33,8 @@ class ProposalRecorder(PortObject):
         The only acceptable message is the pair ('recordproposal',[UserID,RoutePoints,CarDescription,
                                                                   CarID,NumberOfSeats,MoneyPerKm,DepartureTime,
                                                                   ArrivalTime,Status],
-                                                                  SuccessCallBack,FailureCallBack)
+                                                                  SuccessCallBack,FailureCallBack,User)
+                                                                  
         @pre : DB is initialized and is the SQL database
                findpair_port is the FindPair module's port
                
@@ -47,6 +48,7 @@ class ProposalRecorder(PortObject):
                Status is a String either 'P' either 'C'
                SuccessCallBack is a procedure 
                FailureCallBack is a procedure
+               User is a User object
       
         @post : The specified proposal is added to the DB (in the proposal table).
                 a msg is sent to FindPair module via findpair_port with the following message : 
@@ -88,5 +90,4 @@ class ProposalRecorder(PortObject):
             else:  
                 self.send_to(self.findpair_port, ('newproposal', prop_id))
                 threading.Thread(target = msg[2], args = (msg[4],)).start()
-        else:
-            print 'ProposalRecorder received an unexpected message'
+

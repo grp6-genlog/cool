@@ -22,7 +22,7 @@ class RequestRecorder(PortObject):
 
     def __init__(self,findpair_portG):
         """
-        Initialize self, DB, findpair_port.
+        Initialize self, findpair_port.
         @pre findpair_portG is the FindPair module port (a Queue)
         @post self.findpair_port = findpair_portG              
         """
@@ -35,7 +35,8 @@ class RequestRecorder(PortObject):
         The only acceptable message is the pair ('recordrequest',[UserID,departurePoint,departureRange,
                                                                   arrivalPoint,arrivalRange,arrivalTime,maxDelay,
                                                                   nbRequestedSeats,cancellationMargin,status],
-                                                                  SuccessCallBack,FailureCallBack,user)
+                                                                  SuccessCallBack,FailureCallBack,User)
+
         @pre : DB is initialized and is the SQL database
                findpair_port is the FindPair module's port
 
@@ -48,9 +49,10 @@ class RequestRecorder(PortObject):
                maxDelay is a datetime.time
                nbRequestedSeats is an integer
                cancellationMargin is a datetime.time
+               Status is a String either 'P' either 'C'
                SuccessCallBack is a procedure
                FailureCallBack is a procedure
-               Status is a String either 'P' either 'C'
+               User is a User object
       
         @post : The specified request is added to the DB (in the request table).
                 a msg is sent to FindPair module via findpair_port with the following message : 
@@ -86,6 +88,4 @@ class RequestRecorder(PortObject):
             else:  
                 self.send_to(self.findpair_port, ('newrequest', req_id))
                 threading.Thread(target = msg[2], args = (msg[4],)).start()
-        else:
-            print 'RequestRecorder received an unexpected message'
 

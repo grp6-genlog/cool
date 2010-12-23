@@ -26,34 +26,34 @@ CARDESCRIPTION = 14
 class ProfileRecorder(PortObject):
     
     def __init__(self):
-        """
-        Initialize self.DB
-        @pre DBG is the SQL database
-        @post self.DB = DBG
-        """
+        """ Initialize the port object """
         PortObject.__init__(self)
     
     def routine(self,src,msg):
         """
         The msg treatement routine.
         The only acceptable messages are the pairs ('recordprofile',[username, pwd, email,
-                                                                    first_name, last_name, NumberOfSeats,
-                                                                    BirthDate, Smoker, Communities,
-                                                                    MoneyPerKm, Gender, BankAccountNumber,
-                                                                    CarID, GSMNumber, CarDescription],
+                                                        first_name, last_name, NumberOfSeats,
+                                                        BirthDate, Smoker, Communities,
+                                                        MoneyPerKm, Gender, BankAccountNumber,
+                                                        CarID, GSMNumber, CarDescription],
                                                     callback_ok, callback_ok)
-                                                   ('updateprofile',[userid, None, email,
-                                                                    first_name, last_name, NumberOfSeats,
-                                                                    BirthDate, Smoker, Communities,
-                                                                    MoneyPerKm, Gender, BankAccountNumber,
-                                                                    CarID, GSMNumber, CarDescription],
+                                                   ('updateprofile',[UserID, None, email,
+                                                        first_name, last_name, NumberOfSeats,
+                                                        BirthDate, Smoker, Communities,
+                                                        MoneyPerKm, Gender, BankAccountNumber,
+                                                        CarID, GSMNumber, CarDescription],
                                                     callback_ok, callback_ok)
-                                                   ('changepass',[userid, newpass],
+                                                   ('changepass',[UserID, pwd],
                                                     callback_ok, callback_ok)
                                                     
-        @pre : DB is initialized and is the SQL database
-               
-               UserID is an integer
+        @pre : 
+               UserID is the id of a user in the database
+               username is a string
+               pwd is a string
+               email is string representing an email
+               first_name is a string
+               last_name is a string
                NumberOfSeats is an integer
                BirthDate is a (datetime.date)
                Smoker is a boolean
@@ -64,22 +64,23 @@ class ProfileRecorder(PortObject):
                CarID is a string
                GSMNumber is a string
                CarDescription is a string
-               SuccessCallBack is a procedure 
-               FailureCallBack is a procedure
+               callback_ok is a procedure 
+               callback_ko is a procedure
       
         @post : If the first element of the pair in the message was 'recordprofile'
-                the specified profile is added to the DB (in the profile table).
+                the specified profile is added to the DB (in the user and userprofile table).
                 If the first element of the pair in the message was 'updateprofile'
                 the profile corresponding to the UserId specified updates every field
                 of this profile in the database for which the corresponding element
                 in the list was not None.
-                If no error or unexpected events happened, the SuccessCallBack procedure
-                has been executed, otherwise FailureCallBack has been executed.
+                If the first element of the pair in the message was 'changepass'
+                modify the previous password by pwd encrypted with the sha1 algorithm.
+                If no error or unexpected events happened, the callback_ok procedure
+                has been executed, otherwise callback_ko has been executed.
         """
         if msg[0] == 'recordprofile':
             try:
                 lfields = msg[1]
-                
                 
                 usr = User.objects.create_user(lfields[USERNAME], lfields[EMAIL], lfields[PASSWORD])
                 usr.first_name = lfields[FIRST]
@@ -163,5 +164,4 @@ class ProfileRecorder(PortObject):
                 threading.Thread(target = msg[3],).start()
             else:
                 threading.Thread(target = msg[2],).start()
-        else:
-            print 'ProfileRecorder received an unexpected message'
+

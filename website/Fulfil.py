@@ -1,7 +1,9 @@
 #!/usr/bin/python
 #
 # @Author Cyrille Dejemeppe
-
+#
+# script to fill the database with random data
+#
 from django.conf import settings
 import os, sys
 sys.path.insert(0, os.path.join(settings.PROJECT_PATH,'modules'))

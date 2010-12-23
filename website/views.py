@@ -6,9 +6,9 @@ from django.core.context_processors import csrf
 from django.template import RequestContext
 from django.core.mail import send_mail
 
-
 import datetime
 
+""" Different fields to log a user """
 class LoginForm(forms.Form):
     login = forms.CharField(max_length=50,
                        error_messages={'required': 'Login requiered'})
@@ -17,6 +17,12 @@ class LoginForm(forms.Form):
                        error_messages={'required': 'Password requiered'}) 
 
 
+""" 
+Return an HTML page with the login form is the user isn't authentificated and
+with the home menu otherwise.
+If request.POST is true, authentificate the user if the loginform is valid,
+display the login form otherwise with the appropriate error message
+"""
 def home(request):
     current_date = datetime.datetime.now()
     if not request.user.is_authenticated():
@@ -41,7 +47,7 @@ def home(request):
     
 
 
-
+""" Log out the user and redirect to the home page """
 def logout(request):
     auth.logout(request)
     current_date = datetime.datetime.now()

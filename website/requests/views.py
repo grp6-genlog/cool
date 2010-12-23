@@ -114,10 +114,6 @@ def addrequest(request, port_request=None):
             nb_requested_seats = form.cleaned_data['nb_requested_seats']
             cancellation_margin = form.cleaned_data['cancellation_margin']
             
-            #if abs(cancellation_margin - (arrival_time - datetime.timedelta(seconds=max_delay))) < datetime.timedelta(minutes=30):
-            #    form._errors["cancellation_margin"] = form.error_class(["Specify a cancellation margin earlier"])
-            #    return render_to_response('requestform.html', locals())
-            
             status = 'P'
             
             WaitCallbacksRequest.declare(request.user)

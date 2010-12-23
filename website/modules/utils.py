@@ -1,9 +1,8 @@
 #!/usr/bin/python
 import math,datetime
 
+""" Convert latitude and longitude to spherical coordinates in radians. """
 def distance_on_unit_sphere(lat1, long1, lat2, long2):
-    # Convert latitude and longitude to 
-    # spherical coordinates in radians.
     degrees_to_radians = math.pi/180.0
         
     # phi = 90 - latitude
@@ -34,6 +33,13 @@ def get_distance((src_lat,src_lon),(dst_lat,dst_lon)):
     return distance_on_unit_sphere(src_lat,src_lon,dst_lat,dst_lon)*6368
 
 
+"""
+Return the time at the specified point of a list
+points : list of RoutePoints
+arrindex : index of specified point in the points list
+deptime : departure time (datetime.datetime)
+arrtime : arrival time (datetime.datetime)
+"""
 def get_time_at_point(points,arrindex,deptime,arrtime):
     total_dist=0.
     ride_dist=0.
@@ -46,5 +52,6 @@ def get_time_at_point(points,arrindex,deptime,arrtime):
     return deptime + (arrtime-deptime) * int(ride_dist/total_dist)
 
 
+""" convert a timedelta into seconds """
 def total_seconds(td):
     return (td.microseconds + (td.seconds + td.days * 24 * 3600) * 10**6) / 10**6

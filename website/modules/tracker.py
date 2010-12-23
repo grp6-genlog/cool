@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # @Author Group 6
 # Interface of the Tracker
 
@@ -15,6 +14,8 @@ if not DEBUG:
     from profiles.models import UserProfile
 import socket,threading,datetime
 from utils import get_distance
+
+SERVER_IP = "130.104.99.183"
 
 DERIDEND=0
 DERIDED=1
@@ -79,7 +80,7 @@ class Tracker(PortObject):
                 the port_object init has been called called
         """
         self.usernotifier_port = usernotifier_port
-        TCP_IP = "130.104.99.183" # the car pooling tracker s
+        TCP_IP = SERVER_IP # the car pooling server id
         TCP_PORT = 4242 # and port
         self.tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.tcp_socket.bind((TCP_IP,TCP_PORT))
@@ -91,15 +92,18 @@ class Tracker(PortObject):
         self.rides_list = list()
         self.check_all_rides()
         PortObject.__init__(self)
+        
+        
     def check_all_rides(self):
-        """ dunno yet
+        """
+        Check every ride in the self.rides_list which contains an object for each tracked ride
+        For every ride in the list, proccess the new messages
         """
         new_connection = True
         # accept new connections and ask name
         while new_connection:
             try :
                 conn,addr = self.tcp_socket.accept()
-                print 'New unregistered user'
                 conn.setblocking(0)
                 self.unregistered_connections.append([None,conn])
             except :
@@ -110,17 +114,12 @@ class Tracker(PortObject):
             try : 
                 msgs = unreg[1].recv(1024)
                 for msg in msgs.split('\n'):
-                    print msg.split('&')[MTYPE]
                     if msg.split('&')[MTYPE]=='usr!':
-                        print 'log',msg.split('&')[MMESS]
                         if not User.objects.filter(username=msg.split('&')[MMESS]):#msg.split('&')[MMESS] not in self.debug_userdico:
-#
-                            print 'not in dic'
                             unreg[1].send('usr?&&\n')
                         
                         else :
                             unreg[0]=msg.split('&')[MMESS]
-                            print 'in dic'
                             unreg[1].send('pwd?&&\n')
                     
                     elif msg.split('&')[MTYPE]=='pwd!':
@@ -173,14 +172,10 @@ class Tracker(PortObject):
                 elif ride[STATE]==SREMINDED:
                     self.send_to(self.usernotifier_port,('newmsg',ride[NDRIVER],"Please, open your COOL's smartphone app."))
                     ride[STATE]=SOPENCONN
-        
-
-            
 
             if drivername in self.userdict:
                 fill_buffer(self.userdict[drivername])
                 for msg in self.userdict[drivername][UBUFF]:
-                    print msg
                     if msg.split('&')[MTYPE]=='est!' and int(msg.split('&')[MRIDE])==ride[RIDEID]:
                         self.userdict[drivername][UBUFF].remove(msg)
                         if drivername not in self.userdict:
@@ -194,8 +189,8 @@ class Tracker(PortObject):
                         else:
                             dist = get_distance(map(float,msg.split('&')[MMESS].split()),(ride[PPLAT],ride[PPLON]))
                             self.userdict[ndrivername][UCONN].send('dst!&'+msg[MRIDE]+'&'+str(dist)+' km\n')
+                            
                     else:
-                        print 'connection with ',ride[DRIVER],'closed.'
                         self.userdict[drivername][UCONN].close()
                         self.userdict[drivername][UCONN]=None
                 if self.userdict[drivername]==[None,list()]:
@@ -206,7 +201,6 @@ class Tracker(PortObject):
             if ndrivername in self.userdict:
                 fill_buffer(self.userdict[ndrivername])
                 for msg in self.userdict[ndrivername][UBUFF]:
-                    print msg
                     if msg.split('&')[MTYPE]=='get?' and int(msg.split('&')[MRIDE])==ride[RIDEID]:
                         self.userdict[ndrivername][UBUFF].remove(msg)
                         if drivername not in self.userdict:
@@ -222,15 +216,12 @@ class Tracker(PortObject):
                             self.userdict[drivername][UCONN].send('stt!&'+str(ride[RIDEID])+'&\n')
                         else:
                             self.send_to(self.usernotifier_port,('newmsg',ride[DRIVER],'Ride '+str(ride[RIDEID])+' has started.'))
-                        print 'ride ok'
                         self.rides_list.remove(ride)
                     elif msg.split('&')[MTYPE]=='ccl!' and int(msg.split('&')[MRIDE])==ride[RIDEID]:
                         self.userdict[ndrivername][UBUFF].remove(msg)
                         threading.Thread(target=ride[CALLB_KO]).start()
-                        print 'ride cancelled'
                         self.rides_list.remove(ride)
                     else:
-                        print 'connection with ',ride[DRIVER],'closed.'
                         self.userdict[drivername][UCONN].close()
                         self.userdict[ndrivername][UCONN]=None
                 if self.userdict[ndrivername]==(None,list()):
@@ -241,11 +232,12 @@ class Tracker(PortObject):
     def routine(self,src,msg):
         """
         There is two messages received by tracker : 
-        ('startride',instruID,callb_ok,callb_ko)
-        @pre : instruId is the id of an instruction (ride) in DB
-        @post : start_ride is called.
+        ('startride',rideID,callb_ok,callb_ko)
+        indicates that the ride has started
+        
+        ('cancelride',rideID)
+        indicates that the ride is cancelled
         """
-        print msg
         if msg[0]=='startride':
             ride,driver,ndriver=None,None,None
             if not DEBUG:
@@ -270,6 +262,7 @@ class Tracker(PortObject):
                 self.userdict[ndriver][0].send('ndr!&&\n')
                 info[NDAWARE]=True
             self.lock.release()
+            
         elif msg[0]=='cancelride':
             self.lock.acquire()
             for ride in self.rides_list:

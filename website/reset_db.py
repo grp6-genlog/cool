@@ -1,3 +1,7 @@
+#
+# script to empty the database and create a new super user with the login 'mart' and password 'martin'
+#
+
 from django.contrib.auth.models import User
 
 from profiles.models import *
