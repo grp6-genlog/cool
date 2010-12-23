@@ -38,9 +38,18 @@ def distance_origin_dest(origin, destination, checkpoints):
     else:
         return -1
 
+"""
+Returns the distance of tuples of distance
+@pre : the arguments are tuples of points respecting the latitude/longitude values
+@post : the google map distance between the two points is returned
+"""
 def get_distance((src_lat,src_lon),(dst_lat,dst_lon)):
     return float(distance_origin_dest(str(src_lat)+","+str(src_lon),str(dst_lat)+","+str(dst_lon),list()))/1000
 
+"""
+Returns a tuple of coordinates of the adress
+@pre : address is a valid google map address
+"""
 def address_to_location(address):
     doc=get_json_geocoding_doc(address, False)
     parsed_doc=json.loads(doc.read())
@@ -49,6 +58,11 @@ def address_to_location(address):
     else:
         return -1
 
+"""
+Converts location (string) to a string giving the jason object about the location
+@pre : location is a valid string format (x,y)
+@post : the adress is return
+"""
 def location_to_address(location, print_url=False):
     url=GEOCODING_URL+"?latlng=%s&sensor=false" % (location)
     if print_url:
@@ -56,7 +70,9 @@ def location_to_address(location, print_url=False):
     data=urllib.urlopen(url)
     return data
     
-
+"""
+From a json doc, return the location
+"""
 def get_location_from_doc(json_doc):
     results=json_doc['results']
     if len(results)==0:

@@ -38,9 +38,7 @@ class FindPair(PortObject):
         """
         This operation try to match the specified proposal with each request of the DB
         
-        @pre : DB has been initialized and is the SQL database
-               offermanager_port has been initialized and is the port of the OfferManager module
-               
+        @pre : offermanager_port has been initialized and is the port of the OfferManager module
                propId is the id of a proposal in the database
                
         @post : DB has not been modified.
@@ -49,7 +47,6 @@ class FindPair(PortObject):
         """
         infos=Proposal.objects.get(id=propID)
         requests=Request.objects.filter(nb_requested_seats__lte=infos.number_of_seats, status='P')
-        print "len req:"+str(len(requests))
         for request in requests:
             found = False
             for offer in Offer.objects.filter(request=request):
@@ -93,9 +90,7 @@ class FindPair(PortObject):
         """
         This operation try to match the specified proposal with each request of the DB
         
-        @pre : DB has been initialized and is the SQL database
-               offermanager_port has been initialized and is the port of the OfferManager module
-               
+        @pre : offermanager_port has been initialized and is the port of the OfferManager module
                requestId is the id of a request in the database
                
         @post : DB has not been modified.
