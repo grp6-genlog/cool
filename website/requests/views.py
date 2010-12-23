@@ -14,7 +14,7 @@ from google_tools_json import *
 import datetime, time, re
 
 
-
+""" Different fields to record a new request """
 class RequestForm(forms.Form):
     departure_point = forms.CharField()
     departure_range = forms.FloatField()

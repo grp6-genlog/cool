@@ -13,13 +13,15 @@ from guiutils import WaitCallbacks
 
 import datetime, time, utils
 
+
 class WaitCallbacksOffer(WaitCallbacks):
     pass    
 
-"""
-    Display the list of offers of the authenticated user waiting for approval
-    of one or the two participant
-    If he isn't connected, display the home page
+
+""" 
+Return an HTML page with the list of offers of the authenticated user waiting
+for approval of one or the two participant.
+Redirect to the home page if he isn't logged in
 """
 def myoffers(request, global_address_cache=None):
     if not request.user.is_authenticated():
@@ -124,8 +126,15 @@ def myoffers(request, global_address_cache=None):
         WaitCallbacksOffer.erase_message(request.user)
     return render_to_response('myoffers.html', locals())
     
+   
     
-    
+"""
+insert an instance of offer into the list sorted by status (waiting for approval
+first) and then by date (earliest first)
+offer_l : the current list of offer, updated after the call
+new_o : the offer to insert
+The instances of offer are dictionnary with at least a field 'status' and 'date_pick'
+"""
 def insert_offer(offer_l, new_o):
     for i in xrange(len(offer_l)):
          if (not new_o['status'] and offer_l[i]['status']):
@@ -142,13 +151,20 @@ def insert_offer(offer_l, new_o):
     offer_l.append(new_o)
     
  
-"""
-    Response to an offer
-    offer : the id of the offer specified in the url
-    port_offer : the port_object to the offer manager
-    accept : boolean containing the response
-    global_address_cache : cache address for optimisation
-"""
+
+""" 
+Return an HTML page with the response while trying to response to an offer
+Redirect to the home page if no user is logged in or the call is invalid
+If the offermanager didn't proccess the message correctly display an error
+message, display a validation message otherwise.
+request : request object created by django at the function call
+offset : parameter set at the end of the url, represent the offer id
+port_offer : port object to the offer manager
+accept : true if the offer is accepted, false otherwise
+@pre : /
+@post : the evaluation is send to the evaluation recorder to be stored in the
+    database
+""" 
 def responseoffer(request, offset, port_offer, accept):
 
     try:
@@ -211,10 +227,17 @@ def responseoffer(request, offset, port_offer, accept):
                 return redirect('/offers/')
 
 
-        
+"""
+Success callback function
+@post : update the callback dictionnary to set 'success' at the key with the user 
+"""
 def successcall(user, message=None):
     WaitCallbacksOffer.update(user, 'success')
-    
+  
+"""
+Failure callback function
+@post : update the callback dictionnary to set 'fail' at the key with the user 
+"""   
 def failurecall(user, message=None):
     if message:
         WaitCallbacksOffer.update_message(user, message)

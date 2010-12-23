@@ -5,6 +5,7 @@ STATUS_CHOICES = (
     ('C', 'Cancelled'),
 )
 
+""" Structure of the sql table for the requests """
 class Request(models.Model):
     user = models.ForeignKey('profiles.UserProfile')
     departure_point_lat = models.FloatField()

@@ -4,12 +4,14 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 
 
+# choices for the rating of the gender
 GENDER_CHOICES = (
     ('M', 'Male'),
     ('F', 'Female'),
 )
 
 
+""" Structure of the sql table for the user profiles """
 class UserProfile(models.Model):
     user = models.ForeignKey(User, unique=True)
     

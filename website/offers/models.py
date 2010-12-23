@@ -1,5 +1,7 @@
 from django.db import models
 
+
+# different possible status for an offer
 STATUS_CHOICES = (
     ('P', 'Pending'),
     ('C', 'Cancelled'),
@@ -8,6 +10,7 @@ STATUS_CHOICES = (
     ('F', 'Finished'),
 )
 
+""" Structure of the sql table for the offers """
 class Offer(models.Model):
     request = models.ForeignKey('requests.Request')
     proposal = models.ForeignKey('proposals.Proposal')

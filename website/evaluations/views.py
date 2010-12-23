@@ -12,7 +12,7 @@ from guiutils import WaitCallbacks
 
 import datetime, time
 
-
+# choices for the rating of the evaluation
 RATING_CHOICES = (
     (1, '1/5'),
     (2, '2/5'),
@@ -21,6 +21,8 @@ RATING_CHOICES = (
     (5, '5/5'),
 )
 
+
+""" Different fields to create a new evaluation """
 class EvaluationForm(forms.Form):
     rating = forms.ChoiceField(choices=RATING_CHOICES, initial=3)
     content = forms.CharField(max_length=500,
@@ -28,11 +30,14 @@ class EvaluationForm(forms.Form):
                             required=False)
 
 
-
 class WaitCallbacksEval(WaitCallbacks):
     pass
 
 
+""" 
+Return an HTML page with the list of evaluation of the connected user
+Redirect to the home page if he isn't logged in
+"""
 def myevaluations(request):
     if not request.user.is_authenticated():
         return redirect('/home/')
@@ -43,7 +48,21 @@ def myevaluations(request):
     return render_to_response('myevaluations.html', locals())
     
     
-    
+""" 
+Return an HTML page with the response while trying to add an evaluation
+Redirect to the home page if no user is logged in or the call is invalid
+If request.POST is false, display the empty evaluation form
+If the evaluation form is not filled correctly, display an message explaining
+the error.
+If the evaluationrecorder didn't proccess the message correctly display an error
+message, display a validation message otherwise.
+request : request object created by django at the function call
+offset : parameter set at the end of the url, represent the ride id
+port_evaluation : port object to the evaluation recorder
+@pre : /
+@post : the evaluation is send to the evaluation recorder to be stored in the
+    database
+""" 
 def addevaluation(request, offset, port_evaluation=None):
     try:
         offset = int(offset)
@@ -84,7 +103,6 @@ def addevaluation(request, offset, port_evaluation=None):
                         notification = {'content':'Evaluation successfully registered', 'success':True}
                         return render_to_response('home.html', locals())
                     else:
-                        print WaitCallbacksEval.status(request.user)
                         WaitCallbacksEval.free(request.user)
                         notification = {'content':'An error occured, try again later', 'success':False}
                         return render_to_response('evaluationform.html', locals())
@@ -122,10 +140,17 @@ def addevaluation(request, offset, port_evaluation=None):
                 return render_to_response('evaluationform.html', locals())
                     
                     
-
+"""
+Success callback function
+@post : update the callback dictionnary to set 'success' at the key with the user 
+"""
 def successcall(user):
     WaitCallbacksEval.update(user, 'success')
-    
+   
+"""
+Failure callback function
+@post : update the callback dictionnary to set 'fail' at the key with the user 
+""" 
 def failurecall(user):
     WaitCallbacksEval.update(user, 'fail')
         

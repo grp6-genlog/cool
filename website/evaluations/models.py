@@ -1,5 +1,6 @@
 from django.db import models
 
+""" Structure of the sql table for the evaluations """
 class Evaluation(models.Model):
     ride = models.ForeignKey('rides.Ride', null=True)
     user_from = models.ForeignKey('profiles.UserProfile', related_name='user_from')

@@ -70,7 +70,8 @@ REQUIEREMENT :
     Apache (optional)
     SMTP server (optional)
     
-To fit the database configuration with the one installed on your computer, modify the settings.py file at the root of the django project by setting the engine, name, user, password and host of the database into the DATABASE dictionnary.
+To fit the database configuration with the one installed on your computer, modify the settings.py file at the root of the django project by setting the engine, name, user, password and host of the database into the DATABASE dictionnary. Once done, run the manage.py file with the following syntax :
+    $ python manage.py syncdb
 
 The software can be run in the developpement mode easily by executing the manage.py file with the following syntax :
     $ python manage.py runserver

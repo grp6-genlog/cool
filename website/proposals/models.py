@@ -7,6 +7,7 @@ STATUS_CHOICES = (
 )
 
 
+""" Structure of the sql table for the proposals """
 class Proposal(models.Model):
     user = models.ForeignKey('profiles.UserProfile')
     car_id = models.CharField(max_length=50)
@@ -23,7 +24,7 @@ class Proposal(models.Model):
     class Meta:
         ordering = ['departure_time']
         
-        
+""" Structure of the sql table for the route points """
 class RoutePoints(models.Model):
     proposal = models.ForeignKey('Proposal')
     latitude = models.FloatField()

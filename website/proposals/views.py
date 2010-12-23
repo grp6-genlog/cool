@@ -11,7 +11,7 @@ from guiutils import WaitCallbacks
 import datetime, time, re
 
 
-
+""" Different fields to record a new proposal """
 class ProposalForm(forms.Form):
 
     car_id = forms.CharField(max_length=50, label=u'Car plate')

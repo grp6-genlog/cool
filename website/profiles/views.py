@@ -20,13 +20,14 @@ import datetime, time
 from portobject import *
 from guiutils import *
 
-
+# choices for the gender of the user
 GENDER_CHOICES = (
     ('M', 'Male'),
     ('F', 'Female'),
 )
 
 
+""" Different fields to register a new user """
 class RegisterForm(forms.Form):
     username = forms.CharField(max_length=50,
                                 min_length=3)
@@ -57,6 +58,7 @@ class RegisterForm(forms.Form):
     number_of_seats = forms.IntegerField(required=False)
 
 
+""" Different fields to modify the profile of a user """
 class EditProfileForm(forms.Form):
     email = forms.EmailField(max_length=70,
                         label=u'Email address')
@@ -79,6 +81,7 @@ class EditProfileForm(forms.Form):
     number_of_seats = forms.IntegerField(required=False)
 
 
+""" Different fields to modify the password of a user """
 class PasswordForm(forms.Form):
     old_password = forms.CharField(max_length=50,
                        min_length=3,
@@ -90,12 +93,15 @@ class PasswordForm(forms.Form):
                        widget=forms.PasswordInput(render_value=False),
                        label=u'Confirm password')
 
+""" Different fields to add money to the virtual account of the user """
 class FillAccountForm(forms.Form):
     amount = forms.FloatField()
     password = forms.CharField(max_length=50,
                        min_length=3,
                        widget=forms.PasswordInput(render_value=False),)
 
+""" Different fields to transfer money from the virtual account of the user
+    to the specified bank account """
 class TransferAccountForm(forms.Form):
     amount = forms.FloatField()
     account_number = forms.CharField(max_length=50,)
@@ -108,6 +114,19 @@ class WaitCallbacksProfile(WaitCallbacks):
     pass
 
 
+""" 
+Return an HTML page with the response while trying to register a user
+Redirect to the home page if no user is logged in or the call is invalid
+If the registration form is not filled correctly, display an message explaining
+the error.
+If the profilerecorder didn't proccess the message correctly display an error
+message, display a validation message otherwise.
+request : request object created by django at the function call
+port_profile : port object to the profile recorder
+@pre : /
+@post : the registration is send to the registration recorder to be stored in 
+    the database
+""" 
 def register(request, port_profile=None):
     
     if request.user.is_authenticated():
@@ -147,6 +166,19 @@ def register(request, port_profile=None):
             return render_to_response('register.html', locals())
 
 
+""" 
+Return an HTML page with the response while trying to edit the profile of a user
+Redirect to the home page if no user is logged in or the call is invalid
+If the edition form is not filled correctly, display an message explaining
+the error.
+If the profilerecorder didn't proccess the message correctly display an error
+message, display a validation message otherwise.
+request : request object created by django at the function call
+port_profile : port object to the profile recorder
+@pre : /
+@post : the modifications are send to the registration recorder to be stored in 
+    the database
+""" 
 def editprofile(request, port_profile=None):
     if not request.user.is_authenticated():
         current_date = datetime.datetime.now()
@@ -192,7 +224,22 @@ def editprofile(request, port_profile=None):
                 form = EditProfileForm(initial=init,)
             
             return render_to_response('register.html', locals())
-            
+   
+   
+""" 
+Return an HTML page with the response while trying to change the password of a user
+Redirect to the home page if no user is logged in or the call is invalid
+If request.POST is false, display the empty password form
+If the change password form is not filled correctly, display an message
+explaining the error.
+If the profilerecorder didn't proccess the message correctly display an error
+message, display a validation message otherwise.
+request : request object created by django at the function call
+port_profile : port object to the profile recorder
+@pre : /
+@post : the change is send to the registration recorder to be stored in 
+    the database
+"""
 def changepassword(request, port_profile=None):
     if not request.user.is_authenticated():
         current_date = datetime.datetime.now()
@@ -231,7 +278,14 @@ def changepassword(request, port_profile=None):
 
             return render_to_response('password.html', locals())
     
-        
+
+"""
+Send a message to the profile recorder. A form associated to the action is
+in send via POST in the request object
+request : request object created by django at the function call
+port_profile : port object to the profile recorder
+action : 'register' (RegisterForm), 'edit' (EditProfileForm) or 'password' (PasswordForm)
+"""
 def toprofilerecorder(request, port_profile, action):
     if action != 'register' and action != 'edit' and action != 'password':
         return render_to_response('home.html', locals())
@@ -323,7 +377,13 @@ def toprofilerecorder(request, port_profile, action):
         notification = {'content':'Unexpected error, try again later', 'success':True}
         return render_to_response('home.html', locals())
     
-    
+
+""" 
+Return an HTML page with the profile of the specified user displaying the
+information that the connected user can see
+Redirect to the home page if he isn't logged in
+offset : id of the user specified in the url
+""" 
 def publicprofile(request, offset):
     try:
         offset = int(offset)
@@ -378,8 +438,21 @@ def publicprofile(request, offset):
         age = int(abs(datetime.date.today() - other.date_of_birth).days/(365*0.75 + 366*0.25))
         evaluation_l = other.user_to.all()
         return render_to_response('publicprofile.html', locals())
+
         
-        
+""" 
+Return an HTML page with the response while trying to add money to the account of a user
+Redirect to the home page if no user is logged in or the call is invalid
+If request.POST is false, display the empty fillaccountform and transferaccountform
+If the form is not filled correctly, display an message explaining the error.
+If the payement manager didn't proccess the message correctly display an error
+message, display a validation message otherwise.
+request : request object created by django at the function call
+port_payement : port object to the payement manager
+@pre : /
+@post : the change is send to the payement manager to be stored in 
+    the database
+"""
 def myaccount(request, port_payment):
     if not request.user.is_authenticated():
         current_date = datetime.datetime.now()
@@ -441,7 +514,20 @@ def myaccount(request, port_payment):
         current_amount = user_p.account_balance
         return render_to_response('accountform.html', locals())
         
-        
+
+""" 
+Return an HTML page with the response while trying to transfer money from the account of a user
+Redirect to the home page if no user is logged in or the call is invalid
+If request.POST is false, display the empty fillaccountform and transferaccountform
+If the form is not filled correctly, display an message explaining the error.
+If the payement manager didn't proccess the message correctly display an error
+message, display a validation message otherwise.
+request : request object created by django at the function call
+port_payement : port object to the payement manager
+@pre : /
+@post : the change is send to the payement manager to be stored in 
+    the database
+"""
 def emptyaccount(request, port_payment):
     if not request.user.is_authenticated():
         current_date = datetime.datetime.now()
@@ -504,10 +590,18 @@ def emptyaccount(request, port_payment):
         return render_to_response('accountform.html', locals())
 
         
-        
+
+"""
+Success callback function
+@post : update the callback dictionnary to set 'success' at the key with the user 
+"""        
 def successcall(user):
     WaitCallbacksProfile.update(user, 'success')
     
+"""
+Failure callback function
+@post : update the callback dictionnary to set 'fail' at the key with the user 
+""" 
 def failurecall(user):
     WaitCallbacksProfile.update(user, 'fail')
 
