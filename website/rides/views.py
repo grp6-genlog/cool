@@ -20,9 +20,10 @@ class WaitCallbacksRide(WaitCallbacks):
     pass
                       
 
-"""
-    Display the list of rides of the authenticated user
-    If he isn't connected, display the home page
+""" 
+Return an HTML page with the list of rides of the authenticated user that are
+associated to a pending request or proposal and that the offer is not pending or discarded
+Redirect to the home page if he isn't logged in
 """
 def myrides(request, global_address_cache=None):
     
@@ -135,22 +136,32 @@ def myrides(request, global_address_cache=None):
     return render_to_response('myrides.html', locals())
     
     
-    
-def insert_ride(offer_l, new_o):
-    for i in xrange(len(offer_l)):
-         if offer_l[i]['date_pick'] > new_o['date_pick']:
-             offer_l.insert(i,new_o)
+"""
+insert an instance of ride into the list sorted by status (waiting for approval
+first) and then by date (earliest first)
+ride_l : the current list of offer, updated after the call
+new_r : the ride to insert
+The instances of ride are dictionnary with at least a field 'status' and 'date_pick'
+"""  
+def insert_ride(ride_l, new_r):
+    for i in xrange(len(ride_l)):
+         if ride_l[i]['date_pick'] > new_r['date_pick']:
+             ride_l.insert(i,new_r)
              return
              
-    offer_l.append(new_o)
+    ride_l.append(new_r)
     
- 
-"""
-    Response to an offer
-    offer : the id of the offer specified in the url
-    port_offer : the port_object to the offer manager
-    accept : boolean containing the response
-    global_address_cache : cache address for optimisation
+
+""" 
+Return an HTML page with the response while trying to cancel a ride
+Redirect to the home page if no user is logged in or the call is invalid
+If the ridemanager didn't proccess the message correctly display an error
+message, display a validation message otherwise.
+request : request object created by django at the function call
+offset : parameter set at the end of the url, represent the ride id
+ride_port : port object to the ride manager
+@pre : /
+@post : the response is send to the ride manager to update the database
 """
 def cancelride(request, offset, ride_port):
 
@@ -205,10 +216,17 @@ def cancelride(request, offset, ride_port):
                 return redirect('/rides/')
 
 
-        
+"""
+Success callback function
+@post : update the callback dictionnary to set 'success' at the key with the user 
+"""        
 def successcall(user, message=None):
     WaitCallbacksRide.update(user, 'success')
-    
+
+"""
+Failure callback function
+@post : update the callback dictionnary to set 'fail' at the key with the user 
+"""   
 def failurecall(user, message=None):
     if message:
         WaitCallbacksRide.update_message(user, message)

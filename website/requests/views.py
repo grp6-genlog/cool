@@ -29,7 +29,11 @@ class RequestForm(forms.Form):
 class WaitCallbacksRequest(WaitCallbacks):
     pass
 
-
+""" 
+Return an HTML page with the list of requests of the authenticated user that
+are still pending and in the future
+Redirect to the home page if he isn't logged in
+"""
 def myrequests(request):
     if not request.user.is_authenticated():
         return redirect('/home/')
@@ -61,7 +65,20 @@ def myrequests(request):
     return render_to_response('myrequests.html', locals())
     
     
-    
+""" 
+Return an HTML page with the response while trying to add a request
+Redirect to the home page if no user is logged in or the call is invalid
+If request.POST is false, display the empty request form
+If the request form is not filled correctly, display an message explaining
+the error.
+If the request recorder didn't proccess the message correctly display an error
+message, display a validation message otherwise.
+request : request object created by django at the function call
+port_request : port object to the request recorder
+@pre : /
+@post : the request is send to the request recorder to be stored in the
+    database
+"""     
 def addrequest(request, port_request=None):
     if not request.user.is_authenticated():
         return redirect('/home/', request=request)
@@ -139,6 +156,17 @@ def addrequest(request, port_request=None):
         return render_to_response('requestform.html', locals())
 
 
+""" 
+Return an HTML page with the response while trying to cancel a request
+Redirect to the home page if no user is logged in or the call is invalid
+If the offermanager didn't proccess the message correctly display an error
+message, display a validation message otherwise.
+request : request object created by django at the function call
+offset : parameter set at the end of the url, represent the request id
+port_offer : port object to the offer manager
+@pre : /
+@post : the response is send to the offer manager to update the database
+"""
 def cancelrequest(request, offset, port_offer=None):
     try:
         offset = int(offset)
@@ -183,9 +211,17 @@ def cancelrequest(request, offset, port_offer=None):
         return render_to_response('home.html', locals())
 
 
+"""
+Success callback function
+@post : update the callback dictionnary to set 'success' at the key with the user 
+"""
 def successcall(user):
     WaitCallbacksRequest.update(user, 'success')
-    
+
+"""
+Failure callback function
+@post : update the callback dictionnary to set 'fail' at the key with the user 
+"""    
 def failurecall(user):
     WaitCallbacksRequest.update(user, 'fail')
         

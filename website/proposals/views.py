@@ -27,6 +27,11 @@ class WaitCallbacksProposal(WaitCallbacks):
     pass
 
 
+""" 
+Return an HTML page with the list of proposal of the authenticated user that
+are still pending and in the future
+Redirect to the home page if he isn't logged in
+"""
 def myproposals(request):
     if not request.user.is_authenticated():
         return redirect('/home/')
@@ -35,7 +40,22 @@ def myproposals(request):
     proposals = Proposal.objects.filter(user=user, status='P', departure_time__gt=datetime.datetime.today())
     return render_to_response('myproposals.html', locals())
     
-    
+
+""" 
+Return an HTML page with the response while trying to add a proposal
+Redirect to the home page if no user is logged in or the call is invalid
+If request.POST is false, display the empty proposal form
+If the proposal form is not filled correctly, display an message explaining
+the error.
+If the proposalrecorder didn't proccess the message correctly display an error
+message, display a validation message otherwise.
+request : request object created by django at the function call
+port_proposal : port object to the proposal recorder
+global_address_cache : reference to the address cache
+@pre : /
+@post : the proposal is send to the proposal recorder to be stored in the
+    database
+"""     
 def addproposal(request, port_proposal=None,global_address_cache=None):
     if not request.user.is_authenticated():
         return redirect('/home/', request=request)
@@ -106,7 +126,17 @@ def addproposal(request, port_proposal=None,global_address_cache=None):
 
 
         
-    
+""" 
+Return an HTML page with the response while trying to cancel a proposal
+Redirect to the home page if no user is logged in or the call is invalid
+If the offermanager didn't proccess the message correctly display an error
+message, display a validation message otherwise.
+request : request object created by django at the function call
+offset : parameter set at the end of the url, represent the offer id
+port_offer : port object to the offer manager
+@pre : /
+@post : the response is send to the offer manager to update the database
+"""
 def cancelproposal(request, offset, port_offer):
     try:
         offset = int(offset)
@@ -151,10 +181,17 @@ def cancelproposal(request, offset, port_offer):
         return render_to_response('home.html', locals())
 
     
-    
+"""
+Success callback function
+@post : update the callback dictionnary to set 'success' at the key with the user 
+"""
 def successcall(user):
     WaitCallbacksProposal.update(user, 'success')
-    
+
+"""
+Failure callback function
+@post : update the callback dictionnary to set 'fail' at the key with the user 
+"""
 def failurecall(user):
     WaitCallbacksProposal.update(user, 'fail')
 

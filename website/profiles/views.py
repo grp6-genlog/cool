@@ -116,7 +116,7 @@ class WaitCallbacksProfile(WaitCallbacks):
 
 """ 
 Return an HTML page with the response while trying to register a user
-Redirect to the home page if no user is logged in or the call is invalid
+Redirect to the home page if a user is logged in or the call is invalid
 If the registration form is not filled correctly, display an message explaining
 the error.
 If the profilerecorder didn't proccess the message correctly display an error

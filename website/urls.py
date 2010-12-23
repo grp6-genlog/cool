@@ -36,8 +36,9 @@ class PortObjects(object):
         self.find_pair_port = FindPair(self.offer_port).get_port()
         self.proposal_rec_port = ProposalRecorder(self.find_pair_port).get_port()
         self.request_rec_port = RequestRecorder(self.find_pair_port).get_port()
-        
 
+      
+# cache object containing the equivalent coordinates - location
 global_address_cache = guiutils.AddressCache()
 global_address_cache.load('addresses.cache')
 global_ports = PortObjects(global_address_cache)
