@@ -11,6 +11,8 @@ import threading
 class PaymentManager(PortObject):
     def __init__(self):
         """
+        @pre : the payment manager has not already been initialized
+        @post : the payment manager is initialized
         """
         PortObject.__init__(self)
         
@@ -34,13 +36,17 @@ class PaymentManager(PortObject):
 
     def valid_transfer(self,bankAccount,communication,amount):
         """
-        We trust you my friend :)
+        In user we trust.
+        @pre : \
+        @post : return if the transfer is valid
         """
         return True
 
     def transfer_money(self,bankAccount,communication,amount):
         """
-        Trust me :)
+        In us we trust.
+        @pre : \
+        @post : transfer the money to the bank account
         """
         print 'Transfer sent to bank:',bankAccount,communication,amount
         return True
@@ -98,7 +104,6 @@ class PaymentManager(PortObject):
               - if the message received is 'getmoney' the amount of money of the userID's account is 
             removed and sent to the dstBankAccount. The call back function is called.
         """
-        print msg
         if len(msg)==2:
             (name,instructionID)=msg
             self.fee_transfer(instructionID)
