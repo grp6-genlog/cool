@@ -3,7 +3,7 @@ import os, sys
 
 PROJECT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__)))
 
-DEBUG = True
+DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (

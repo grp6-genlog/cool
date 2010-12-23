@@ -307,7 +307,7 @@ def toprofilerecorder(request, port_profile, action):
     if WaitCallbacksProfile.status(request.user) == 'success':
         WaitCallbacksProfile.free(request.user)
         if action == 'register':
-            user = auth.authenticate(username=username.username, password=pwd)
+            user = auth.authenticate(username=username, password=pwd)
             if user is not None and user.is_active:
                 auth.login(request, user)
 
