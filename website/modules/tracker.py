@@ -97,7 +97,7 @@ class Tracker(PortObject):
     def check_all_rides(self):
         """
         Check every ride in the self.rides_list which contains an object for each tracked ride
-        For every ride in the list, proccess the new messages
+        For every ride in the list, process the new messages
         """
         new_connection = True
         # accept new connections and ask name

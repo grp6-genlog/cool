@@ -1,4 +1,9 @@
 #!/usr/bin/env python
+#
+# @Author : group 6
+# 
+# Script to run on a smartphone during a ride
+# 
 
 import socket,sys,pickle,threading,re
 from gps import *
@@ -8,7 +13,7 @@ print ' Car Pooling App 2.0'
 print 21*'#'
 
 if len(sys.argv)>3 or len(sys.argv)<2:
-    print 'default usage:',sys.argv[0],'<Car Pooling Server IP> <GPS FILE> (optional)'
+    print 'default usage:',sys.argv[0],'<Car Pooling Server IP> [<GPS FILE>]'
     sys.exit(1)
 
 TCP_IP = sys.argv[1] # the car pooling tracker 'IP
@@ -28,6 +33,9 @@ s[0].connect((TCP_IP, TCP_PORT))
 
 
 def routine(conn,list_msg,lock):
+    """
+    Process the messages in list_msg
+    """
     while True:
         msgs = conn[0].recv(BUFFER_SIZE)
         if not msgs:
