@@ -9,26 +9,26 @@ from profiles.models import UserProfile
 from django.contrib.auth.models import User
 import threading, datetime
 
+"""
+Evaluation manager agent implementation
+"""
 class EvaluationManager(PortObject):
 	
 	def __init__(self):
 		"""Initialize DB
-		@pre : DB is the database written in SQL
-		@post : self.DB=DB
+		@pre : \
+		@post : the portobject of the evaluation manager is initiated
 		"""
 		PortObject.__init__(self)
 		
 	def updateEvaluation(self,rideID, userID, content):
 		"""Make an evaluation for a user with id userID and related with the instructionID
-		@pre : instructionID is the id of the instruction
+		@pre : rideID is the id of the ride
 			   userID is the id of the user
 			   content is the content of the evaluation, a pair (note, comment)
-			   DB is a database that is initialized and the evaluation related to instructionID and
-			   userID is already in database, but empty
 		@post : the evaluation contains now the content
 		"""
-        
-		evaluation = Evaluation.objects.get(ride = Ride.objects.get(id = rideID), user_from=UserProfile.objects.get(id=userID))
+    	evaluation = Evaluation.objects.get(ride = Ride.objects.get(id = rideID), user_from=UserProfile.objects.get(id=userID))
 		if not evaluation.locked:
 			evaluation.rating = content[0]
 			evaluation.content = content[1]
@@ -38,8 +38,8 @@ class EvaluationManager(PortObject):
 		
 	def lockEvaluation(self,evaluationID):
 		"""Lock the evaluation and evaluate is not more possible for this evaluation
-		@pre : DB is initialized and evaluationID is in database
-			 evaluationID is the id of the evaluation
+		@pre : evaluationID is in database
+			   evaluationID is the id of the evaluation
 		@post : the evaluation is now locked
 		"""
 		evals = Evaluation.objects.filter(id=evaluationID)
@@ -50,9 +50,10 @@ class EvaluationManager(PortObject):
 	def buildEmptyEvaluation(self,userID, rideID):
 		"""Make an empty evaluation for userID and instructionID
 		@pre : userID is the id of a user
-			   instructionID is the id of an instruction
-			   DB in initialized
+			   rideID is the id of the ride
 		@post : the empty evaluation for userID and instructionID is now present in DB
+		        the thread that will launch the delay making the evaluation 
+		        after 3 days unavailable is launched.
 		"""
 		ride = Ride.objects.get(id = rideID)
 		if ride.offer.proposal.user.id!=userID:
@@ -91,18 +92,42 @@ class EvaluationManager(PortObject):
 		elif msg[0] == 'closeevaluation':
 			self.lockEvaluation(msg[1])
 
-#timer description
+"""
+This is the timer that we use to delay the actions
+"""
 class delayAction:
+    """
+        @pre : \
+        @post : the timer delayAction is initiated
+    """
 	def __init__(self, delay, fun, arg):
 		self.delay = delay
 		self.fun = fun
 		self.arg = arg
+	
+	"""
+	    @pre : the timer has been initiated
+	    @post : a thread that will launch the functio
+	    
+	    n self.fun with
+	    arguments self.arg after a delay self.delay is launched. 
+	"""
 	def start(self):
 		self.t = threading.Timer(self.delay,self.fun,self.arg)
 		self.t.start()
+        
+    """
+        @pre : the delayAction instance has already been started
+        @post : the thread launched in start is stopped
+    """        
 	def cancel(self):
 		self.t.cancel()
 		self.t.join()
+	
+	"""
+	    @pre : the delayAction instance has already been started
+	    @post : the thread launched in start is restarted
+	"""
 	def restart(self):
 		self.cancel()
 		self.t = Timer(self.delay,self.fun,self.arg)
