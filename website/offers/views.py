@@ -221,7 +221,6 @@ def responseoffer(request, offset, port_offer, accept):
             else:
                 WaitCallbacksOffer.update_message(request.user , {'content':WaitCallbacksOffer.get_message(request.user),'success':False})
                     
-                print WaitCallbacksOffer.status(request.user)
                 WaitCallbacksOffer.free(request.user)
                 
                 return redirect('/offers/')

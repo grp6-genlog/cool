@@ -79,8 +79,6 @@ def myrides(request, global_address_cache=None):
 
                 insert_ride(info_rides, infos)
                 
-            else:
-                print "offer "+str(of.id)+" with status "+of.status+"without ride"
 
 
     for req in Request.objects.filter(user=user, status='P', arrival_time__gt=three_days_ago):
@@ -127,9 +125,7 @@ def myrides(request, global_address_cache=None):
                 }
 
                 insert_ride(info_rides, infos)
-            else:
-                print "offer "+str(of.id)+" with status "+of.status+"without ride"
-    
+       
     if WaitCallbacksRide.message_present(request.user):
         notification = WaitCallbacksRide.get_message(user)
         WaitCallbacksRide.erase_message(user)
@@ -210,7 +206,6 @@ def cancelride(request, offset, ride_port):
                 return redirect('/rides/')
                 
             else:
-                print WaitCallbacksRide.status(request.user)
                 WaitCallbacksRide.free(request.user)
                 
                 return redirect('/rides/')

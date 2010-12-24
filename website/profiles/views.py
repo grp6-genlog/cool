@@ -372,7 +372,6 @@ def toprofilerecorder(request, port_profile, action):
             notification = {'content':"Password changed successfully", 'success':True}
         return render_to_response('home.html', locals())
     else:
-        print WaitCallbacksProfile.status(request.user)
         WaitCallbacksProfile.free(request.user)
         notification = {'content':'Unexpected error, try again later', 'success':True}
         return render_to_response('home.html', locals())
@@ -427,8 +426,6 @@ def publicprofile(request, offset):
                     b = True
                     com_offer = other_o
                     break
-                else:
-                    print str(other_o.request)+" not in "+str(user_requests)+" with status "+other_o.status
             if b:
                 break
     if not b:
@@ -504,7 +501,6 @@ def myaccount(request, port_payment):
                 return render_to_response('accountform.html', locals())
                 
             else:
-                print WaitCallbacksProfile.status(request.user)
                 WaitCallbacksProfile.free(request.user)
                 notification1 = {'content':'Unexpected error, try again later', 'success':False}
                 
@@ -580,7 +576,6 @@ def emptyaccount(request, port_payment):
                 return render_to_response('accountform.html', locals())
                 
             else:
-                print WaitCallbacksProfile.status(request.user)
                 WaitCallbacksProfile.free(request.user)
                 notification2 = {'content':'Unexpected error, try again later', 'success':False}
                 
