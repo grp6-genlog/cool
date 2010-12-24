@@ -192,7 +192,6 @@ def check_validity(n):
     return result
 
 def IBAN_check(IBAN):
-    print "IBAN account No. :",IBAN
     length = len(IBAN)
     country = IBAN[:2]
     if country_dic.has_key(country):
@@ -200,7 +199,6 @@ def IBAN_check(IBAN):
         length_c = data[0]
         name_c = data[1]
         if length == length_c:
-            print name_c,"/ IBAN length",length_c,"OK!"
             header = IBAN[:4]                                   # Get the first four characters
             body = IBAN[4:]                                     # And the remaining characters
             IBAN = body+header                                  # Move the first block at the end
